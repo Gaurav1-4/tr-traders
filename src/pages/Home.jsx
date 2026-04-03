@@ -7,18 +7,19 @@ import { ArrowRight } from 'lucide-react';
 
 const categories = ['All', 'Casual', 'Formal', 'Bridal', 'Festive', 'Winter', 'Cotton'];
 
+// Using samples that are known to allow hotlinking for visibility test
 const DEFAULT_VIDEOS = [
-  'https://videos.pexels.com/video-files/4620563/4620563-uhd_1440_2560_30fps.mp4',
-  'https://videos.pexels.com/video-files/5710432/5710432-uhd_1440_2560_30fps.mp4',
-  'https://videos.pexels.com/video-files/4620571/4620571-uhd_1440_2560_30fps.mp4',
+  'https://www.w3schools.com/html/mov_bbb.mp4',
+  'https://www.w3schools.com/html/movie.mp4',
+  'https://www.w3schools.com/html/mov_bbb.mp4',
 ];
 
 const fallbackImages = [
-  '/collection-images/suit-maroon-velvet.png',
-  '/collection-images/suit-sage-chiffon.png',
-  '/collection-images/suit-blush-pink.png',
-  '/collection-images/suit-royal-blue.png',
-  '/collection-images/suit-black-gold.png',
+  '/images/suit-red-silk.jpg',
+  '/images/suit-khatli.jpg',
+  '/images/suit-blue.jpg',
+  '/images/suit-tie-dye.jpg',
+  '/images/suit-unstitched.jpg'
 ];
 
 const Home = () => {
@@ -28,13 +29,18 @@ const Home = () => {
   const [heroVideos, setHeroVideos] = useState(DEFAULT_VIDEOS);
   const [videoErrors, setVideoErrors] = useState({});
 
-  // Load videos from admin settings
   useEffect(() => {
     const loadVideos = () => {
       const saved = localStorage.getItem('tr_traders_hero_videos');
       if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) setHeroVideos(parsed);
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setHeroVideos(parsed);
+          }
+        } catch (e) {
+          console.error("Local videos parse error", e);
+        }
       }
     };
     loadVideos();
@@ -57,6 +63,7 @@ const Home = () => {
   }, [activeCategory]);
 
   const handleVideoError = (index) => {
+    console.warn(`Video ${index} failed to load, falling back to image.`);
     setVideoErrors(prev => ({ ...prev, [index]: true }));
   };
 
@@ -67,8 +74,8 @@ const Home = () => {
   return (
     <div className="flex flex-col min-h-screen bg-bg">
 
-      {/* ===== 1. VIDEO STRIP — directly below navbar ===== */}
-      <section className="w-full relative">
+      {/* ===== 1. VIDEO STRIP (Distraction Free) ===== */}
+      <section className="w-full relative bg-[#0D1B38]">
         <div className={`grid gap-0 ${
           heroVideos.length === 1 ? 'grid-cols-1' :
           heroVideos.length === 2 ? 'grid-cols-2' :
@@ -77,13 +84,13 @@ const Home = () => {
           'grid-cols-1 md:grid-cols-3'
         }`}>
           {heroVideos.map((url, i) => (
-            <div key={i} className="relative aspect-[9/16] md:aspect-[3/4] overflow-hidden group bg-[#0D1B38]">
+            <div key={i} className="relative aspect-[9/16] md:aspect-[3/4] overflow-hidden group">
               {/* Fallback image */}
               {videoErrors[i] && (
                 <img 
                   src={fallbackImages[i % fallbackImages.length]} 
                   alt="" 
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover animate-fade-in"
                 />
               )}
               {/* Video */}
@@ -93,72 +100,28 @@ const Home = () => {
                   muted
                   loop
                   playsInline
-                  preload="auto"
-                  onError={() => handleVideoError(i)}
                   className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105"
+                  onError={() => handleVideoError(i)}
                 >
                   <source src={url} type="video/mp4" />
                 </video>
               )}
-              {/* Subtle dark gradient at bottom */}
+              {/* Subtle dark gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none"></div>
             </div>
           ))}
         </div>
-
-        {/* Overlay Content */}
-        <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-          <div className="bg-black/30 backdrop-blur-[2px] rounded-2xl px-8 md:px-14 py-10 md:py-14 text-center max-w-xl mx-4 pointer-events-auto">
-            <p 
-              className="text-white/60 tracking-[0.5em] font-sans font-medium text-[10px] uppercase mb-5 opacity-0 animate-fade-up"
-              style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}
-            >
-              The Festive Edit 2025
-            </p>
-            <h1 
-              className="text-white text-[clamp(2.5rem,6vw,4.5rem)] font-serif font-light leading-[0.95] tracking-tight opacity-0 animate-[letterIn_1s_ease-out_forwards]"
-              style={{ animationDelay: '0.4s' }}
-            >
-              Timeless.<br/>Elegance.
-            </h1>
-            <p 
-              className="text-white/50 font-sans text-xs md:text-sm max-w-sm mx-auto mt-5 leading-relaxed font-light opacity-0 animate-fade-up"
-              style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}
-            >
-              Discover our curated collection of hand-embroidered silks, pure cottons, and breathtaking designer organza suites.
-            </p>
-            <div 
-              className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8 opacity-0 animate-fade-up"
-              style={{ animationDelay: '1s', animationFillMode: 'forwards' }}
-            >
-              <button 
-                onClick={scrollToCollection}
-                className="bg-white text-text px-8 py-3 hover:bg-white/90 transition-all uppercase tracking-[0.2em] text-[11px] font-semibold w-full sm:w-auto"
-              >
-                The Collection
-              </button>
-              <a 
-                href="https://wa.me/919208275274?text=Hi!%20I%20would%20like%20to%20know%20more%20about%20your%20new%20collection."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white border border-white/30 px-8 py-3 hover:bg-white/10 transition-all uppercase tracking-[0.2em] text-[11px] font-semibold w-full sm:w-auto text-center"
-              >
-                Enquire Stylist
-              </a>
-            </div>
-          </div>
-        </div>
       </section>
 
       {/* ===== 2. Category Strip ===== */}
-      <section id="collection-start" className="py-5 border-b border-border bg-white sticky top-[105px] md:top-[118px] z-30">
+      <section id="collection-start" className="py-5 border-b border-border bg-white sticky top-[105px] md:top-[118px] z-30 shadow-sm">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8 overflow-x-auto no-scrollbar scroll-smooth px-2">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`relative flex-shrink-0 py-2 uppercase tracking-[0.15em] text-[11px] font-medium transition-colors hover:text-text group ${
+                className={`relative flex-shrink-0 py-2 uppercase tracking-[0.18em] text-[11px] font-semibold transition-colors hover:text-text group ${
                   activeCategory === cat ? 'text-text' : 'text-muted'
                 }`}
               >
@@ -174,13 +137,13 @@ const Home = () => {
 
       {/* ===== 3. Product Grid ===== */}
       <section className="py-20 max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-12 w-full flex-grow bg-bg">
-        <div className="flex flex-col items-center justify-center mb-14 text-center space-y-3">
+        <div className="flex flex-col items-center justify-center mb-16 text-center space-y-4">
           <h2 className="text-3xl md:text-4xl font-serif font-normal text-text">Signature Pieces</h2>
-          <div className="w-12 h-[1.5px] bg-text/20"></div>
-          <p className="text-muted text-sm font-light tracking-wide">Handpicked for the modern traditionalist</p>
+          <div className="w-16 h-[1.5px] bg-text/20"></div>
+          <p className="text-muted text-sm font-light tracking-widest uppercase">Handpicked for the modern traditionalist</p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-10 md:gap-x-7 md:gap-y-14">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-12 md:gap-x-8 md:gap-y-16">
           {loading ? (
             <SkeletonLoader count={4} />
           ) : products.length > 0 ? (
@@ -201,38 +164,16 @@ const Home = () => {
         </div>
         
         {products.length > 0 && (
-          <div className="mt-16 flex justify-center">
+          <div className="mt-20 flex justify-center">
             <Link 
               to="/catalog" 
-              className="group border border-text text-text px-12 py-4 hover:bg-text hover:text-white transition-all duration-300 uppercase tracking-[0.2em] text-[11px] font-bold flex items-center gap-3"
+              className="group border border-text text-text px-14 py-5 hover:bg-text hover:text-white transition-all duration-500 uppercase tracking-[0.25em] text-[11px] font-bold flex items-center gap-4 shadow-sm"
             >
-              View All Arrivals
-              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+              View Full Catalog
+              <ArrowRight size={14} className="group-hover:translate-x-1.5 transition-transform" />
             </Link>
           </div>
         )}
-      </section>
-
-      {/* ===== 4. Editorial Section ===== */}
-      <section className="bg-[#0D1B38] py-28 px-6 lg:px-16 overflow-hidden relative">
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0" style={{backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(126,20,255,0.3) 0%, transparent 50%)'}}></div>
-        </div>
-        <div className="max-w-5xl mx-auto text-center relative z-10">
-          <p className="text-primary/60 tracking-[0.5em] uppercase text-[10px] font-medium mb-6">The Art of Tradition</p>
-          <h2 className="text-white text-[clamp(2rem,4vw,3.2rem)] font-serif font-light leading-[1.2] mb-8">
-            Where timeless tradition<br className="hidden md:block"/> meets modern sophistication.
-          </h2>
-          <p className="text-white/40 font-sans font-light text-sm max-w-lg mx-auto leading-relaxed mb-10">
-            Every fabric tells a story of heritage — of artisans who pour their hearts into every stitch, of traditions passed through generations.
-          </p>
-          <Link 
-            to="/about"
-            className="inline-block text-white/70 hover:text-white uppercase tracking-[0.2em] text-[11px] font-medium border-b border-white/20 pb-1 hover:border-white/60 transition-all"
-          >
-            Read Our Story
-          </Link>
-        </div>
       </section>
     </div>
   );

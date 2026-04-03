@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { Heart } from 'lucide-react';
 import { useWishlist } from '../hooks/useWishlist';
@@ -6,8 +6,9 @@ import WhatsAppButton from './WhatsAppButton';
 
 const ProductCard = ({ product }) => {
   const cardRef = useRef(null);
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
-  const { wishlist, toggleWishlist, isInWishlist } = useWishlist();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
@@ -30,10 +31,17 @@ const ProductCard = ({ product }) => {
 
   const saved = isInWishlist(product.id);
 
+  const handleCardClick = (e) => {
+    // If user clicked the button or wishlist, don't navigate
+    if (e.target.closest('button') || e.target.closest('a')) return;
+    navigate(`/product/${product.id}`);
+  };
+
   return (
     <div 
       ref={cardRef}
-      className={`card-enter ${isVisible ? 'visible' : ''} group flex flex-col relative`}
+      onClick={handleCardClick}
+      className={`card-enter ${isVisible ? 'visible' : ''} group flex flex-col relative cursor-pointer`}
     >
       {/* Wishlist Button */}
       <button 
@@ -48,13 +56,13 @@ const ProductCard = ({ product }) => {
         <Heart size={16} className={saved ? 'fill-red-500' : ''} strokeWidth={1.5} />
       </button>
 
-      {/* Image */}
-      <Link to={`/product/${product.id}`} className="relative aspect-[3/4] overflow-hidden bg-[#f5f0eb] block">
+      {/* Image Container */}
+      <div className="relative aspect-[3/4] overflow-hidden bg-[#f5f0eb] block">
         {/* Loading Skeleton */}
         {!imageLoaded && <div className="absolute inset-0 skeleton"></div>}
         
         <img
-          src={product.images[0] || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&q=80'}
+          src={product.images[0] || '/images/placeholder.jpg'}
           alt={product.name}
           className={`w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           loading="lazy"
@@ -72,35 +80,22 @@ const ProductCard = ({ product }) => {
               Best Selling
             </span>
           )}
-          {product.stock === 'low_stock' && (
-            <span className="bg-amber-500 text-white text-[9px] font-semibold px-3 py-1 uppercase tracking-[0.15em]">
-              Low Stock
-            </span>
-          )}
-          {product.status === 'out_of_stock' && (
-            <span className="bg-red-500 text-white text-[9px] font-semibold px-3 py-1 uppercase tracking-[0.15em]">
-              Sold Out
-            </span>
-          )}
         </div>
 
         {/* Quick Enquiry on hover */}
         <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-10">
           <WhatsAppButton 
             productName={product.name}
-            className="w-full text-[10px] py-3 bg-white text-text hover:bg-[#0D1B38] hover:text-white shadow-lg tracking-[0.15em] uppercase font-semibold transition-colors"
+            className="w-full text-[10px] py-3 bg-white text-text hover:bg-[#0D1B38] hover:text-white shadow-lg tracking-[0.15em] uppercase font-semibold transition-colors justify-center"
           />
         </div>
-      </Link>
+      </div>
 
       {/* Info */}
       <div className="pt-3 pb-1 space-y-1.5">
-        <Link 
-          to={`/product/${product.id}`} 
-          className="block font-serif text-[15px] md:text-base font-normal text-text leading-snug hover:text-primary transition-colors line-clamp-2"
-        >
+        <h3 className="font-serif text-[15px] md:text-base font-normal text-text leading-snug hover:text-primary transition-colors line-clamp-2">
           {product.name}
-        </Link>
+        </h3>
         
         {product.fabric && (
           <p className="text-[11px] uppercase tracking-[0.15em] text-muted">{product.fabric}</p>
