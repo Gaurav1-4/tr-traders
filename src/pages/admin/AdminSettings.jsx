@@ -17,20 +17,20 @@ const AdminSettings = () => {
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [uploadProgress, setUploadProgress] = useState({});
   const [uploadingIndex, setUploadingIndex] = useState(null);
   
   const [settings, setSettings] = useState({
     storeName: 'TR Traders',
     whatsappNumber: '919208275274',
     email: 'contact@trtraders.com',
-    address: '123 Heritage Lane, Chandni Chowk, Delhi 110006',
+    address: 'Shori Cloth Market, Rohtak, Haryana (124001)',
     currency: 'INR',
   });
 
   const [heroVideos, setHeroVideos] = useState([...DEFAULT_VIDEOS]);
   const [categories, setCategories] = useState([...DEFAULT_CATEGORIES]);
 
-  // Load from Firestore
   useEffect(() => {
     const fetchSettings = async () => {
       setFetching(true);
@@ -59,19 +59,27 @@ const AdminSettings = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > 50 * 1024 * 1024) {
-      showToast('Video too large (Max 50MB)', 'error');
+    if (file.size > 100 * 1024 * 1024) {
+      showToast('Video too large (Max 100MB)', 'error');
       return;
     }
 
     setUploadingIndex(index);
+    setUploadProgress(prev => ({ ...prev, [index]: 0 }));
 
     if (isMockMode) {
-      setTimeout(() => {
-        const localPreviewUrl = URL.createObjectURL(file);
-        handleVideoChange(index, localPreviewUrl);
-        setUploadingIndex(null);
-      }, 1500);
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 10;
+        setUploadProgress(prev => ({ ...prev, [index]: progress }));
+        if (progress >= 100) {
+          clearInterval(interval);
+          const localPreviewUrl = URL.createObjectURL(file);
+          handleVideoChange(index, localPreviewUrl);
+          setUploadingIndex(null);
+          showToast('Mock Upload Complete!', 'success');
+        }
+      }, 300);
       return;
     }
 
@@ -81,20 +89,24 @@ const AdminSettings = () => {
 
       uploadTask.on(
         'state_changed',
-        null,
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setUploadProgress(prev => ({ ...prev, [index]: Math.round(progress) }));
+        },
         (error) => {
-          showToast('Upload failed.', 'error');
+          console.error(error);
+          showToast('Upload failed. Check your internet connection.', 'error');
           setUploadingIndex(null);
         },
         async () => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           handleVideoChange(index, downloadURL);
-          showToast('Uploaded to Cloud!', 'success');
+          showToast('Sync Successful!', 'success');
           setUploadingIndex(null);
         }
       );
     } catch (err) {
-      showToast('Error uploading.', 'error');
+      showToast('Error initializing upload.', 'error');
       setUploadingIndex(null);
     }
   };
@@ -136,139 +148,94 @@ const AdminSettings = () => {
           updatedAt: new Date().toISOString()
         });
       }
-      
-      // Save local fallback
       localStorage.setItem('tr_traders_settings', JSON.stringify(settings));
-      localStorage.setItem('tr_traders_hero_videos', JSON.stringify(heroVideos));
-      localStorage.setItem('tr_traders_categories', JSON.stringify(categories));
-      
       window.dispatchEvent(new Event('settingsUpdated'));
-      showToast('Global settings updated and synced across all devices!', 'success');
+      showToast('Live site updated successfully!', 'success');
     } catch (error) {
-      showToast('Failed to sync. Please check your internet.', 'error');
+      showToast('Sync failed. Please try again.', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   if (fetching) {
-     return <div className="h-[60vh] flex items-center justify-center text-muted"><Loader2 className="animate-spin mr-2" /> Connecting to cloud...</div>;
+     return <div className="h-[60vh] flex items-center justify-center text-muted animate-pulse font-serif">Connecting to TR TRADERS Cloud...</div>;
   }
 
   return (
-    <div className="max-w-4xl mx-auto pb-20">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <SettingsIcon size={28} className="text-primary" />
-          <h1 className="text-2xl font-serif font-medium text-text">Store Settings</h1>
+    <div className="max-w-5xl mx-auto pb-32">
+      <div className="mb-10 flex items-center justify-between bg-white p-6 rounded-2xl border border-border shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+            <SettingsIcon size={24} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-serif font-medium text-text">Store Experience</h1>
+            <p className="text-xs text-muted uppercase tracking-widest font-bold">Manage your global brand presence</p>
+          </div>
         </div>
-        <div className="bg-primary-light text-primary text-[link] px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-widest">
-          Cloud Synced
+        <div className="px-4 py-1.5 bg-green-50 text-green-600 rounded-full text-[10px] uppercase font-bold tracking-[0.15em] border border-green-100 flex items-center gap-2">
+           <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" /> Live Cloud Syncing
         </div>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-8">
+      <form onSubmit={handleSave} className="space-y-10">
 
-        {/* ===== COLLECTION CATEGORIES SECTION ===== */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-border">
-          <h2 className="text-lg text-text font-serif font-medium mb-2 flex items-center gap-2">
-            <Tags size={20} className="text-primary" />
-            Collection Categories
-          </h2>
-          <p className="text-sm text-muted mb-6 border-b border-border pb-4">
-            Manage the list of collections visible to your customers (e.g., Casual, Formal, Bridal). These will appear in your home navigation and product filters globally.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-            {categories.map((cat, index) => (
-              <div key={index} className="flex gap-2 group">
-                <div className="flex-1 bg-gray-50 border border-border rounded-lg flex items-center px-3 group-focus-within:border-primary transition-colors">
-                   <input
-                     type="text"
-                     value={cat}
-                     onChange={(e) => handleCategoryChange(index, e.target.value)}
-                     className="w-full py-2.5 bg-transparent outline-none text-sm font-medium"
-                   />
-                </div>
-                {categories.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeCategory(index)}
-                    className="p-2 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                  >
-                     <Trash2 size={16} />
-                  </button>
-                )}
-              </div>
-            ))}
+        {/* ===== VIDEO MANAGER WITH PROGRESS BAR ===== */}
+        <div className="bg-white p-8 rounded-3xl shadow-sm border border-border">
+          <div className="flex items-center gap-3 mb-2">
+            <Video size={24} className="text-primary" />
+            <h2 className="text-xl font-serif text-text">Hero Video Grid</h2>
           </div>
-
-          {categories.length < 12 && (
-            <button
-              type="button"
-              onClick={addCategory}
-              className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-widest p-2 hover:bg-primary-light rounded-lg transition-all"
-            >
-              <Plus size={16} /> Add Another Collection
-            </button>
-          )}
-        </div>
-
-        {/* ===== HERO VIDEOS SECTION ===== */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-border">
-          <h2 className="text-lg text-text font-serif font-medium mb-2 flex items-center gap-2">
-            <Video size={20} className="text-primary" />
-            Hero Video Manager
-          </h2>
-          <p className="text-sm text-muted mb-5 border-b border-border pb-4">
-            Update the 3 main videos on your homepage. New videos reflect on all customers' devices instantly upon saving.
+          <p className="text-sm text-muted mb-8 border-b border-border pb-4">
+            Changes reflect instantly on all customer phones and laptops. Max file size: 100MB. Recommended size: under 10MB.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {heroVideos.map((url, index) => (
-              <div key={index} className="space-y-4">
-                <div className="aspect-[9/16] bg-black rounded-xl overflow-hidden relative shadow-lg">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {heroVideos.slice(0, 3).map((url, index) => (
+              <div key={index} className="space-y-5">
+                <div className="aspect-[9/16] bg-black rounded-2xl overflow-hidden relative shadow-2xl border border-black/5 group">
                   {uploadingIndex === index ? (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-white gap-2 bg-black/40">
-                      <Loader2 className="animate-spin" size={24} />
-                      <span className="text-[10px] tracking-widest font-bold">UPLOADING...</span>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-white gap-4 bg-black/60 backdrop-blur-sm px-6">
+                      <div className="relative w-full h-1 bg-white/20 rounded-full overflow-hidden">
+                        <div 
+                          className="absolute left-0 top-0 h-full bg-primary transition-all duration-300"
+                          style={{ width: `${uploadProgress[index] || 0}%` }}
+                        />
+                      </div>
+                      <span className="text-[14px] font-black tracking-widest">{uploadProgress[index] || 0}%</span>
+                      <span className="text-[9px] uppercase font-bold tracking-widest opacity-60">Synchronizing...</span>
                     </div>
                   ) : url ? (
-                    <video
-                      src={url}
-                      muted
-                      loop
-                      playsInline
-                      autoPlay
-                      className="w-full h-full object-cover"
-                      onError={(e) => { e.target.style.display = 'none'; }}
-                    />
+                    <>
+                      <video src={url} muted loop playsInline autoPlay className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-[2s]" />
+                      <div className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-md text-white text-[8px] uppercase tracking-widest px-2 py-1 rounded-md border border-white/10">Active</div>
+                    </>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center opacity-30"><Video size={40} className="text-white" /></div>
+                    <div className="w-full h-full flex items-center justify-center opacity-10"><Video size={48} className="text-white" /></div>
                   )}
                 </div>
                 
-                <div className="flex flex-col gap-2">
-                  <label className="cursor-pointer">
-                    <input 
-                      type="file" 
-                      accept="video/*" 
-                      className="hidden" 
+                <div className="space-y-3 px-1">
+                  <label className="block w-full">
+                    <input type="file" accept="video/*" className="hidden" 
                       onChange={(e) => handleFileUpload(e, index)}
                       disabled={uploadingIndex !== null}
                     />
-                    <div className="flex items-center justify-center gap-2 py-2 px-3 bg-primary-light text-primary hover:bg-primary hover:text-white transition-all rounded-lg text-[10px] font-bold uppercase tracking-widest border border-primary/20">
+                    <div className="flex items-center justify-center gap-2 py-3 bg-[#0D1B38] text-white hover:bg-black transition-all rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] shadow-lg cursor-pointer">
                       <Upload size={14} /> Upload Video
                     </div>
                   </label>
-                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-border rounded-lg">
-                    <LinkIcon size={12} className="text-gray-400" />
+                  <div className="relative group">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted transition-colors group-focus-within:text-primary">
+                       <LinkIcon size={12} />
+                    </div>
                     <input
                       type="url"
                       value={url}
                       onChange={(e) => handleVideoChange(index, e.target.value)}
                       placeholder="Paste .mp4 link"
-                      className="w-full text-[10px] outline-none bg-transparent"
+                      className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-border rounded-xl text-[10px] outline-none focus:border-primary transition-all"
                     />
                   </div>
                 </div>
@@ -277,31 +244,55 @@ const AdminSettings = () => {
           </div>
         </div>
 
-        {/* Store Info */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-border">
-          <h2 className="text-lg text-text font-serif font-medium mb-5 border-b border-border pb-3 flex items-center gap-2">
-            <Store size={20} className="text-primary" /> Store Identity
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted">Whatsapp Contact</label>
-              <input type="text" value={settings.whatsappNumber} onChange={(e) => setSettings({...settings, whatsappNumber: e.target.value})}
-                className="w-full p-3 bg-gray-50 border border-border rounded-lg outline-none focus:border-primary transition-colors text-sm" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted">Business Email</label>
-              <input type="email" value={settings.email} onChange={(e) => setSettings({...settings, email: e.target.value})}
-                className="w-full p-3 bg-gray-50 border border-border rounded-lg outline-none focus:border-primary transition-colors text-sm" />
-            </div>
+        {/* ===== COLLECTION EDITOR ===== */}
+        <div className="bg-white p-8 rounded-3xl shadow-sm border border-border">
+          <div className="flex items-center gap-3 mb-2">
+            <Tags size={24} className="text-primary" />
+            <h2 className="text-xl font-serif text-text">Global Collections</h2>
+          </div>
+          <p className="text-sm text-muted mb-8 border-b border-border pb-4">
+            Manage your product categories. Renaming here will update all menus globally.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+            {categories.map((cat, index) => (
+              <div key={index} className="flex gap-2 group animate-fade-in">
+                <div className="flex-1 bg-gray-50 border border-border rounded-xl flex items-center px-4 group-focus-within:border-primary transition-all shadow-sm">
+                   <input
+                     type="text"
+                     value={cat}
+                     onChange={(e) => handleCategoryChange(index, e.target.value)}
+                     className="w-full py-3 bg-transparent outline-none text-xs font-bold uppercase tracking-widest text-text"
+                   />
+                </div>
+                {categories.length > 1 && (
+                  <button type="button" onClick={() => removeCategory(index)}
+                    className="p-3 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-red-100">
+                     <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
+            ))}
+            {categories.length < 12 && (
+              <button type="button" onClick={addCategory}
+                className="flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-border text-muted hover:border-primary hover:text-primary transition-all hover:bg-primary-light">
+                <Plus size={18} />
+                <span className="text-[10px] font-bold uppercase tracking-widest">Add Collection</span>
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Final Sync */}
-        <div className="flex justify-end pt-8">
+        {/* Save Bar */}
+        <div className="flex items-center justify-between bg-[#0D1B38] p-8 rounded-3xl shadow-2xl">
+          <div className="hidden sm:block">
+            <p className="text-white text-base font-serif italic">"Tradition meets technology."</p>
+            <p className="text-white/40 text-[9px] uppercase tracking-widest mt-1">Changes are synced to all customer devices</p>
+          </div>
           <button type="submit" disabled={loading || uploadingIndex !== null}
-            className="flex items-center gap-3 px-10 py-5 bg-[#0D1B38] text-white rounded-xl font-bold uppercase tracking-[0.25em] text-[11px] hover:bg-black transition-all shadow-xl hover:-translate-y-1 active:scale-95 disabled:opacity-50">
+            className="flex items-center gap-4 px-12 py-5 bg-white text-[#0D1B38] rounded-2xl font-black uppercase tracking-[0.3em] text-xs hover:bg-[#FAF7F4] transition-all shadow-2xl hover:-translate-y-2 active:translate-y-0 disabled:opacity-50 w-full sm:w-auto justify-center">
             {loading ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
-            Push Update to Devices
+            Push Updates Live
           </button>
         </div>
       </form>
