@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import ProductCard from '../product/ProductCard';
+import ProductCard from '../components/ProductCard';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { getProducts } from '../services/productService';
-import { ArrowRight, Wifi, WifiOff, Volume2 } from 'lucide-react';
+import { ArrowRight, Wifi, WifiOff, Loader2 } from 'lucide-react';
 import { db, isMockMode } from '../services/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
@@ -62,7 +63,7 @@ const Home = () => {
     <div className="flex flex-col min-h-screen bg-bg overflow-x-hidden">
       
       {/* ===== CINEMATIC TALL VIDEO STRIP ===== */}
-      <section className="w-full relative bg-black overflow-hidden border-b border-border min-h-[70vh] md:h-[85vh]">
+      <section className="w-full relative bg-black overflow-hidden border-b border-border h-[65vh] md:h-[85vh]">
         <div className="absolute top-8 right-8 z-50">
            {cloudSynced === true ? (
              <div className="flex items-center gap-3 px-4 py-2 bg-black/40 backdrop-blur-xl rounded-full border border-white/10 text-[9px] uppercase tracking-widest text-white font-black">
@@ -80,7 +81,7 @@ const Home = () => {
             <div key={i} className="relative h-full overflow-hidden group border-r border-white/10 last:border-r-0 bg-black">
                {videoErrors[i] ? (
                  <div className="absolute inset-0 bg-[#0D1B38] flex flex-col items-center justify-center p-12 text-center">
-                    <p className="text-white/10 text-[10px] uppercase font-black tracking-[0.5em] leading-relaxed">Visual Transmission <br/> Fragmented</p>
+                    <p className="text-white/10 text-[10px] uppercase font-black tracking-[0.5em] leading-relaxed">Visual Transmission <br/> Unavailable</p>
                  </div>
                ) : (
                  <video 
@@ -97,10 +98,9 @@ const Home = () => {
                  </video>
                )}
                
-               {/* Editorial Overlay */}
-               <div className="absolute inset-x-0 bottom-0 py-20 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000">
+               <div className="absolute inset-x-0 bottom-0 py-20 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 select-none">
                   <div className="flex flex-col items-center text-white gap-4">
-                     <span className="text-[9px] font-black tracking-[0.6em] uppercase">Autumn 2026</span>
+                     <span className="text-[9px] font-black tracking-[0.6em] uppercase">Autumn 2026 Collection</span>
                      <div className="w-10 h-px bg-white/40"></div>
                   </div>
                </div>
@@ -108,9 +108,9 @@ const Home = () => {
           ))}
         </div>
 
-        {/* Brand Floating Logo (Subtle) */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-           <div className="text-white/5 font-serif text-[15vw] tracking-tighter uppercase select-none italic">Tr Traders</div>
+        {/* Brand Floating Logo (Subtle Background Effect) */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none overflow-hidden">
+           <div className="text-white/[0.04] font-serif text-[28vw] tracking-tighter uppercase italic -rotate-12 translate-y-20 whitespace-nowrap">Tr Traders</div>
         </div>
       </section>
 
@@ -118,28 +118,26 @@ const Home = () => {
       <section className="py-6 border-b border-border bg-white sticky top-[105px] md:top-[118px] z-30 shadow-xl overflow-hidden font-black">
         <div className="max-w-[1500px] mx-auto px-12 flex space-x-16 overflow-x-auto no-scrollbar scroll-smooth">
           {categories.slice(0, 10).map((cat) => (
-            <button key={cat} className="relative flex-shrink-0 py-2 uppercase tracking-[0.4em] text-[10px] md:text-[11px] text-[#0D1B38]/40 hover:text-[#0D1B38] transition-all hover:-translate-y-1">
+            <button key={cat} className="relative flex-shrink-0 py-2 uppercase tracking-[0.4em] text-[10px] md:text-[11px] text-[#0D1B38]/40 hover:text-[#0D1B38] transition-all hover:translate-x-2">
               {cat}
             </button>
           ))}
         </div>
       </section>
 
-      {/* ===== HERITAGE EXHIBITION ===== */}
+      {/* ===== SIGNATURE EXHIBITION ===== */}
       <section className="py-24 md:py-48 max-w-[1600px] mx-auto px-8 lg:px-20 w-full flex-grow bg-bg">
         <div className="flex flex-col items-center justify-center mb-32 text-center animate-fade-in px-4">
-          <h1 className="text-5xl md:text-8xl font-serif font-light text-text tracking-tighter mb-10 italic leading-none">Couture Artistry</h1>
-          <div className="w-32 h-0.5 bg-[#0D1B38]/10 mb-10"></div>
+          <h1 className="text-6xl md:text-[8rem] font-serif font-light text-text tracking-tighter mb-10 italic leading-none">Couture Art</h1>
+          <div className="w-40 h-0.5 bg-[#0D1B38]/10 mb-10"></div>
           <p className="max-w-xl text-[#0D1B38]/50 text-[10px] md:text-[11px] uppercase tracking-[0.5em] font-black leading-loose">
-             Experience the delicate fusion of Rohtak heritage <br/> and contemporary visionary design.
+             Mastering the fusion of Rohtak craftsmanship <br/> with visionary 2026 designer heritage.
           </p>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-10 md:gap-x-20 gap-y-24 md:gap-y-48">
           {loading ? (
-             <div className="col-span-full h-96 bg-gray-50 flex items-center justify-center rounded-[4rem]">
-                <Loader2 className="animate-spin text-[#0D1B38]/10" size={48} />
-             </div>
+             <SkeletonLoader count={4} />
           ) : products.length > 0 ? (
              products.map((p) => <ProductCard key={p.id} product={p} />)
           ) : (
@@ -151,9 +149,9 @@ const Home = () => {
           )}
         </div>
 
-        <div className="mt-48 flex justify-center">
-          <Link to="/catalog" className="group relative border-[3px] border-[#0D1B38] text-[#0D1B38] px-32 py-10 hover:bg-[#0D1B38] hover:text-white transition-all duration-1000 uppercase tracking-[0.7em] text-[14px] font-black shadow-[0_40px_100px_-20px_rgba(13,27,56,0.3)] hover:-translate-y-4">
-            Enter The Vault <ArrowRight size={22} className="inline ml-10 group-hover:translate-x-6 transition-transform" />
+        <div className="mt-48 flex justify-center pb-20">
+          <Link to="/catalog" className="group relative border-[2.5px] border-[#0D1B38] text-[#0D1B38] px-32 py-12 hover:bg-[#0D1B38] hover:text-white transition-all duration-1000 uppercase tracking-[0.8em] text-[15px] font-black shadow-[0_50px_120px_-30px_rgba(13,27,56,0.5)] active:scale-95">
+            Enter The Vault <ArrowRight size={22} className="inline ml-10 group-hover:translate-x-6 transition-all duration-700" />
           </Link>
         </div>
       </section>
