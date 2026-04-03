@@ -10,13 +10,12 @@ const ProductCard = ({ product }) => {
   const { wishlist, toggleWishlist, isInWishlist } = useWishlist();
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  // Intersection Observer for scroll-in entrance
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
           setIsVisible(true);
-          observer.disconnect(); // Only animate once
+          observer.disconnect();
         }
       },
       { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
@@ -34,84 +33,84 @@ const ProductCard = ({ product }) => {
   return (
     <div 
       ref={cardRef}
-      className={`card-enter ${isVisible ? 'visible' : ''} group flex flex-col bg-white border border-gray-100/50 rounded-2xl overflow-hidden hover:-translate-y-1 transition-all duration-500 relative shadow-sm hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)]`}
+      className={`card-enter ${isVisible ? 'visible' : ''} group flex flex-col relative`}
     >
-      {/* Wishlist Button Overlay */}
+      {/* Wishlist Button */}
       <button 
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
           toggleWishlist(product.id);
         }}
-        className={`absolute top-4 right-4 z-20 w-10 h-10 rounded-full flex items-center justify-center bg-white/90 backdrop-blur-md shadow-sm transition-transform active:scale-110 ${saved ? 'text-accent' : 'text-gray-400 hover:text-accent'}`}
-        style={{ transition: 'transform 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275), color 200ms ease' }}
+        className={`absolute top-3 right-3 z-20 w-9 h-9 rounded-full flex items-center justify-center bg-white/80 backdrop-blur-sm shadow-sm transition-all opacity-0 group-hover:opacity-100 ${saved ? 'opacity-100 text-red-500' : 'text-gray-500 hover:text-red-500'}`}
         aria-label="Save to Wishlist"
       >
-        <Heart size={18} className={saved ? 'fill-accent' : ''} />
+        <Heart size={16} className={saved ? 'fill-red-500' : ''} strokeWidth={1.5} />
       </button>
 
-      {/* Image Container */}
-      <Link to={`/product/${product.id}`} className="relative aspect-[3/4] overflow-hidden bg-gray-50 block card-img">
+      {/* Image */}
+      <Link to={`/product/${product.id}`} className="relative aspect-[3/4] overflow-hidden bg-[#f5f0eb] block">
         {/* Loading Skeleton */}
         {!imageLoaded && <div className="absolute inset-0 skeleton"></div>}
         
         <img
           src={product.images[0] || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&q=80'}
           alt={product.name}
-          className={`w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05] ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+          className={`w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           loading="lazy"
           onLoad={() => setImageLoaded(true)}
           onError={(e) => {
             e.target.style.display = 'none';
-            e.target.parentElement.innerHTML += `<div class="absolute inset-0 bg-gradient-to-tr from-gray-100 to-gray-200 flex items-center justify-center"><span class="text-4xl font-serif text-gray-400">${product.name.charAt(0)}</span></div>`;
+            e.target.parentElement.innerHTML += `<div class="absolute inset-0 bg-gradient-to-tr from-gray-100 to-gray-200 flex items-center justify-center"><span class="text-4xl font-serif text-gray-300">${product.name.charAt(0)}</span></div>`;
           }}
         />
         
-        {/* Floating Tags */}
-        <div className="absolute top-4 left-4 flex flex-col gap-2 z-10 pointer-events-none">
-          {product.status === 'out_of_stock' ? (
-            <span className="bg-white/90 backdrop-blur-md text-red-600 border border-red-100 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest shadow-sm flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span> Sold Out
-            </span>
-          ) : product.featured && (
-            <span className="bg-white/90 backdrop-blur-md text-text border border-gray-200 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest shadow-sm flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span> New Arrival
+        {/* Badges */}
+        <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 pointer-events-none">
+          {product.featured && (
+            <span className="bg-[#0D1B38] text-white text-[9px] font-semibold px-3 py-1 uppercase tracking-[0.15em]">
+              Best Selling
             </span>
           )}
-          {product.fabric && (
-             <span className="bg-black/50 backdrop-blur-md text-white text-[10px] px-3 py-1.5 rounded-full uppercase tracking-widest float-left w-fit border border-white/20">
-               {product.fabric}
-             </span>
+          {product.stock === 'low_stock' && (
+            <span className="bg-amber-500 text-white text-[9px] font-semibold px-3 py-1 uppercase tracking-[0.15em]">
+              Low Stock
+            </span>
           )}
+          {product.status === 'out_of_stock' && (
+            <span className="bg-red-500 text-white text-[9px] font-semibold px-3 py-1 uppercase tracking-[0.15em]">
+              Sold Out
+            </span>
+          )}
+        </div>
+
+        {/* Quick Enquiry on hover */}
+        <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-10">
+          <WhatsAppButton 
+            productName={product.name}
+            className="w-full text-[10px] py-3 bg-white text-text hover:bg-[#0D1B38] hover:text-white shadow-lg tracking-[0.15em] uppercase font-semibold transition-colors"
+          />
         </div>
       </Link>
 
-      {/* Content */}
-      <div className="p-6 flex flex-col flex-grow bg-white">
-        <div className="flex-grow space-y-1.5 text-center px-2">
-          <h3 className="font-serif text-[clamp(1.1rem,2vw,1.25rem)] font-normal text-text leading-snug line-clamp-2">
-            <Link to={`/product/${product.id}`} className="hover:text-primary transition-colors focus-visible:outline-2 focus-visible:outline-primary rounded">
-              {product.name}
-            </Link>
-          </h3>
-          
-          <div className="flex flex-col items-center justify-center mt-3 gap-1">
-            <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-gray-400">{product.category}</span>
-            {product.price ? (
-              <span className="font-serif text-primary text-xl mt-1">₹{product.price.toLocaleString('en-IN')}</span>
-            ) : (
-              <span className="italic text-xs text-gray-500 mt-1">Price on Request</span>
-            )}
-          </div>
-        </div>
-
-        {/* Action - Hidden until hover */}
-        <div className="mt-0 overflow-hidden max-h-0 group-hover:max-h-14 group-hover:mt-6 transition-all duration-300 opacity-0 group-hover:opacity-100 flex items-center justify-center">
-          <WhatsAppButton 
-            productName={product.name}
-            className="w-full text-[11px] py-3.5 rounded-lg bg-text text-white hover:bg-primary shadow-none tracking-[0.15em] uppercase"
-          />
-        </div>
+      {/* Info */}
+      <div className="pt-3 pb-1 space-y-1.5">
+        <Link 
+          to={`/product/${product.id}`} 
+          className="block font-serif text-[15px] md:text-base font-normal text-text leading-snug hover:text-primary transition-colors line-clamp-2"
+        >
+          {product.name}
+        </Link>
+        
+        {product.fabric && (
+          <p className="text-[11px] uppercase tracking-[0.15em] text-muted">{product.fabric}</p>
+        )}
+        
+        {product.price ? (
+          <p className="text-sm font-medium text-text">₹{product.price.toLocaleString('en-IN')}</p>
+        ) : (
+          <p className="text-sm italic text-muted">Price on Request</p>
+        )}
       </div>
     </div>
   );
