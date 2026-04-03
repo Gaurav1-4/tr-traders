@@ -1,17 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
-import { Save, Phone, Mail, MapPin, Store, Settings as SettingsIcon, Video, Trash2, Plus, Link as LinkIcon, Eye, Upload, Loader2, Tags, Layers } from 'lucide-react';
+import { Save, Phone, Mail, MapPin, Store, Settings as SettingsIcon, Video, Trash2, Plus, Link as LinkIcon, Eye, Upload, Loader2, Tags, Layers, AlertCircle, ExternalLink, Sparkles } from 'lucide-react';
 import { useToast } from '../../components/Toast';
 import { db, storage, isMockMode } from '../../services/firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 const DEFAULT_VIDEOS = [
-  'https://www.w3schools.com/html/mov_bbb.mp4',
-  'https://www.w3schools.com/html/movie.mp4',
-  'https://www.w3schools.com/html/mov_bbb.mp4',
+  'https://assets.mixkit.co/videos/preview/mixkit-girl-in-a-traditional-indian-dress-walking-41007-large.mp4',
+  'https://assets.mixkit.co/videos/preview/mixkit-woman-showing-off-her-indian-dress-41014-large.mp4',
+  'https://assets.mixkit.co/videos/preview/mixkit-indian-woman-posing-with-a-sari-41011-large.mp4',
 ];
-
-const DEFAULT_CATEGORIES = ['Casual', 'Formal', 'Bridal', 'Festive', 'Winter', 'Cotton'];
 
 const AdminSettings = () => {
   const { showToast } = useToast();
@@ -23,13 +21,12 @@ const AdminSettings = () => {
   const [settings, setSettings] = useState({
     storeName: 'TR Traders',
     whatsappNumber: '919208275274',
-    email: 'contact@trtraders.com',
+    email: 'gauravgoyal2112007@gmail.com',
     address: 'Shori Cloth Market, Rohtak, Haryana (124001)',
-    currency: 'INR',
   });
 
   const [heroVideos, setHeroVideos] = useState([...DEFAULT_VIDEOS]);
-  const [categories, setCategories] = useState([...DEFAULT_CATEGORIES]);
+  const [categories, setCategories] = useState(['Casual', 'Formal', 'Bridal', 'Festive', 'Winter', 'Cotton']);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -38,7 +35,6 @@ const AdminSettings = () => {
         if (!isMockMode) {
           const docRef = doc(db, 'settings', 'global');
           const docSnap = await getDoc(docRef);
-          
           if (docSnap.exists()) {
             const data = docSnap.data();
             if (data.store) setSettings(data.store);
@@ -47,7 +43,7 @@ const AdminSettings = () => {
           }
         }
       } catch (err) {
-        console.error("Firebase settings fetch error:", err);
+        console.error("Firebase settings error:", err);
       } finally {
         setFetching(false);
       }
@@ -55,175 +51,123 @@ const AdminSettings = () => {
     fetchSettings();
   }, []);
 
+  const handleVideoLinkChange = (index, value) => {
+    let cleanUrl = value.trim();
+    
+    // Gdrive conversion
+    if (cleanUrl.includes('drive.google.com')) {
+      const gmatch = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || cleanUrl.match(/id=([a-zA-Z0-9_-]+)/);
+      if (gmatch) {
+        cleanUrl = `https://drive.google.com/uc?export=download&id=${gmatch[1]}`;
+        showToast('Converted for direct streaming!', 'success');
+      }
+    }
+    // Advanced Dropbox conversion (?raw=1)
+    if (cleanUrl.includes('dropbox.com')) {
+      cleanUrl = cleanUrl.split('?')[0]; // Remove existing params
+      const params = value.includes('?') ? value.split('?')[1].replace('dl=0', '').replace('dl=1', '') : '';
+      cleanUrl = cleanUrl + '?' + (params ? params + '&' : '') + 'raw=1';
+      cleanUrl = cleanUrl.replace('&&', '&').replace('?&', '?');
+      showToast('Dropbox stream optimized!', 'success');
+    }
+
+    setHeroVideos(p => {
+      const next = [...p];
+      next[index] = cleanUrl;
+      return next;
+    });
+  };
+
   const handleFileUpload = async (e, index) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    if (file.size > 100 * 1024 * 1024) {
-      showToast('Video too large (Max 100MB)', 'error');
-      return;
-    }
-
     setUploadingIndex(index);
     setUploadProgress(prev => ({ ...prev, [index]: 0 }));
-
-    if (isMockMode) {
-      setTimeout(() => {
-        const localPreviewUrl = URL.createObjectURL(file);
-        handleVideoChange(index, localPreviewUrl);
-        setUploadingIndex(null);
-      }, 1000);
-      return;
-    }
-
     try {
-      // Direct upload
       const storageRef = ref(storage, `hero-videos/v-${Date.now()}`);
       const uploadTask = uploadBytesResumable(storageRef, file);
-
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setUploadProgress(prev => ({ ...prev, [index]: Math.round(progress) }));
-        },
-        (error) => {
-          console.error("Upload Error Details:", error);
-          if (error.code === 'storage/unauthorized') {
-            showToast('Permission Denied! Please check Step 1: Set Storage Rules to "if true"', 'error');
-          } else {
-            showToast(`Upload failed: ${error.message || 'Unknown error'}`, 'error');
-          }
-          setUploadingIndex(null);
-        },
-        async () => {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          handleVideoChange(index, downloadURL);
-          showToast('Sync Successful!', 'success');
-          setUploadingIndex(null);
-        }
-      );
-    } catch (err) {
-      showToast('Storage not initialized. Check your Firebase console.', 'error');
-      setUploadingIndex(null);
-    }
-  };
-
-  const handleVideoChange = (index, value) => {
-    setHeroVideos(prev => {
-      const next = [...prev];
-      next[index] = value;
-      return next;
-    });
-  };
-
-  const handleCategoryChange = (index, value) => {
-    setCategories(prev => {
-      const next = [...prev];
-      next[index] = value;
-      return next;
-    });
-  };
-
-  const addCategory = () => {
-    if (categories.length < 12) setCategories(prev => [...prev, 'New Category']);
-  };
-
-  const removeCategory = (index) => {
-    if (categories.length > 1) setCategories(prev => prev.filter((_, i) => i !== index));
+      uploadTask.on('state_changed', (snap) => {
+        setUploadProgress(p => ({ ...p, [index]: Math.round((snap.bytesTransferred / snap.totalBytes) * 100) }));
+      }, (err) => {
+        setUploadingIndex(null);
+        showToast('Region restricted. Please paste a Dropbox link below!', 'error');
+      }, async () => {
+        const url = await getDownloadURL(uploadTask.snapshot.ref);
+        handleVideoLinkChange(index, url);
+        setUploadingIndex(null);
+      });
+    } catch (err) { setUploadingIndex(null); }
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      if (!isMockMode) {
-        const docRef = doc(db, 'settings', 'global');
-        await setDoc(docRef, {
-          store: settings,
-          heroVideos: heroVideos.filter(v => v.trim() !== ''),
-          categories: categories.filter(c => c.trim() !== ''),
-          updatedAt: new Date().toISOString()
-        });
-      }
-      showToast('Live site updated successfully!', 'success');
-    } catch (error) {
-      showToast('Sync failed. Please try again.', 'error');
-    } finally {
-      setLoading(false);
-    }
+      const docRef = doc(db, 'settings', 'global');
+      await setDoc(docRef, { store: settings, heroVideos: heroVideos, categories: categories, updatedAt: new Date().toISOString() });
+      showToast('Brand synchronized live!', 'success');
+    } catch (error) { 
+      showToast('Cloud connection error. Check your Firebase Rules.', 'error');
+    } finally { setLoading(false); }
   };
 
-  if (fetching) {
-     return <div className="h-[60vh] flex items-center justify-center text-muted animate-pulse font-serif italic uppercase tracking-[0.2em] text-xs">Authenticating Brand Sync...</div>;
-  }
+  if (fetching) return <div className="h-[60vh] flex flex-col items-center justify-center gap-6 text-primary animate-pulse">Establishing Cinema Engine...</div>;
 
   return (
-    <div className="max-w-5xl mx-auto pb-32 px-4">
-      <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between bg-white p-8 rounded-3xl border border-border shadow-soft gap-4">
-        <div className="flex items-center gap-5">
-          <div className="w-14 h-14 bg-[#0D1B38] rounded-2xl flex items-center justify-center text-white shadow-xl">
-            <SettingsIcon size={26} />
-          </div>
+    <div className="max-w-7xl mx-auto px-8 pb-48">
+      <div className="mb-16 flex flex-col md:flex-row md:items-center justify-between bg-[#FDFCFB] rounded-[3rem] p-12 shadow-soft border border-border border-l-[12px] border-[#0D1B38]">
+        <div className="flex items-center gap-10">
+          <div className="w-16 h-16 bg-[#0D1B38] text-white rounded-3xl flex items-center justify-center shadow-2xl"><SettingsIcon size={32} /></div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-serif font-medium text-text">Store Experience</h1>
-            <p className="text-[9px] text-muted uppercase tracking-[0.4em] font-black">Powered by TR TRADERS Cloud</p>
+            <h1 className="text-4xl font-serif text-text mb-2 tracking-tight">E-commerce Heritage</h1>
+            <p className="text-[10px] text-muted tracking-[0.5em] uppercase font-black opacity-80">Connected to tr-traders-live-33109</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 self-start md:self-center">
-           <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-ping" />
-           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-green-600">Online & Ready</span>
+        <div className="flex items-center gap-4 py-3 px-8 bg-black text-white rounded-full text-[10px] uppercase font-black tracking-widest shadow-2xl self-start md:self-center">
+           <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" /> Real-time Status
         </div>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-12">
-
-        {/* ===== VIDEO GRID MANAGER ===== */}
-        <div className="bg-white p-8 rounded-3xl shadow-soft border border-border overflow-hidden">
-          <div className="flex items-center gap-3 mb-2">
-            <Video size={24} className="text-primary" />
-            <h2 className="text-xl font-serif text-text">Hero Video Grid</h2>
+      <form onSubmit={handleSave} className="space-y-20">
+        <div className="bg-white rounded-[4.5rem] p-16 md:p-24 shadow-soft border border-border">
+          <div className="pb-16 mb-20 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-10">
+            <div className="max-w-xl">
+               <h2 className="text-3xl font-serif text-text mb-4 flex items-center gap-6"><Video size={40} className="text-primary"/> Film & Cinema Matrix</h2>
+               <p className="text-lg text-muted font-light leading-relaxed">Update your storefront background films. Paste your Dropbox links, and our engine will **Auto-Refine** them for streaming.</p>
+            </div>
+            <div className="flex gap-4">
+              <a href="https://dropbox.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-[11px] font-black uppercase tracking-widest text-[#0D1B38] hover:bg-[#0D1B38] hover:text-white py-4 px-8 border-2 border-[#0D1B38] rounded-3xl transition-all shadow-xl">
+                 <ExternalLink size={18} /> Dropbox
+              </a>
+            </div>
           </div>
-          <p className="text-sm text-muted mb-8 border-b border-border pb-4 font-light">
-            Keep videos under <span className="font-bold text-text">10MB</span> for the fastest customer experience.
-          </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {heroVideos.slice(0, 3).map((url, index) => (
-              <div key={index} className="space-y-6">
-                <div className="aspect-[9/16] md:aspect-[3/4] bg-[#000] rounded-3xl overflow-hidden relative shadow-2xl group border border-white/5">
-                  {uploadingIndex === index ? (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-white gap-3 bg-[#0D1B38]/90 backdrop-blur-md px-10">
-                      <div className="relative w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                        <div 
-                          className="absolute left-0 top-0 h-full bg-white transition-all duration-300"
-                          style={{ width: `${uploadProgress[index] || 2}%` }}
-                        />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-20">
+            {heroVideos.slice(0, 3).map((url, i) => (
+              <div key={i} className="flex flex-col gap-10 group animate-fade-in" style={{animationDelay: `${i * 0.15}s`}}>
+                <div className="aspect-[9/16] md:aspect-[3/4] bg-black rounded-[4rem] overflow-hidden relative shadow-[0_60px_120px_-30px_rgba(0,0,0,0.7)] hover:shadow-primary/30 transition-all duration-1000 group-hover:-translate-y-5 border-2 border-white/5">
+                  {uploadingIndex === i ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-10 bg-[#0D1B38]/95 backdrop-blur-3xl px-16">
+                      <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full bg-white transition-all duration-300" style={{ width: `${uploadProgress[i]}%` }} />
                       </div>
-                      <span className="text-[18px] font-black tracking-widest">{uploadProgress[index] || 0}%</span>
-                      <span className="text-[8px] uppercase font-bold tracking-[0.3em] opacity-50 animate-pulse">Synchronizing</span>
+                      <span className="text-5xl font-black tracking-tighter text-white">{uploadProgress[i]}%</span>
                     </div>
-                  ) : url ? (
-                    <video src={url} muted loop playsInline autoPlay className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-[3s]" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-[#0D1B38]/5"><Video size={48} className="text-[#0D1B38]/10" /></div>
+                    <video key={url} src={url} autoPlay muted loop playsInline className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-1000 scale-[1.01]" />
                   )}
+                  <div className="absolute top-10 left-10"><span className="text-[10px] font-black tracking-[0.6em] uppercase text-white/50">CINEMA {i+1}</span></div>
                 </div>
                 
-                <div className="space-y-4">
-                  <label className="block w-full">
-                    <input type="file" accept="video/*" className="hidden" 
-                      onChange={(e) => handleFileUpload(e, index)}
-                      disabled={uploadingIndex !== null}
-                    />
-                    <div className="flex items-center justify-center gap-2 py-4 bg-[#0D1B38] text-white hover:bg-black transition-all rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] shadow-xl cursor-pointer hover:-translate-y-1 active:translate-y-0">
-                      <Upload size={14} /> Replace Video
+                <div className="space-y-8 px-4">
+                  <div className="relative">
+                    <div className="absolute -top-3 left-8 px-4 bg-white text-[10px] font-black uppercase tracking-[0.3em] text-primary z-10 flex items-center gap-3">
+                       <Sparkles size={14} className="animate-pulse" /> Auto-Correction
                     </div>
-                  </label>
-                  <div className="flex items-center gap-3 px-4 py-3.5 bg-gray-50 border border-border rounded-2xl group focus-within:border-[#0D1B38] transition-all">
-                    <LinkIcon size={14} className="text-muted group-focus-within:text-[#0D1B38]" />
-                    <input type="url" value={url} onChange={(e) => handleVideoChange(index, e.target.value)} 
-                      placeholder="Paste .mp4 link" className="w-full text-[10px] outline-none bg-transparent font-bold tracking-widest" />
+                    <div className="flex items-center gap-5 px-8 py-6 bg-gray-50 border border-border rounded-[2.5rem] group focus-within:border-primary transition-all duration-700 shadow-sm">
+                      <LinkIcon size={20} className="text-muted group-focus-within:text-primary transition-colors" />
+                      <input type="text" value={url} onChange={(e) => handleVideoLinkChange(i, e.target.value)} placeholder="Paste Dropbox Link" className="bg-transparent w-full text-[12px] font-black tracking-[0.15em] outline-none text-[#0D1B38] placeholder:text-muted/30" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -231,69 +175,24 @@ const AdminSettings = () => {
           </div>
         </div>
 
-        {/* ===== COLLECTION MANAGER ===== */}
-        <div className="bg-white p-8 rounded-3xl shadow-soft border border-border">
-          <div className="flex items-center gap-3 mb-2">
-            <Tags size={24} className="text-primary" />
-            <h2 className="text-xl font-serif text-text">Collection Navigation</h2>
-          </div>
-          <p className="text-sm text-muted mb-8 border-b border-border pb-4 font-light">
-            Renaming a collection here will update the shop menu for all customers.
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 mb-8">
-            {categories.map((cat, index) => (
-              <div key={index} className="flex gap-2 group animate-fade-up" style={{animationDelay: `${index * 0.05}s`}}>
-                <div className="flex-1 bg-white border border-border rounded-2xl flex items-center px-5 group-focus-within:border-[#0D1B38] shadow-sm transition-all hover:shadow-md">
-                   <input
-                     type="text"
-                     value={cat}
-                     onChange={(e) => handleCategoryChange(index, e.target.value)}
-                     className="w-full py-4 bg-transparent outline-none text-[11px] font-bold uppercase tracking-[0.25em] text-[#0D1B38]"
-                   />
-                </div>
-                {categories.length > 1 && (
-                  <button type="button" onClick={() => removeCategory(index)}
-                    className="p-3 text-red-300 hover:text-white hover:bg-red-500 rounded-2xl transition-all border border-border hover:border-red-500 shadow-sm">
-                     <Trash2 size={18} />
-                  </button>
-                )}
-              </div>
-            ))}
-            {categories.length < 12 && (
-              <button type="button" onClick={addCategory}
-                className="flex items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border text-muted hover:border-[#0D1B38] hover:text-[#0D1B38] transition-all hover:bg-gray-50 group py-4">
-                <Plus size={20} className="transition-transform group-hover:rotate-90" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Add New Collection</span>
-              </button>
-            )}
-          </div>
-        </div>
-
         {/* Global Save Button */}
-        <div className="sticky bottom-8 left-0 right-0 z-40">
-          <div className="bg-[#0D1B38] p-6 md:p-8 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="hidden md:block">
-              <p className="text-white text-lg font-serif italic">Push all updates live?</p>
-              <p className="text-white/30 text-[9px] uppercase tracking-[0.4em] mt-2">Will reflect on all devices globally</p>
-            </div>
-            <button type="submit" disabled={loading || uploadingIndex !== null}
-              className="group flex items-center justify-center gap-5 px-14 py-6 bg-white text-[#0D1B38] rounded-2xl font-black uppercase tracking-[0.3em] text-[12px] hover:bg-[#FAF7F4] transition-all shadow-2xl hover:-translate-y-2 active:translate-y-0 disabled:opacity-50 w-full md:w-auto">
-              {loading ? <Loader2 size={24} className="animate-spin text-[#0D1B38]" /> : (
-                <>
-                  Publish Live Site
-                  <Save size={20} className="group-hover:scale-110 transition-transform" />
-                </>
-              )}
-            </button>
-          </div>
+        <div className="sticky bottom-12 left-0 right-0 z-40 mx-8">
+          <button type="submit" disabled={loading || uploadingIndex !== null}
+            className="w-full group relative overflow-hidden flex items-center justify-center gap-10 py-10 bg-[#0D1B38] text-white rounded-[3rem] font-black uppercase tracking-[0.6em] text-[16px] shadow-[0_40px_100px_-20px_rgba(13,27,56,0.5)] hover:-translate-y-2 transition-all active:scale-95 disabled:opacity-50">
+            {loading ? <Loader2 size={30} className="animate-spin" /> : (
+              <>
+                 Synchronize All Devices
+                 <Save size={28} className="group-hover:rotate-12 transition-transform" />
+              </>
+            )}
+            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+          </button>
         </div>
-
       </form>
       
       <style>{`
         .shadow-soft {
-          box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05);
+          box-shadow: 0 30px 90px -20px rgba(0,0,0,0.04);
         }
       `}</style>
     </div>

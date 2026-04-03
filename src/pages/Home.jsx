@@ -7,6 +7,7 @@ import { ArrowRight } from 'lucide-react';
 import { db, isMockMode } from '../services/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
+// STABLE MIXKIT FASHION VIDEOS
 const DEFAULT_VIDEOS = [
   'https://assets.mixkit.co/videos/preview/mixkit-girl-in-a-traditional-indian-dress-walking-41007-large.mp4',
   'https://assets.mixkit.co/videos/preview/mixkit-woman-showing-off-her-indian-dress-41014-large.mp4',
@@ -14,6 +15,12 @@ const DEFAULT_VIDEOS = [
 ];
 
 const DEFAULT_CATEGORIES = ['All', 'Casual', 'Formal', 'Bridal', 'Festive', 'Winter', 'Cotton'];
+
+const fallbackImages = [
+  '/images/suit-red-silk.jpg',
+  '/images/suit-khatli.jpg',
+  '/images/suit-blue.jpg'
+];
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -36,7 +43,7 @@ const Home = () => {
           }
         }
       } catch (err) {
-        console.warn("Cloud Sync Note: Using local visual defaults for now.");
+        console.warn("Using visual defaults.");
       }
     };
     fetchSettings();
@@ -56,18 +63,28 @@ const Home = () => {
     fetchProducts();
   }, [activeCategory]);
 
+  const handleVideoError = (index) => {
+    console.warn(`Video ${index} failed. Checking fallback...`);
+    setVideoErrors(prev => ({ ...prev, [index]: true }));
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-bg">
-      <section className="w-full relative shadow-inner overflow-hidden border-b border-border bg-[#0D1B38]">
+      <section className="w-full relative overflow-hidden border-b border-border bg-[#0D1B38]">
         <div className="grid gap-0 grid-cols-3">
           {heroVideos.slice(0, 3).map((url, i) => (
-            <div key={i} className="relative aspect-[9/16] md:aspect-[3/4] overflow-hidden group border-r border-white/5 last:border-r-0">
-              <video autoPlay muted loop playsInline
-                className="w-full h-full object-cover transition-transform duration-[4s] group-hover:scale-110"
-                onError={() => setVideoErrors(p => ({...p, [i]: true}))}
-              >
-                <source src={url} type="video/mp4" />
-              </video>
+            <div key={i} className="relative aspect-[16/25] sm:aspect-[9/16] md:aspect-[3/4] overflow-hidden group border-r border-white/5 last:border-r-0 bg-black">
+              {videoErrors[i] ? (
+                <img src={fallbackImages[i % fallbackImages.length]} alt="" className="absolute inset-0 w-full h-full object-cover animate-fade-in opacity-80" />
+              ) : (
+                <video autoPlay muted loop playsInline
+                  key={`${url}-${i}`}
+                  className="w-full h-full object-cover transition-transform duration-[4s] group-hover:scale-110"
+                  onError={() => handleVideoError(i)}
+                >
+                  <source src={url} type="video/mp4" />
+                </video>
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none"></div>
             </div>
           ))}
@@ -95,7 +112,7 @@ const Home = () => {
 
       <section className="py-20 md:py-32 max-w-[1400px] mx-auto px-6 lg:px-12 w-full flex-grow bg-bg">
         <div className="flex flex-col items-center justify-center mb-20 text-center">
-          <h2 className="text-4xl md:text-6xl font-serif font-light text-text tracking-tighter mb-8">Selected Couture</h2>
+          <h2 className="text-4xl md:text-6xl font-serif font-light text-text tracking-tighter mb-8 italic">Signature Heritage</h2>
           <div className="w-16 h-0.5 bg-primary/20"></div>
         </div>
 
@@ -106,16 +123,16 @@ const Home = () => {
             products.map((product) => <ProductCard key={product.id} product={product} />)
           ) : (
             <div className="col-span-full py-40 text-center text-muted border border-dashed border-border/20 rounded-[3rem] bg-surface/50">
-              <p className="font-serif text-2xl italic font-light opacity-40 uppercase tracking-widest leading-loose">
-                Curating the <br/> Spring Heritage Collection
+              <p className="font-serif text-2xl italic font-light opacity-40 uppercase tracking-[0.5em] leading-loose">
+                Curating Elegance...
               </p>
             </div>
           )}
         </div>
         
         <div className="mt-32 flex justify-center">
-          <Link to="/catalog" className="group border border-[#0D1B38] text-[#0D1B38] px-16 py-6 hover:bg-[#0D1B38] hover:text-white transition-all duration-700 uppercase tracking-[0.4em] text-[12px] font-black flex items-center gap-6 shadow-2xl">
-            Explore Catalog <ArrowRight size={18} className="group-hover:translate-x-3 transition-transform" />
+          <Link to="/catalog" className="group border-2 border-[#0D1B38] text-[#0D1B38] px-16 py-6 hover:bg-[#0D1B38] hover:text-white transition-all duration-700 uppercase tracking-[0.5em] text-[11px] font-black flex items-center gap-6 shadow-[0_20px_60px_-10px_rgba(13,27,56,0.3)]">
+            The Full Gallery <ArrowRight size={18} className="group-hover:translate-x-3 transition-transform" />
           </Link>
         </div>
       </section>
