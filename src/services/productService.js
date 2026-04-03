@@ -1,5 +1,5 @@
 import { isMockMode, db } from './firebase';
-import { collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, query, orderBy, onSnapshot } from 'firebase/firestore';
 
 // Heritage Signature Collection (Original 5 Pieces)
 export const HERITAGE_COLLECTION = [
@@ -88,12 +88,16 @@ export const getProducts = async (includeHidden = false) => {
   
   try {
     const productsRef = collection(db, "products");
-    const q = query(productsRef, orderBy("createdAt", "desc"));
-    const querySnapshot = await getDocs(q);
+    // Removed specific orderBy to avoid "Missing Index" Cloud errors
+    const querySnapshot = await getDocs(productsRef);
     let products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    // Sort manually in memory to ensure stability without needing complex Cloud indexes
+    products.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
     return includeHidden ? products : products.filter(p => p.status === 'active');
   } catch (error) {
-    console.error("Cloud Error:", error);
+    console.error("Cloud Products Error:", error);
     return getMockData();
   }
 };
@@ -122,18 +126,19 @@ export const addProduct = async (productData) => {
 };
 
 export const updateProduct = async (id, updates) => {
+  const data = { ...updates, updatedAt: new Date().toISOString() };
   if (isMockMode || id.startsWith('h')) {
     const products = getMockData();
     const idx = products.findIndex(p => p.id === id);
     if (idx > -1) {
-      products[idx] = { ...products[idx], ...updates };
+      products[idx] = { ...products[idx], ...data };
       localStorage.setItem('tr_traders_products', JSON.stringify(products));
       return products[idx];
     }
   }
   const docRef = doc(db, "products", id);
-  await updateDoc(docRef, updates);
-  return { id, ...updates };
+  await updateDoc(docRef, data);
+  return { id, ...data };
 };
 
 export const deleteProduct = async (id) => {
