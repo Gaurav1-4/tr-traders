@@ -1,113 +1,77 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
-import { Heart } from 'lucide-react';
+import { Heart, ArrowUpRight } from 'lucide-react';
 import { useWishlist } from '../hooks/useWishlist';
 import WhatsAppButton from './WhatsAppButton';
 
 const ProductCard = ({ product }) => {
-  const cardRef = useRef(null);
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const { toggleWishlist, isInWishlist } = useWishlist();
   const [imageLoaded, setImageLoaded] = useState(false);
+  const cardRef = useRef(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
-    );
-    
-    if (cardRef.current) {
-      observer.observe(cardRef.current);
-    }
-    
+    const observer = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setIsVisible(true); observer.disconnect(); } }, { threshold: 0.1 });
+    if (cardRef.current) observer.observe(cardRef.current);
     return () => observer.disconnect();
   }, []);
 
   const saved = isInWishlist(product.id);
 
-  const handleCardClick = (e) => {
-    // If user clicked the button or wishlist, don't navigate
-    if (e.target.closest('button') || e.target.closest('a')) return;
-    navigate(`/product/${product.id}`);
-  };
-
   return (
     <div 
       ref={cardRef}
-      onClick={handleCardClick}
-      className={`card-enter ${isVisible ? 'visible' : ''} group flex flex-col relative cursor-pointer`}
+      className={`relative flex flex-col group transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
     >
-      {/* Wishlist Button */}
-      <button 
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          toggleWishlist(product.id);
-        }}
-        className={`absolute top-3 right-3 z-20 w-9 h-9 rounded-full flex items-center justify-center bg-white/80 backdrop-blur-sm shadow-sm transition-all opacity-0 group-hover:opacity-100 ${saved ? 'opacity-100 text-red-500' : 'text-gray-500 hover:text-red-500'}`}
-        aria-label="Save to Wishlist"
-      >
-        <Heart size={16} className={saved ? 'fill-red-500' : ''} strokeWidth={1.5} />
-      </button>
-
-      {/* Image Container */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-[#f5f0eb] block">
-        {/* Loading Skeleton */}
+      {/* 1. IMAGE BOX - CLICKABLE */}
+      <Link to={`/product/${product.id}`} className="relative aspect-[3/4] overflow-hidden bg-[#f5f0eb] rounded-sm block">
         {!imageLoaded && <div className="absolute inset-0 skeleton"></div>}
-        
         <img
-          src={product.images[0] || '/images/placeholder.jpg'}
+          src={product.images?.[0] || '/images/placeholder.jpg'}
           alt={product.name}
-          className={`w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+          className={`w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           loading="lazy"
           onLoad={() => setImageLoaded(true)}
-          onError={(e) => {
-            e.target.style.display = 'none';
-            e.target.parentElement.innerHTML += `<div class="absolute inset-0 bg-gradient-to-tr from-gray-100 to-gray-200 flex items-center justify-center"><span class="text-4xl font-serif text-gray-300">${product.name.charAt(0)}</span></div>`;
-          }}
         />
-      </div>
-        
-      {/* Info */}
-      <div className="pt-5 pb-3 space-y-2">
-        <div className="flex justify-between items-start gap-4">
-           <h3 className="font-serif text-[15px] md:text-[17px] font-normal text-text leading-tight group-hover:text-primary transition-colors flex-1">
+        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-500 shadow-2xl">
+               <ArrowUpRight size={20} className="text-[#0D1B38]" />
+            </div>
+        </div>
+      </Link>
+
+      {/* 2. WISHLIST - INDEPENDENT BUTTON */}
+      <button 
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product.id); }}
+        className={`absolute top-4 right-4 z-20 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md border border-white/20 transition-all ${saved ? 'bg-red-500 text-white border-red-500' : 'bg-white/10 text-white hover:bg-white/20 opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100'}`}
+      >
+        <Heart size={18} className={saved ? 'fill-white' : ''} />
+      </button>
+
+      {/* 3. INFO SECTION */}
+      <div className="pt-6 space-y-3">
+        <div className="flex justify-between items-baseline gap-2">
+           <Link to={`/product/${product.id}`} className="font-serif text-[16px] md:text-[18px] text-[#0D1B38] hover:opacity-60 transition-opacity leading-snug flex-1">
              {product.name}
-           </h3>
-           <button 
-             onClick={(e) => {
-               e.preventDefault();
-               e.stopPropagation();
-               toggleWishlist(product.id);
-             }}
-             className={`transition-all ${saved ? 'text-red-500 scale-110' : 'text-gray-200 hover:text-red-400 opacity-0 group-hover:opacity-100'}`}
-             aria-label="Save to Wishlist"
-           >
-             <Heart size={18} className={saved ? 'fill-red-500' : ''} strokeWidth={1.5} />
-           </button>
+           </Link>
+           {product.price ? (
+             <span className="text-[12px] font-black uppercase tracking-widest text-[#0D1B38]">₹{product.price.toLocaleString('en-IN')}</span>
+           ) : (
+             <span className="text-[10px] italic text-[#0D1B38]/30">On Request</span>
+           )}
         </div>
         
-        <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.2em] pt-1">
-           {product.fabric && (
-             <p className="text-muted/60">{product.fabric}</p>
-           )}
-           {product.price ? (
-             <p className="font-black text-text">₹{product.price.toLocaleString('en-IN')}</p>
-           ) : (
-             <p className="italic text-muted/30">Price on Request</p>
-           )}
+        <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.3em] text-[#0D1B38]/30">
+           <span>{product.fabric || 'Premium Blend'}</span>
+           <span className="h-px bg-[#0D1B38]/10 flex-1 mx-4"></span>
+           <span className="text-[#0D1B38]/20">{product.category}</span>
         </div>
 
-        <div className="pt-6">
+        <div className="pt-4">
            <WhatsAppButton 
              productName={product.name}
-             className="w-full text-[9px] py-3.5 bg-transparent border border-border/60 text-[#0D1B38]/40 hover:bg-[#0D1B38] hover:text-white hover:border-[#0D1B38] shadow-none uppercase tracking-[0.3em] font-black transition-all justify-center rounded-sm"
+             className="w-full text-[10px] py-4 bg-transparent border border-[#0D1B38]/10 text-[#0D1B38]/40 hover:bg-[#0D1B38] hover:text-white hover:border-[#0D1B38] uppercase tracking-[0.4em] font-black transition-all justify-center rounded-none"
            />
         </div>
       </div>
