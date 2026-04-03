@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Save, Phone, Mail, MapPin, Store, Settings as SettingsIcon, Video, Trash2, Plus, Link as LinkIcon, Eye, Upload, Loader2, Tags, Layers, AlertCircle, ExternalLink, Sparkles, RefreshCcw, CheckCircle2 } from 'lucide-react';
+import { Save, Phone, Mail, MapPin, Store, Settings as SettingsIcon, Video, Trash2, Plus, Link as LinkIcon, Eye, Upload, Loader2, Tags, Layers, AlertCircle, ExternalLink, Sparkles, RefreshCcw, XCircle } from 'lucide-react';
 import { useToast } from '../../components/Toast';
 import { db, storage, isMockMode } from '../../services/firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -69,14 +69,27 @@ const AdminSettings = () => {
     setKey(k => k + 1);
   };
 
+  const addVideoSlot = () => {
+    setHeroVideos(p => [...p, '']);
+  };
+
+  const removeVideoSlot = (index) => {
+    if (heroVideos.length <= 1) {
+      showToast('You must have at least one slot.', 'error');
+      return;
+    }
+    setHeroVideos(p => p.filter((_, i) => i !== index));
+    setKey(k => k + 1);
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const docRef = doc(db, 'settings', 'global');
       await setDoc(docRef, { store: settings, heroVideos: heroVideos, categories: categories, updatedAt: new Date().toISOString() });
-      showToast('Brand synchronized!', 'success');
-    } catch (error) { showToast('Permission error.', 'error'); } 
+      showToast('Fashion Reel Synchronized!', 'success');
+    } catch (error) { showToast('Sync failed.', 'error'); } 
     finally { setLoading(false); }
   };
 
@@ -84,18 +97,18 @@ const AdminSettings = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-6 pb-48">
-      {/* HEADER SECTION - SLEEKER */}
+      {/* HEADER SECTION */}
       <div className="mb-12 flex flex-col md:flex-row md:items-center justify-between bg-white rounded-[2rem] p-8 shadow-sm border border-border mt-6">
         <div className="flex items-center gap-6">
           <div className="w-12 h-12 bg-[#0D1B38] text-white rounded-[1rem] flex items-center justify-center shadow-lg"><SettingsIcon size={24} /></div>
           <div>
-            <h1 className="text-2xl font-serif text-text mb-0.5">Control Center</h1>
-            <p className="text-[8px] text-muted tracking-[0.4em] uppercase font-black opacity-60">Global Brand Engine</p>
+            <h1 className="text-2xl font-serif text-text mb-0.5">Brand Engine</h1>
+            <p className="text-[8px] text-muted tracking-[0.4em] uppercase font-black opacity-60">Infinite Reel Active</p>
           </div>
         </div>
         <div className="flex items-center gap-3 px-5 py-2.5 bg-gray-50 rounded-full border border-border self-start md:self-center mt-4 md:mt-0">
-           <div className="w-2 h-2 bg-green-500 rounded-full" />
-           <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#0D1B38]/50">Live Sync Engaged</span>
+           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+           <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#0D1B38]/50">Cloud Sync Active</span>
         </div>
       </div>
 
@@ -103,28 +116,37 @@ const AdminSettings = () => {
         <div className="bg-white rounded-[3rem] p-10 md:p-16 shadow-soft border border-border">
           <div className="pb-10 mb-16 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-8">
             <div className="max-w-xl">
-               <h2 className="text-xl font-serif text-text mb-2 flex items-center gap-3"><Video size={20} className="text-primary"/> Film Exhibition</h2>
-               <p className="text-xs text-muted font-light leading-relaxed">Update the background films of your storefront heritage strip.</p>
+               <h2 className="text-xl font-serif text-text mb-2 flex items-center gap-3"><Video size={20} className="text-primary"/> Cinema Exhibition Strips</h2>
+               <p className="text-xs text-muted font-light leading-relaxed">Add as many videos as you like. They will appear as a beautiful continuous reel on the main site.</p>
             </div>
-            <button type="button" onClick={() => setKey(k => k + 1)} className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-[#0D1B38]/40 hover:text-primary transition-all">
-               <RefreshCcw size={14} /> Refresh Previews
-            </button>
+            <div className="flex items-center gap-6">
+              <button type="button" onClick={() => setKey(k => k + 1)} className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-[#0D1B38]/40 hover:text-primary transition-all">
+                 <RefreshCcw size={14} /> Refresh
+              </button>
+              <button type="button" onClick={addVideoSlot} className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest bg-[#0D1B38] text-white py-3 px-6 rounded-full hover:bg-black transition-all shadow-xl">
+                 <Plus size={14} /> Add Video Slot
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
-            {heroVideos.slice(0, 3).map((url, i) => (
-              <div key={`${i}-${key}`} className="flex flex-col gap-6 animate-fade-in group" style={{animationDelay: `${i * 0.1}s`}}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+            {heroVideos.map((url, i) => (
+              <div key={`${i}-${key}`} className="flex flex-col gap-6 animate-fade-in group relative" style={{animationDelay: `${i * 0.1}s`}}>
+                <button type="button" onClick={() => removeVideoSlot(i)} className="absolute top-4 right-4 z-20 text-white/40 hover:text-white transition-all">
+                   <XCircle size={20} />
+                </button>
+                
                 <div className="aspect-[3/4] bg-black rounded-[2.5rem] overflow-hidden relative shadow-2xl border border-white/5 transition-transform duration-700 group-hover:-translate-y-2">
                   <video src={url} autoPlay muted loop playsInline className="w-full h-full object-cover opacity-90" />
-                  <div className="absolute top-8 left-8 text-white/20 text-[8px] font-black uppercase tracking-[0.5em]">FILM {i+1}</div>
+                  <div className="absolute top-8 left-8 text-white/20 text-[8px] font-black uppercase tracking-[0.5em]">REEL {i+1}</div>
                 </div>
                 
                 <div className="space-y-4">
                   <div className="relative">
-                    <div className="absolute -top-2 left-6 px-3 bg-white text-[8px] font-black uppercase tracking-[0.3em] text-primary/60 z-10">Smart Link</div>
+                    <div className="absolute -top-2 left-6 px-3 bg-white text-[8px] font-black uppercase tracking-[0.3em] text-primary/60 z-10">Smart Stream</div>
                     <div className="flex items-center gap-4 px-6 py-4 bg-gray-50 border border-border rounded-2xl group focus-within:border-primary transition-all shadow-sm">
                       <LinkIcon size={16} className="text-muted group-focus-within:text-primary transition-all" />
-                      <input type="text" value={url} onChange={(e) => handleVideoLinkChange(i, e.target.value)} placeholder="Paste Link" className="bg-transparent w-full text-[10px] font-black tracking-[0.1em] outline-none text-[#0D1B38]" />
+                      <input type="text" value={url} onChange={(e) => handleVideoLinkChange(i, e.target.value)} placeholder="Paste GDrive/Dropbox Link" className="bg-transparent w-full text-[10px] font-black tracking-[0.1em] outline-none text-[#0D1B38]" />
                     </div>
                   </div>
                 </div>
@@ -133,25 +155,19 @@ const AdminSettings = () => {
           </div>
         </div>
 
-        {/* Global Save Button - SLEEKER */}
+        {/* Global Save Button */}
         <div className="sticky bottom-10 left-0 right-0 z-40 mx-auto max-w-sm">
           <button type="submit" disabled={loading}
-            className="w-full relative overflow-hidden flex items-center justify-center gap-6 py-6 bg-[#0D1B38] text-white rounded-3xl font-black uppercase tracking-[0.4em] text-[11px] shadow-2xl hover:-translate-y-1 transition-all active:scale-95 disabled:opacity-50">
+            className="w-full relative overflow-hidden flex items-center justify-center gap-6 py-6 bg-[#0D1B38] text-white rounded-3xl font-black uppercase tracking-[0.4em] text-[11px] shadow-2xl hover:-translate-y-1 transition-all active:scale-95 disabled:opacity-50 border border-white/10">
             {loading ? <Loader2 size={24} className="animate-spin" /> : (
               <div className="flex items-center gap-4">
-                 <span>Synchronize Brand</span>
+                 <span>Update Global Heritage Strip</span>
                  <Save size={18} />
               </div>
             )}
           </button>
         </div>
       </form>
-      
-      <style>{`
-        .shadow-soft {
-          box-shadow: 0 40px 120px -30px rgba(0,0,0,0.02);
-        }
-      `}</style>
     </div>
   );
 };
