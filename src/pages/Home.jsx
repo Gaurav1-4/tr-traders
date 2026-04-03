@@ -21,7 +21,7 @@ const Home = () => {
   const [videoErrors, setVideoErrors] = useState({});
   const videoRefs = useRef([]);
 
-  // REAL-TIME SYNC ENGINE
+  // INSTANT REAL-TIME SYNC
   useEffect(() => {
     if (isMockMode) return;
     const unsub = onSnapshot(doc(db, 'settings', 'global'), (docSnap) => {
@@ -30,9 +30,7 @@ const Home = () => {
         if (data.heroVideos && data.heroVideos.length > 0) {
           const refinedLinks = data.heroVideos.map(v => {
             if (v && v.includes('dropbox.com') && !v.includes('raw=1')) {
-              const base = v.split('?')[0];
-              const params = v.includes('?') ? v.split('?')[1].replace('dl=0', '').replace('dl=1', '') : '';
-              return `${base}?${params ? params + '&' : ''}raw=1`.replace('&&', '&').replace('?&', '?');
+              return v.split('?')[0] + '?raw=1';
             }
             return v;
           }).filter(v => v);
@@ -43,6 +41,7 @@ const Home = () => {
     return () => unsub();
   }, []);
 
+  // OPTIMIZED PRODUCT FETCH (Lazy on Mobile)
   useEffect(() => {
     getProducts().then(data => {
       setProducts(data.slice(0, 8));
@@ -50,58 +49,50 @@ const Home = () => {
     });
   }, []);
 
-  // THE MOBILE AUTOPLAY MASTER KEY
+  // TURBO MOBILE AUTOPLAY - METADATA ORIENTED
   useEffect(() => {
-    const forcePlay = () => {
-      videoRefs.current.forEach(video => {
+    const startStreams = () => {
+      videoRefs.current.forEach((video, idx) => {
         if (video) {
           video.muted = true;
-          video.play()?.catch(() => {});
+          // Staggered load to prevent bandwidth choke
+          setTimeout(() => {
+            video.play()?.catch(() => {});
+          }, idx * 300);
         }
       });
     };
 
-    // Attempt immediately
-    forcePlay();
-
-    // The Secret: Listening for the first user interaction (Touch or Click)
-    // This unlocks the "Autoplay Budget" on iOS/Android
-    window.addEventListener('touchstart', forcePlay, { once: true });
-    window.addEventListener('click', forcePlay, { once: true });
-    window.addEventListener('scroll', forcePlay, { once: true });
-
-    return () => {
-      window.removeEventListener('touchstart', forcePlay);
-      window.removeEventListener('click', forcePlay);
-      window.removeEventListener('scroll', forcePlay);
-    };
+    startStreams();
+    const interactions = ['touchstart', 'click', 'scroll'];
+    interactions.forEach(evt => window.addEventListener(evt, startStreams, { once: true }));
+    
+    return () => interactions.forEach(evt => window.removeEventListener(evt, startStreams));
   }, [heroVideos]);
 
   return (
     <div className="flex flex-col min-h-screen bg-bg overflow-x-hidden">
       
-      {/* SIGNATURE HERO REEL - INDESTRUCTIBLE MOBILE ENGINE */}
+      {/* SIGNATURE HERO REEL - TURBO MOBILE LOADING (metadata mode) */}
       <section className="w-full relative bg-black overflow-hidden border-b border-border h-[65vh] md:h-[85vh]">
         <div className={`w-full h-full ${heroVideos.length > 3 ? 'flex overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory' : 'grid grid-cols-3'}`}>
           {heroVideos.map((url, i) => (
-            <div key={i} className={`relative h-full overflow-hidden group bg-black transition-all duration-1000 ${heroVideos.length > 3 ? 'flex-shrink-0 w-[85vw] md:w-[33.33vw] snap-center border-r border-white/10' : 'w-full border-r border-white/5 last:border-r-0'}`}>
+            <div key={i} className={`relative h-full overflow-hidden group bg-black transition-all duration-1000 ${heroVideos.length > 3 ? 'flex-shrink-0 w-[85vw] md:w-[33.33vw] snap-center border-r border-white/10 shadow-2xl relative z-10' : 'w-full border-r border-white/5 last:border-r-0'}`}>
                {!videoErrors[i] ? (
                  <video 
                    ref={el => videoRefs.current[i] = el}
                    src={url}
-                   preload="auto"
+                   preload="metadata" // TURBO FIX: Only load headers, not full file immediately
                    autoPlay 
                    muted 
                    loop 
                    playsInline
                    webkit-playsinline="true"
-                   x5-playsinline="true"
                    className="w-full h-full object-cover opacity-90 transition-all duration-[6s] group-hover:scale-105 group-hover:opacity-100"
-                   onLoadedData={(e) => e.target.play()}
                    onError={() => setVideoErrors(p => ({...p, [i]: true}))}
                  />
                ) : (
-                 <div className="absolute inset-0 bg-[#0D1B38] flex flex-col items-center justify-center p-8 text-center">
+                 <div className="absolute inset-0 bg-[#0D1B38] flex flex-col items-center justify-center p-8 text-center animate-fade-in">
                     <Sparkles className="text-white/20 mb-4 animate-pulse" size={24} />
                     <p className="text-white/5 text-[8px] uppercase font-black tracking-[1em]">Heritage Piece {i+1}</p>
                  </div>
