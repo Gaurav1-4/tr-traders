@@ -7,28 +7,22 @@ import { ArrowRight, Loader2 } from 'lucide-react';
 import { db, isMockMode } from '../services/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
+// Your Google Drive Direct Link (Converted)
+const PROD_VIDEO_1 = "https://drive.google.com/uc?export=download&id=1rwwvoV3M8Fat2u3UMYfG5igUqZHKtZzf";
+
 const DEFAULT_VIDEOS = [
-  'https://www.w3schools.com/html/mov_bbb.mp4',
+  PROD_VIDEO_1,
   'https://www.w3schools.com/html/movie.mp4',
   'https://www.w3schools.com/html/mov_bbb.mp4',
 ];
 
 const DEFAULT_CATEGORIES = ['All', 'Casual', 'Formal', 'Bridal', 'Festive', 'Winter', 'Cotton'];
 
-const fallbackImages = [
-  '/images/suit-red-silk.jpg',
-  '/images/suit-khatli.jpg',
-  '/images/suit-blue.jpg',
-  '/images/suit-tie-dye.jpg',
-  '/images/suit-unstitched.jpg'
-];
-
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('All');
   
-  // Real-time Settings
   const [heroVideos, setHeroVideos] = useState([...DEFAULT_VIDEOS]);
   const [categories, setCategories] = useState([...DEFAULT_CATEGORIES]);
   const [videoErrors, setVideoErrors] = useState({});
@@ -46,7 +40,7 @@ const Home = () => {
           }
         }
       } catch (err) {
-        console.error("Cloud fetching error", err);
+        console.error("Cloud settings error", err);
       }
     };
     fetchSettings();
@@ -67,27 +61,26 @@ const Home = () => {
   }, [activeCategory]);
 
   const handleVideoError = (index) => {
+    console.warn(`Video ${index} failed: Check Gdrive Permissions.`);
     setVideoErrors(prev => ({ ...prev, [index]: true }));
-  };
-
-  const scrollToCollection = () => {
-    document.getElementById('collection-start')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-bg">
 
-      {/* ===== 1. CLOUD VIDEO STRIP ===== */}
-      <section className="w-full relative bg-[#0D1B38]">
+      {/* ===== 1. VIDEO STRIP ===== */}
+      <section className="w-full relative shadow-inner overflow-hidden">
         <div className="grid gap-0 border-b border-white/5 grid-cols-3">
           {heroVideos.slice(0, 3).map((url, i) => (
-            <div key={i} className="relative aspect-[9/16] md:aspect-[3/4] overflow-hidden group border-r border-white/5 last:border-r-0">
+            <div key={i} className="relative aspect-[9/16] md:aspect-[3/4] overflow-hidden bg-black/5 group border-r border-white/5 last:border-r-0">
               {videoErrors[i] && (
-                <img src={fallbackImages[i % fallbackImages.length]} alt="" className="absolute inset-0 w-full h-full object-cover animate-fade-in" />
+                <div className="absolute inset-0 bg-[#0D1B38] flex flex-col items-center justify-center p-4 text-center">
+                   <p className="text-white/20 text-[8px] uppercase tracking-[0.3em] font-bold">Image Preview Mode</p>
+                </div>
               )}
               {!videoErrors[i] && (
                 <video autoPlay muted loop playsInline
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-[4s] group-hover:scale-105"
                   onError={() => handleVideoError(i)}
                 >
                   <source src={url} type="video/mp4" />
@@ -99,20 +92,20 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ===== 2. DYNAMIC CATEGORY STRIP (From Cloud) ===== */}
-      <section id="collection-start" className="py-4 md:py-5 border-b border-border bg-white sticky top-[105px] md:top-[118px] z-30 shadow-sm overflow-hidden">
+      {/* ===== 2. DYNAMIC CATEGORY STRIP ===== */}
+      <section id="collection-start" className="py-4 border-b border-border bg-white sticky top-[105px] md:top-[118px] z-30 shadow-sm overflow-hidden">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8 overflow-x-auto no-scrollbar scroll-smooth px-1">
+          <div className="flex space-x-8 lg:space-x-12 overflow-x-auto no-scrollbar px-2">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`relative flex-shrink-0 py-2 uppercase tracking-[0.2em] text-[10px] md:text-[11px] font-bold transition-all hover:text-primary group ${
+                className={`relative flex-shrink-0 py-2 uppercase tracking-[0.25em] text-[10px] md:text-[11px] font-black transition-all hover:text-primary group ${
                   activeCategory === cat ? 'text-primary' : 'text-muted'
                 }`}
               >
                 {cat}
-                <span className={`absolute bottom-0 left-0 h-[2px] bg-primary transition-all duration-500 ${
+                <span className={`absolute bottom-0 left-0 h-[2.5px] bg-primary transition-all duration-500 rounded-full ${
                   activeCategory === cat ? 'w-full' : 'w-0 group-hover:w-full'
                 }`}></span>
               </button>
@@ -123,13 +116,12 @@ const Home = () => {
 
       {/* ===== 3. Product Grid ===== */}
       <section className="py-16 md:py-24 max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-12 w-full flex-grow bg-bg">
-        <div className="flex flex-col items-center justify-center mb-12 md:mb-20 text-center space-y-4">
-          <h2 className="text-3xl md:text-5xl font-serif font-normal text-text tracking-tight">Signature Pieces</h2>
-          <div className="w-16 h-[1.5px] bg-primary"></div>
-          <p className="text-muted text-[10px] md:text-xs font-bold tracking-[0.3em] uppercase">Handpicked for you</p>
+        <div className="flex flex-col items-center justify-center mb-16 md:mb-24 text-center">
+          <h2 className="text-4xl md:text-6xl font-serif font-light text-text tracking-tighter mb-6">Signature Selection</h2>
+          <div className="w-20 h-px bg-primary/30"></div>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-5 md:gap-x-10 gap-y-12 md:gap-y-20">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-5 md:gap-x-12 gap-y-16 md:gap-y-24">
           {loading ? (
             <SkeletonLoader count={4} />
           ) : products.length > 0 ? (
@@ -137,21 +129,18 @@ const Home = () => {
               <ProductCard key={product.id} product={product} />
             ))
           ) : (
-            <div className="col-span-full py-20 bg-surface rounded-2xl border border-dashed border-border text-center">
-              <p className="font-serif text-2xl italic mb-6 text-muted">A collection is being curated...</p>
-              <button onClick={() => setActiveCategory('All')} className="text-primary font-bold uppercase tracking-[0.2em] text-xs border-b border-primary/20 pb-1">
-                Back to All Collections
-              </button>
+            <div className="col-span-full py-32 text-center text-muted border border-dashed border-border rounded-3xl">
+              <p className="font-serif text-3xl italic font-light opacity-50">Curating Heritage...</p>
             </div>
           )}
         </div>
         
         {products.length > 0 && (
-          <div className="mt-20 md:mt-28 flex justify-center">
+          <div className="mt-24 md:mt-32 flex justify-center">
             <Link to="/catalog" 
-              className="group border border-[#0D1B38] text-[#0D1B38] px-14 py-5 hover:bg-[#0D1B38] hover:text-white transition-all duration-700 uppercase tracking-[0.3em] text-[11px] font-black flex items-center gap-5 shadow-2xl hover:-translate-y-2">
-              Browse Full Universe
-              <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform" />
+              className="group border-2 border-[#0D1B38] text-[#0D1B38] px-16 py-6 hover:bg-[#0D1B38] hover:text-white transition-all duration-700 uppercase tracking-[0.4em] text-[12px] font-black flex items-center gap-6 shadow-2xl hover:shadow-primary/20">
+              The Full Gallery
+              <ArrowRight size={18} className="group-hover:translate-x-3 transition-transform" />
             </Link>
           </div>
         )}
