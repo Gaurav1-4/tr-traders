@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Save, Phone, Mail, MapPin, Store, Settings as SettingsIcon, Video, Trash2, Plus, Link as LinkIcon, Eye, Upload, Loader2, Tags, Layers, AlertCircle, ExternalLink, Sparkles, RefreshCcw, XCircle } from 'lucide-react';
+import { Save, Phone, Mail, MapPin, Store, Settings as SettingsIcon, Video, Trash2, Plus, Link as LinkIcon, Eye, Upload, Loader2, Tags, Layers, AlertCircle, ExternalLink, Sparkles, RefreshCcw, X, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useToast } from '../../components/Toast';
 import { db, storage, isMockMode } from '../../services/firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -15,8 +15,6 @@ const AdminSettings = () => {
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
-  const [uploadProgress, setUploadProgress] = useState({});
-  const [uploadingIndex, setUploadingIndex] = useState(null);
   const [key, setKey] = useState(0);
   
   const [settings, setSettings] = useState({
@@ -71,14 +69,24 @@ const AdminSettings = () => {
 
   const addVideoSlot = () => {
     setHeroVideos(p => [...p, '']);
+    showToast('New Slot Added!', 'success');
   };
 
   const removeVideoSlot = (index) => {
     if (heroVideos.length <= 1) {
-      showToast('You must have at least one slot.', 'error');
+      showToast('Minimum 1 slot required.', 'error');
       return;
     }
     setHeroVideos(p => p.filter((_, i) => i !== index));
+    setKey(k => k + 1);
+  };
+
+  const moveSlot = (index, direction) => {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= heroVideos.length) return;
+    const next = [...heroVideos];
+    [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+    setHeroVideos(next);
     setKey(k => k + 1);
   };
 
@@ -88,65 +96,81 @@ const AdminSettings = () => {
     try {
       const docRef = doc(db, 'settings', 'global');
       await setDoc(docRef, { store: settings, heroVideos: heroVideos, categories: categories, updatedAt: new Date().toISOString() });
-      showToast('Fashion Reel Synchronized!', 'success');
+      showToast('Luxury Presence Updated!', 'success');
     } catch (error) { showToast('Sync failed.', 'error'); } 
     finally { setLoading(false); }
   };
 
-  if (fetching) return <div className="h-[60vh] flex flex-col items-center justify-center p-10"><Loader2 className="animate-spin text-[#0D1B38]/20 mb-4" size={32} /></div>;
+  if (fetching) return <div className="h-[60vh] flex flex-col items-center justify-center p-10"><Loader2 className="animate-spin text-[#0D1B38]/10 mb-4" size={48} /></div>;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 pb-48">
+    <div className="max-w-7xl mx-auto px-10 pb-48">
       {/* HEADER SECTION */}
-      <div className="mb-12 flex flex-col md:flex-row md:items-center justify-between bg-white rounded-[2rem] p-8 shadow-sm border border-border mt-6">
-        <div className="flex items-center gap-6">
-          <div className="w-12 h-12 bg-[#0D1B38] text-white rounded-[1rem] flex items-center justify-center shadow-lg"><SettingsIcon size={24} /></div>
+      <div className="mb-16 flex flex-col md:flex-row md:items-center justify-between bg-white rounded-[3rem] p-10 shadow-sm border border-border mt-10">
+        <div className="flex items-center gap-10">
+          <div className="w-16 h-16 bg-[#0D1B38] text-white rounded-[1.5rem] flex items-center justify-center shadow-2xl scale-110"><SettingsIcon size={32} /></div>
           <div>
-            <h1 className="text-2xl font-serif text-text mb-0.5">Brand Engine</h1>
-            <p className="text-[8px] text-muted tracking-[0.4em] uppercase font-black opacity-60">Infinite Reel Active</p>
+            <h1 className="text-3xl font-serif text-text mb-1 tracking-tight">Cinema Heritage</h1>
+            <p className="text-[10px] text-muted tracking-[0.5em] uppercase font-black opacity-60">Infinite Reel Experience</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 px-5 py-2.5 bg-gray-50 rounded-full border border-border self-start md:self-center mt-4 md:mt-0">
-           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-           <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#0D1B38]/50">Cloud Sync Active</span>
+        <div className="flex items-center gap-4 py-3 px-8 bg-[#0D1B38] text-white rounded-full text-[10px] uppercase font-black tracking-widest shadow-2xl self-start md:self-center mt-6 md:mt-0">
+           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /> Heritage Sync Online
         </div>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-12">
-        <div className="bg-white rounded-[3rem] p-10 md:p-16 shadow-soft border border-border">
-          <div className="pb-10 mb-16 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-8">
-            <div className="max-w-xl">
-               <h2 className="text-xl font-serif text-text mb-2 flex items-center gap-3"><Video size={20} className="text-primary"/> Cinema Exhibition Strips</h2>
-               <p className="text-xs text-muted font-light leading-relaxed">Add as many videos as you like. They will appear as a beautiful continuous reel on the main site.</p>
+      <form onSubmit={handleSave} className="space-y-20">
+        <div className="bg-white rounded-[4.5rem] p-16 md:p-24 shadow-soft border border-border">
+          <div className="pb-12 mb-20 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-12">
+            <div className="max-w-2xl text-center md:text-left">
+               <h2 className="text-3xl font-serif text-text mb-4 flex flex-col md:flex-row md:items-center gap-6 justify-center md:justify-start">
+                  <Video size={36} className="text-primary mx-auto md:mx-0"/> Film Management
+               </h2>
+               <p className="text-base text-muted font-light leading-relaxed">Customize your 2026 heritage reel. Add slots, remove links, or reorder your story with the controls below.</p>
             </div>
-            <div className="flex items-center gap-6">
-              <button type="button" onClick={() => setKey(k => k + 1)} className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-[#0D1B38]/40 hover:text-primary transition-all">
-                 <RefreshCcw size={14} /> Refresh
+            <div className="flex items-center justify-center gap-6">
+              <button type="button" onClick={() => setKey(k => k + 1)} className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-[#0D1B38]/30 hover:text-primary transition-all">
+                 <RefreshCcw size={16} /> Previews
               </button>
-              <button type="button" onClick={addVideoSlot} className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest bg-[#0D1B38] text-white py-3 px-6 rounded-full hover:bg-black transition-all shadow-xl">
-                 <Plus size={14} /> Add Video Slot
+              <button type="button" onClick={addVideoSlot} className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest bg-[#0D1B38] text-white py-5 px-10 rounded-[2rem] hover:bg-black transition-all shadow-2xl hover:-translate-y-1 active:scale-95">
+                 <Plus size={18} /> Add Film Slot
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-20">
             {heroVideos.map((url, i) => (
-              <div key={`${i}-${key}`} className="flex flex-col gap-6 animate-fade-in group relative" style={{animationDelay: `${i * 0.1}s`}}>
-                <button type="button" onClick={() => removeVideoSlot(i)} className="absolute top-4 right-4 z-20 text-white/40 hover:text-white transition-all">
-                   <XCircle size={20} />
-                </button>
+              <div key={`${i}-${key}`} className="flex flex-col gap-8 animate-fade-in group relative" style={{animationDelay: `${i * 0.1}s`}}>
                 
-                <div className="aspect-[3/4] bg-black rounded-[2.5rem] overflow-hidden relative shadow-2xl border border-white/5 transition-transform duration-700 group-hover:-translate-y-2">
-                  <video src={url} autoPlay muted loop playsInline className="w-full h-full object-cover opacity-90" />
-                  <div className="absolute top-8 left-8 text-white/20 text-[8px] font-black uppercase tracking-[0.5em]">REEL {i+1}</div>
+                {/* TOOLBAR */}
+                <div className="flex items-center justify-between px-6 bg-gray-50 rounded-full py-2 border border-border">
+                   <div className="flex items-center gap-3">
+                      <button type="button" onClick={() => moveSlot(i, -1)} disabled={i === 0} className="w-8 h-8 rounded-full flex items-center justify-center text-muted hover:text-primary disabled:opacity-0 transition-colors">
+                         <ArrowLeft size={14} />
+                      </button>
+                      <button type="button" onClick={() => moveSlot(i, 1)} disabled={i === heroVideos.length - 1} className="w-8 h-8 rounded-full flex items-center justify-center text-muted hover:text-primary disabled:opacity-0 transition-colors">
+                         <ArrowRight size={14} />
+                      </button>
+                   </div>
+                   <span className="text-[10px] font-black tracking-widest text-muted/30">SLOT {i+1}</span>
+                   <button type="button" onClick={() => removeVideoSlot(i)} className="w-8 h-8 rounded-full flex items-center justify-center text-red-300 hover:text-red-500 transition-colors">
+                      <Trash2 size={16} />
+                   </button>
+                </div>
+
+                <div className="aspect-[3/4] bg-black rounded-[3.5rem] overflow-hidden relative shadow-[0_40px_100px_-20px_rgba(0,0,0,0.7)] group-hover:shadow-primary/30 transition-all duration-1000 group-hover:-translate-y-4 border border-white/5">
+                  <video src={url} autoPlay muted loop playsInline className="w-full h-full object-cover opacity-90 transition-opacity group-hover:opacity-100 duration-1000" />
+                  <div className="absolute top-10 left-10 text-white/20 text-[9px] font-black uppercase tracking-[0.5em] select-none">Exhibition {i+1}</div>
                 </div>
                 
-                <div className="space-y-4">
+                <div className="space-y-6 px-4">
                   <div className="relative">
-                    <div className="absolute -top-2 left-6 px-3 bg-white text-[8px] font-black uppercase tracking-[0.3em] text-primary/60 z-10">Smart Stream</div>
-                    <div className="flex items-center gap-4 px-6 py-4 bg-gray-50 border border-border rounded-2xl group focus-within:border-primary transition-all shadow-sm">
-                      <LinkIcon size={16} className="text-muted group-focus-within:text-primary transition-all" />
-                      <input type="text" value={url} onChange={(e) => handleVideoLinkChange(i, e.target.value)} placeholder="Paste GDrive/Dropbox Link" className="bg-transparent w-full text-[10px] font-black tracking-[0.1em] outline-none text-[#0D1B38]" />
+                    <div className="absolute -top-3 left-8 px-4 bg-white text-[9px] font-black uppercase tracking-[0.3em] text-primary z-10 flex items-center gap-3">
+                       <Sparkles size={14} /> Refinement Link
+                    </div>
+                    <div className="flex items-center gap-5 px-8 py-5 bg-gray-50 border border-border rounded-[2.5rem] group focus-within:border-primary transition-all duration-700 shadow-sm">
+                      <LinkIcon size={18} className="text-muted group-focus-within:text-primary transition-all" />
+                      <input type="text" value={url} onChange={(e) => handleVideoLinkChange(i, e.target.value)} placeholder="Paste link here" className="bg-transparent w-full text-[11px] font-black tracking-[0.1em] outline-none text-[#0D1B38]" />
                     </div>
                   </div>
                 </div>
@@ -155,16 +179,17 @@ const AdminSettings = () => {
           </div>
         </div>
 
-        {/* Global Save Button */}
-        <div className="sticky bottom-10 left-0 right-0 z-40 mx-auto max-w-sm">
+        {/* Floating Sync Button */}
+        <div className="sticky bottom-12 left-0 right-0 z-40 mx-auto max-w-lg">
           <button type="submit" disabled={loading}
-            className="w-full relative overflow-hidden flex items-center justify-center gap-6 py-6 bg-[#0D1B38] text-white rounded-3xl font-black uppercase tracking-[0.4em] text-[11px] shadow-2xl hover:-translate-y-1 transition-all active:scale-95 disabled:opacity-50 border border-white/10">
-            {loading ? <Loader2 size={24} className="animate-spin" /> : (
-              <div className="flex items-center gap-4">
-                 <span>Update Global Heritage Strip</span>
-                 <Save size={18} />
-              </div>
+            className="w-full relative overflow-hidden flex flex-col items-center justify-center gap-1 py-10 bg-[#0D1B38] text-white rounded-[4rem] font-black uppercase tracking-[0.6em] text-[15px] shadow-[0_50px_120px_rgba(13,27,56,0.6)] hover:-translate-y-4 transition-all active:scale-95 disabled:opacity-50">
+            {loading ? <Loader2 size={32} className="animate-spin" /> : (
+              <>
+                 <span>Synchronize Experience</span>
+                 <p className="text-[10px] opacity-40 font-black tracking-[0.4em] mt-2">All devices will update live</p>
+              </>
             )}
+            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
           </button>
         </div>
       </form>
