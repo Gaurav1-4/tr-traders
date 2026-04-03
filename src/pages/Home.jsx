@@ -7,7 +7,7 @@ import { ArrowRight } from 'lucide-react';
 
 const categories = ['All', 'Casual', 'Formal', 'Bridal', 'Festive', 'Winter', 'Cotton'];
 
-// Using samples that are known to allow hotlinking for visibility test
+// Using samples that are known to allow hotlinking for visibility test 
 const DEFAULT_VIDEOS = [
   'https://www.w3schools.com/html/mov_bbb.mp4',
   'https://www.w3schools.com/html/movie.mp4',
@@ -74,17 +74,18 @@ const Home = () => {
   return (
     <div className="flex flex-col min-h-screen bg-bg">
 
-      {/* ===== 1. VIDEO STRIP (Distraction Free) ===== */}
+      {/* ===== 1. VIDEO STRIP (Horizontal on all devices) ===== */}
       <section className="w-full relative bg-[#0D1B38]">
-        <div className={`grid gap-0 ${
+        <div className={`grid gap-0 border-b border-white/5 ${
           heroVideos.length === 1 ? 'grid-cols-1' :
           heroVideos.length === 2 ? 'grid-cols-2' :
-          heroVideos.length === 4 ? 'grid-cols-2 md:grid-cols-4' :
-          heroVideos.length === 5 ? 'grid-cols-2 md:grid-cols-5' :
-          'grid-cols-1 md:grid-cols-3'
+          heroVideos.length === 3 ? 'grid-cols-3' :
+          heroVideos.length === 4 ? 'grid-cols-4' :
+          heroVideos.length === 5 ? 'grid-cols-5' :
+          'grid-cols-3'
         }`}>
           {heroVideos.map((url, i) => (
-            <div key={i} className="relative aspect-[9/16] md:aspect-[3/4] overflow-hidden group">
+            <div key={i} className="relative aspect-[9/16] md:aspect-[3/4] overflow-hidden group border-r border-white/5 last:border-r-0">
               {/* Fallback image */}
               {videoErrors[i] && (
                 <img 
@@ -114,14 +115,14 @@ const Home = () => {
       </section>
 
       {/* ===== 2. Category Strip ===== */}
-      <section id="collection-start" className="py-5 border-b border-border bg-white sticky top-[105px] md:top-[118px] z-30 shadow-sm">
+      <section id="collection-start" className="py-4 md:py-5 border-b border-border bg-white sticky top-[105px] md:top-[118px] z-30 shadow-sm">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8 overflow-x-auto no-scrollbar scroll-smooth px-2">
+          <div className="flex space-x-6 md:space-x-8 overflow-x-auto no-scrollbar scroll-smooth px-1">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`relative flex-shrink-0 py-2 uppercase tracking-[0.18em] text-[11px] font-semibold transition-colors hover:text-text group ${
+                className={`relative flex-shrink-0 py-1.5 uppercase tracking-[0.18em] text-[10px] md:text-[11px] font-semibold transition-colors hover:text-text group ${
                   activeCategory === cat ? 'text-text' : 'text-muted'
                 }`}
               >
@@ -136,14 +137,14 @@ const Home = () => {
       </section>
 
       {/* ===== 3. Product Grid ===== */}
-      <section className="py-20 max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-12 w-full flex-grow bg-bg">
-        <div className="flex flex-col items-center justify-center mb-16 text-center space-y-4">
-          <h2 className="text-3xl md:text-4xl font-serif font-normal text-text">Signature Pieces</h2>
-          <div className="w-16 h-[1.5px] bg-text/20"></div>
-          <p className="text-muted text-sm font-light tracking-widest uppercase">Handpicked for the modern traditionalist</p>
+      <section className="py-12 md:py-20 max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-12 w-full flex-grow bg-bg">
+        <div className="flex flex-col items-center justify-center mb-10 md:mb-16 text-center space-y-3 md:space-y-4">
+          <h2 className="text-2xl md:text-4xl font-serif font-normal text-text">Signature Pieces</h2>
+          <div className="w-12 md:w-16 h-[1.5px] bg-text/20"></div>
+          <p className="text-muted text-[10px] md:text-sm font-light tracking-[0.2em] uppercase">Handpicked for the modern traditionalist</p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-12 md:gap-x-8 md:gap-y-16">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 md:gap-x-8 gap-y-10 md:gap-y-16">
           {loading ? (
             <SkeletonLoader count={4} />
           ) : products.length > 0 ? (
@@ -151,11 +152,11 @@ const Home = () => {
               <ProductCard key={product.id} product={product} />
             ))
           ) : (
-            <div className="col-span-full py-20 text-center text-muted">
-              <p className="font-serif text-2xl italic mb-6">This collection is being curated.</p>
+            <div className="col-span-full py-16 text-center text-muted">
+              <p className="font-serif text-xl italic mb-6">This collection is being curated.</p>
               <button 
                 onClick={() => setActiveCategory('All')}
-                className="text-text hover:text-primary uppercase tracking-[0.2em] text-xs font-bold transition-colors border-b border-text/20 pb-1"
+                className="text-text hover:text-primary uppercase tracking-[0.2em] text-[10px] font-bold transition-colors border-b border-text/20 pb-1"
               >
                 View All
               </button>
@@ -164,10 +165,10 @@ const Home = () => {
         </div>
         
         {products.length > 0 && (
-          <div className="mt-20 flex justify-center">
+          <div className="mt-12 md:mt-20 flex justify-center px-4">
             <Link 
               to="/catalog" 
-              className="group border border-text text-text px-14 py-5 hover:bg-text hover:text-white transition-all duration-500 uppercase tracking-[0.25em] text-[11px] font-bold flex items-center gap-4 shadow-sm"
+              className="group border border-text text-text px-10 md:px-14 py-4 md:py-5 hover:bg-text hover:text-white transition-all duration-500 uppercase tracking-[0.25em] text-[10px] md:text-[11px] font-bold flex items-center gap-3 md:gap-4 shadow-sm w-full sm:w-auto text-center justify-center"
             >
               View Full Catalog
               <ArrowRight size={14} className="group-hover:translate-x-1.5 transition-transform" />
