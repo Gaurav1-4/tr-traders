@@ -7,8 +7,8 @@ import { ArrowRight, Wifi, WifiOff } from 'lucide-react';
 import { db, isMockMode } from '../services/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
-// OFFICIAL PROMO VIDEO
-const PROMO_1 = "https://www.dropbox.com/scl/fi/687aazjfn2rfo6ju5lhc1/Women-s_suit_promotional_202604031753-ezremove.mp4?rlkey=ic8vrq3ryp2pue7jj6iukmkod&st=f46x37jg&raw=1";
+// THE ULTIMATE BULLETPROOF DROPBOX STREAMING LINK
+const PROMO_1 = "https://dl.dropboxusercontent.com/scl/fi/687aazjfn2rfo6ju5lhc1/Women-s_suit_promotional_202604031753-ezremove.mp4?rlkey=ic8vrq3ryp2pue7jj6iukmkod&raw=1";
 
 const DEFAULT_VIDEOS = [
   PROMO_1,
@@ -19,7 +19,7 @@ const DEFAULT_VIDEOS = [
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [cloudSynced, setCloudSynced] = useState(null); // null, true, false
+  const [cloudSynced, setCloudSynced] = useState(null);
   const [heroVideos, setHeroVideos] = useState(DEFAULT_VIDEOS);
   const [categories, setCategories] = useState(['All', 'Casual', 'Formal', 'Bridal', 'Festive', 'Winter', 'Cotton']);
   const [videoErrors, setVideoErrors] = useState({});
@@ -32,18 +32,18 @@ const Home = () => {
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
             const data = docSnap.data();
-            if (data.heroVideos && data.heroVideos.length > 0) setHeroVideos(data.heroVideos);
+            if (data.heroVideos && data.heroVideos.length > 0) {
+              setHeroVideos([
+                data.heroVideos[0] || DEFAULT_VIDEOS[0],
+                data.heroVideos[1] || DEFAULT_VIDEOS[1],
+                data.heroVideos[2] || DEFAULT_VIDEOS[2],
+              ]);
+            }
             if (data.categories) setCategories(['All', ...data.categories]);
             setCloudSynced(true);
-          } else {
-            console.log("No remote settings found, using heritage defaults.");
-            setCloudSynced(true);
-          }
+          } else { setCloudSynced(true); }
         }
-      } catch (err) {
-        console.warn("Direct Sync Failed (Database not created/rules not set).");
-        setCloudSynced(false);
-      }
+      } catch (err) { setCloudSynced(false); }
     };
     fetchSettings();
   }, []);
@@ -61,55 +61,51 @@ const Home = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-bg">
-
-      {/* ===== 1. UNIVERSAL VIDEO STRIP ===== */}
       <section className="w-full relative bg-black overflow-hidden border-b border-border">
-        {/* Connection Status (Hidden on Mobile) */}
-        <div className="absolute top-4 right-4 z-50 hidden md:block">
+        <div className="absolute top-4 right-4 z-50">
            {cloudSynced === true ? (
              <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 backdrop-blur-md rounded-full border border-green-500/30 text-[8px] uppercase tracking-widest text-green-400 font-black">
-                <Wifi size={10} /> Cloud Active
+                <Wifi size={10} /> Heritage Sync Active
              </div>
            ) : cloudSynced === false ? (
              <div className="flex items-center gap-2 px-3 py-1 bg-amber-500/20 backdrop-blur-md rounded-full border border-amber-500/30 text-[8px] uppercase tracking-widest text-amber-400 font-black">
-                <WifiOff size={10} /> Local Mode
+                <WifiOff size={10} /> Local Heritage Mode
              </div>
            ) : null}
         </div>
 
         <div className="grid grid-cols-3">
-          {heroVideos.slice(0, 3).map((url, i) => (
-            <div key={i} className="relative aspect-[9/16] md:aspect-[3/4] overflow-hidden group border-r border-white/5 last:border-r-0">
+          {heroVideos.map((url, i) => (
+            <div key={i} className="relative aspect-[9/16] md:aspect-[3/4] overflow-hidden group border-r border-white/5 last:border-r-0 bg-black">
                {videoErrors[i] ? (
                  <div className="absolute inset-0 bg-[#0D1B38] flex flex-col items-center justify-center p-6 text-center">
-                    <p className="text-white/20 text-[9px] uppercase font-black tracking-[0.4em]">Visual Error: Sync Failed</p>
+                    <p className="text-white/20 text-[9px] uppercase font-black tracking-[0.4em]">Visual Heritage Unavailable</p>
                  </div>
                ) : (
                  <video 
+                   preload="auto"
                    autoPlay 
                    muted 
                    loop 
                    playsInline
-                   preload="auto"
+                   key={`${url}-${i}`}
                    className="w-full h-full object-cover opacity-90 transition-all duration-[5s] group-hover:scale-110 group-hover:opacity-100"
                    onError={() => {
-                     console.error(`Playback Error on slot ${i}. URL: ${url}`);
                      setVideoErrors(prev => ({...prev, [i]: true}));
                    }}
                  >
                    <source src={url} type="video/mp4" />
                  </video>
                )}
-               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
+               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none"></div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ===== DYNAMIC CATEGORY STRIP ===== */}
       <section className="py-5 border-b border-border bg-white sticky top-[105px] md:top-[118px] z-30 shadow-sm overflow-hidden font-black">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-12 flex space-x-12 overflow-x-auto no-scrollbar scroll-smooth">
-          {categories.slice(0, 8).map((cat) => (
+        <div className="max-w-[1400px] mx-auto px-12 flex space-x-12 overflow-x-auto no-scrollbar scroll-smooth">
+          {categories.map((cat) => (
             <button key={cat} className="relative flex-shrink-0 py-2 uppercase tracking-[0.3em] text-[10px] md:text-[11px] text-muted hover:text-primary transition-all">
               {cat}
             </button>
@@ -117,12 +113,11 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ===== EXHIBITION GRID ===== */}
       <section className="py-24 md:py-40 max-w-[1400px] mx-auto px-6 lg:px-16 w-full flex-grow bg-bg">
         <div className="flex flex-col items-center justify-center mb-24 text-center">
-          <h1 className="text-5xl md:text-7xl font-serif font-light text-text tracking-tighter mb-8 italic">Heritage Couture</h1>
+          <h1 className="text-5xl md:text-7xl font-serif font-light text-text tracking-tighter mb-8 italic">The Curator Collection</h1>
           <div className="w-20 h-px bg-[#0D1B38]/20"></div>
-          <p className="mt-8 text-[11px] uppercase tracking-[0.6em] text-muted font-black">Curated for 2026</p>
+          <p className="mt-8 text-[11px] uppercase tracking-[0.6em] text-muted font-black">Rohtak, India 2026</p>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 md:gap-x-16 gap-y-24 md:gap-y-40">
@@ -133,15 +128,15 @@ const Home = () => {
           ) : (
             <div className="col-span-full py-48 text-center text-muted border border-dashed border-border/20 rounded-[4rem] bg-[#0D1B38]/[0.02]">
               <p className="font-serif text-3xl italic font-light opacity-30 uppercase tracking-[0.4em] leading-loose">
-                Collection Refreshing...
+                Curating Elegance...
               </p>
             </div>
           )}
         </div>
 
         <div className="mt-40 flex justify-center">
-          <Link to="/catalog" className="group border-[1.5px] border-[#0D1B38] text-[#0D1B38] px-24 py-8 hover:bg-[#0D1B38] hover:text-white transition-all duration-1000 uppercase tracking-[0.6em] text-[13px] font-black shadow-2xl flex items-center gap-8">
-            View Exhibition <ArrowRight size={20} className="group-hover:translate-x-4 transition-transform duration-500" />
+          <Link to="/catalog" className="group relative border-[1.5px] border-[#0D1B38] text-[#0D1B38] px-24 py-8 hover:bg-[#0D1B38] hover:text-white transition-all duration-1000 uppercase tracking-[0.6em] text-[13px] font-black shadow-2xl flex items-center gap-8">
+            The Exhibition <ArrowRight size={20} className="group-hover:translate-x-4 transition-transform duration-500" />
           </Link>
         </div>
       </section>
