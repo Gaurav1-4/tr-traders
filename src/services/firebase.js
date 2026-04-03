@@ -14,13 +14,16 @@ const firebaseConfig = {
 };
 
 // Mode discovery
-export const isMockMode = false; // FORCED TO FALSE
+export const isMockMode = false; 
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+
+// CRITICAL FIX: Connecting to your custom database ID from the screenshot
+const db = getFirestore(app, "ai-studio-6346c158-1d00-4f25-93a5-8e7e79edd8cd");
+
 const storage = getStorage(app);
 const auth = getAuth(app);
 
-console.log("Firebase initialized successfully with provided keys.");
+console.log("Firebase initialized successfully on custom Database ID.");
 
 export { db, storage, auth };
