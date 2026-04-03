@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { getProducts } from '../services/productService';
-import { ArrowRight, Wifi, WifiOff, Loader2 } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import { db, isMockMode } from '../services/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
@@ -19,7 +19,6 @@ const DEFAULT_VIDEOS = [
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [cloudSynced, setCloudSynced] = useState(null);
   const [heroVideos, setHeroVideos] = useState(DEFAULT_VIDEOS);
   const [categories, setCategories] = useState(['All', 'Casual', 'Formal', 'Bridal', 'Festive', 'Winter', 'Cotton']);
   const [videoErrors, setVideoErrors] = useState({});
@@ -40,10 +39,9 @@ const Home = () => {
               ]);
             }
             if (data.categories) setCategories(['All', ...data.categories]);
-            setCloudSynced(true);
           }
         }
-      } catch (err) { setCloudSynced(false); }
+      } catch (err) { console.warn("Heritage Cloud Sync: Using internal curation."); }
     };
     fetchSettings();
   }, []);
@@ -64,24 +62,12 @@ const Home = () => {
       
       {/* ===== CINEMATIC TALL VIDEO STRIP ===== */}
       <section className="w-full relative bg-black overflow-hidden border-b border-border h-[65vh] md:h-[85vh]">
-        <div className="absolute top-8 right-8 z-50">
-           {cloudSynced === true ? (
-             <div className="flex items-center gap-3 px-4 py-2 bg-black/40 backdrop-blur-xl rounded-full border border-white/10 text-[9px] uppercase tracking-widest text-white font-black">
-                <Wifi size={12} className="text-green-500" /> Live Heritage Sync
-             </div>
-           ) : (
-             <div className="flex items-center gap-3 px-4 py-2 bg-black/40 backdrop-blur-xl rounded-full border border-white/10 text-[9px] uppercase tracking-widest text-white font-black opacity-50">
-                <WifiOff size={12} className="text-amber-500" /> Offline Mode
-             </div>
-           )}
-        </div>
-
         <div className="grid grid-cols-3 h-full">
           {heroVideos.map((url, i) => (
             <div key={i} className="relative h-full overflow-hidden group border-r border-white/10 last:border-r-0 bg-black">
                {videoErrors[i] ? (
                  <div className="absolute inset-0 bg-[#0D1B38] flex flex-col items-center justify-center p-12 text-center">
-                    <p className="text-white/10 text-[10px] uppercase font-black tracking-[0.5em] leading-relaxed">Visual Transmission <br/> Unavailable</p>
+                    <p className="text-white/10 text-[10px] uppercase font-black tracking-[0.5em] leading-relaxed">Visual Production <br/> Unavailable</p>
                  </div>
                ) : (
                  <video 
@@ -100,8 +86,8 @@ const Home = () => {
                
                <div className="absolute inset-x-0 bottom-0 py-20 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 select-none">
                   <div className="flex flex-col items-center text-white gap-4">
-                     <span className="text-[9px] font-black tracking-[0.6em] uppercase">Autumn 2026 Collection</span>
-                     <div className="w-10 h-px bg-white/40"></div>
+                     <span className="text-[10px] font-black tracking-[0.6em] uppercase">Autumn 2026 Collection</span>
+                     <div className="w-12 h-px bg-white/50"></div>
                   </div>
                </div>
             </div>
@@ -109,16 +95,16 @@ const Home = () => {
         </div>
 
         {/* Brand Floating Logo (Subtle Background Effect) */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none overflow-hidden">
-           <div className="text-white/[0.04] font-serif text-[28vw] tracking-tighter uppercase italic -rotate-12 translate-y-20 whitespace-nowrap">Tr Traders</div>
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none z-10 select-none overflow-hidden h-full">
+           <div className="text-white/[0.03] font-serif text-[35vw] tracking-tighter uppercase italic -rotate-12 translate-y-10 whitespace-nowrap">Tr Traders</div>
         </div>
       </section>
 
       {/* ===== DYNAMIC CATEGORY NAVIGATION ===== */}
-      <section className="py-6 border-b border-border bg-white sticky top-[105px] md:top-[118px] z-30 shadow-xl overflow-hidden font-black">
+      <section className="py-7 border-b border-border bg-white sticky top-[105px] md:top-[118px] z-30 shadow-xl overflow-hidden font-black">
         <div className="max-w-[1500px] mx-auto px-12 flex space-x-16 overflow-x-auto no-scrollbar scroll-smooth">
           {categories.slice(0, 10).map((cat) => (
-            <button key={cat} className="relative flex-shrink-0 py-2 uppercase tracking-[0.4em] text-[10px] md:text-[11px] text-[#0D1B38]/40 hover:text-[#0D1B38] transition-all hover:translate-x-2">
+            <button key={cat} className="relative flex-shrink-0 py-2 uppercase tracking-[0.4em] text-[10px] md:text-[11px] text-[#0D1B38]/30 hover:text-[#0D1B38] transition-all hover:translate-x-2">
               {cat}
             </button>
           ))}
@@ -127,31 +113,31 @@ const Home = () => {
 
       {/* ===== SIGNATURE EXHIBITION ===== */}
       <section className="py-24 md:py-48 max-w-[1600px] mx-auto px-8 lg:px-20 w-full flex-grow bg-bg">
-        <div className="flex flex-col items-center justify-center mb-32 text-center animate-fade-in px-4">
-          <h1 className="text-6xl md:text-[8rem] font-serif font-light text-text tracking-tighter mb-10 italic leading-none">Couture Art</h1>
-          <div className="w-40 h-0.5 bg-[#0D1B38]/10 mb-10"></div>
-          <p className="max-w-xl text-[#0D1B38]/50 text-[10px] md:text-[11px] uppercase tracking-[0.5em] font-black leading-loose">
-             Mastering the fusion of Rohtak craftsmanship <br/> with visionary 2026 designer heritage.
+        <div className="flex flex-col items-center justify-center mb-36 text-center animate-fade-in px-4">
+          <h1 className="text-6xl md:text-[10rem] font-serif font-light text-text tracking-tighter mb-12 italic leading-none">Couture Heritage</h1>
+          <div className="w-48 h-0.5 bg-[#0D1B38]/10 mb-12"></div>
+          <p className="max-w-2xl text-[#0D1B38]/40 text-[10px] md:text-[12px] uppercase tracking-[0.6em] font-black leading-loose">
+             Mastering the fusion of Rohtak craftsmanship <br/> with visionary 2026 designer legacy.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-10 md:gap-x-20 gap-y-24 md:gap-y-48">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-12 md:gap-x-24 gap-y-28 md:gap-y-56">
           {loading ? (
              <SkeletonLoader count={4} />
           ) : products.length > 0 ? (
              products.map((p) => <ProductCard key={p.id} product={p} />)
           ) : (
             <div className="col-span-full py-60 text-center text-muted border border-dashed border-[#0D1B38]/5 rounded-[6rem] bg-[#0D1B38]/[0.01]">
-              <p className="font-serif text-4xl italic font-light opacity-20 uppercase tracking-[0.4em] leading-relaxed">
+              <p className="font-serif text-4xl italic font-light opacity-10 uppercase tracking-[0.4em] leading-relaxed">
                  Masterpieces <br/> Arriving Shortly...
               </p>
             </div>
           )}
         </div>
 
-        <div className="mt-48 flex justify-center pb-20">
-          <Link to="/catalog" className="group relative border-[2.5px] border-[#0D1B38] text-[#0D1B38] px-32 py-12 hover:bg-[#0D1B38] hover:text-white transition-all duration-1000 uppercase tracking-[0.8em] text-[15px] font-black shadow-[0_50px_120px_-30px_rgba(13,27,56,0.5)] active:scale-95">
-            Enter The Vault <ArrowRight size={22} className="inline ml-10 group-hover:translate-x-6 transition-all duration-700" />
+        <div className="mt-56 flex justify-center pb-24">
+          <Link to="/catalog" className="group relative border-[3px] border-[#0D1B38] text-[#0D1B38] px-36 py-14 hover:bg-[#0D1B38] hover:text-white transition-all duration-1000 uppercase tracking-[0.8em] text-[15px] font-black shadow-[0_60px_150px_-30px_rgba(13,27,56,0.6)] active:scale-95 hover:-translate-y-4">
+            Enter The Vault <ArrowRight size={24} className="inline ml-10 group-hover:translate-x-6 transition-all duration-700" />
           </Link>
         </div>
       </section>
