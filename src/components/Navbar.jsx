@@ -3,15 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { Search, X, Heart, Menu, MessageCircle, User, ChevronDown } from 'lucide-react';
 import { useWishlist } from '../hooks/useWishlist';
 
-const categories = [
-  { name: 'Sarees', path: '/catalog?category=Sarees' },
-  { name: 'Kurta Sets', path: '/catalog?category=Kurta+Sets' },
-  { name: 'Suits', path: '/catalog?category=Suits', hasDropdown: true },
-  { name: 'Unstitched Suits', path: '/catalog?category=Unstitched' },
-  { name: 'Lehengas', path: '/catalog?category=Lehengas' },
-  { name: 'Indo-Western', path: '/catalog?category=Indo-Western' },
-];
-
 const Navbar = ({ onOpenWishlist }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -33,12 +24,6 @@ const Navbar = ({ onOpenWishlist }) => {
 
   return (
     <>
-      {/* Announcement Bar */}
-      <div className="bg-[#0D1B38] text-white text-center py-2 px-4 text-[11px] tracking-[0.15em] uppercase font-sans font-medium z-[60] relative">
-        Free Delivery in India on Prepaid Orders&nbsp;&nbsp;|&nbsp;&nbsp;Shipping Worldwide
-      </div>
-
-      {/* Main Header */}
       <header className={`sticky top-0 z-50 transition-all duration-300 ${
         scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm' : 'bg-white'
       }`}>
@@ -106,21 +91,15 @@ const Navbar = ({ onOpenWishlist }) => {
           </div>
         </div>
 
-        {/* Category Nav (desktop) */}
+        {/* Category Nav - will be populated from firebase later */}
         <nav className="hidden md:block border-t border-border/60">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-center gap-8 lg:gap-12 py-3">
-              {categories.map((cat) => (
-                <Link
-                  key={cat.name}
-                  to={cat.path}
-                  className="relative text-[12px] uppercase tracking-[0.18em] font-medium text-text/80 hover:text-text transition-colors group flex items-center gap-1"
-                >
-                  {cat.name}
-                  {cat.hasDropdown && <ChevronDown size={12} className="text-muted group-hover:text-text transition-colors" />}
-                  <span className="absolute -bottom-3 left-0 w-0 h-[1.5px] bg-text group-hover:w-full transition-all duration-300"></span>
-                </Link>
-              ))}
+              <Link to="/catalog?category=Sarees" className="nav-link-jaipur">Sarees</Link>
+              <Link to="/catalog?category=Kurta+Sets" className="nav-link-jaipur">Kurta Sets</Link>
+              <Link to="/catalog?category=Suits" className="nav-link-jaipur">Suits</Link>
+              <Link to="/catalog?category=Unstitched" className="nav-link-jaipur">Unstitched</Link>
+              <Link to="/catalog?category=Lehengas" className="nav-link-jaipur">Lehengas</Link>
             </div>
           </div>
         </nav>
@@ -135,34 +114,12 @@ const Navbar = ({ onOpenWishlist }) => {
                 autoFocus
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search for suits, sarees, lehengas..."
+                placeholder="Search our heritage collection..."
                 className="flex-1 text-lg font-serif font-light border-none outline-none bg-transparent placeholder:text-muted/50"
               />
               <button onClick={() => { setSearchOpen(false); setSearchQuery(''); }} className="text-muted hover:text-text">
                 <X size={20} />
               </button>
-            </div>
-          </div>
-        )}
-
-        {/* Mobile Menu */}
-        {mobileOpen && (
-          <div className="md:hidden absolute top-full left-0 w-full bg-white border-t border-border shadow-lg z-40 animate-fade-in">
-            <div className="py-4 px-6 space-y-1">
-              {categories.map((cat) => (
-                <Link
-                  key={cat.name}
-                  to={cat.path}
-                  onClick={() => setMobileOpen(false)}
-                  className="block py-3 text-sm uppercase tracking-[0.15em] text-text/80 hover:text-text border-b border-border/30 last:border-none transition-colors"
-                >
-                  {cat.name}
-                </Link>
-              ))}
-              <div className="pt-4 flex gap-4">
-                <Link to="/" onClick={() => setMobileOpen(false)} className="text-sm text-muted hover:text-text uppercase tracking-wider">Home</Link>
-                <Link to="/about" onClick={() => setMobileOpen(false)} className="text-sm text-muted hover:text-text uppercase tracking-wider">About</Link>
-              </div>
             </div>
           </div>
         )}
