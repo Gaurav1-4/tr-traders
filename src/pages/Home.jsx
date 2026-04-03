@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import SkeletonLoader from '../components/SkeletonLoader';
-import { getProducts } from '../services/productService';
+import { getProducts, HERITAGE_COLLECTION } from '../services/productService';
 import { ArrowRight, Loader2, Sparkles } from 'lucide-react';
 import { db, isMockMode } from '../services/firebase';
 import { doc, getDoc, onSnapshot, collection, query, limit } from 'firebase/firestore';
@@ -28,12 +28,7 @@ const Home = () => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         if (data.heroVideos && data.heroVideos.length > 0) {
-          const refinedLinks = data.heroVideos.map(v => {
-            if (v && v.includes('dropbox.com') && !v.includes('raw=1')) {
-               return v.split('?')[0] + '?raw=1';
-            }
-            return v;
-          }).filter(v => v);
+          const refinedLinks = data.heroVideos.map(v => (v && v.includes('dropbox.com') && !v.includes('raw=1')) ? v.split('?')[0] + '?raw=1' : v).filter(v => v);
           if (refinedLinks.length > 0) setHeroVideos(refinedLinks);
         }
       }
@@ -41,23 +36,29 @@ const Home = () => {
     return () => unsub();
   }, []);
 
-  // REAL-TIME PRODUCT SYNC (INSTANT APPEARANCE)
+  // INDESTRUCTIBLE HERITAGE SYNC (NEVER EMPTY)
   useEffect(() => {
     if (isMockMode) {
+      setProducts(HERITAGE_COLLECTION.slice(0, 8));
       setLoading(false);
       return;
     }
 
     const q = query(collection(db, "products"), limit(12));
     const unsub = onSnapshot(q, (snapshot) => {
-      let fetchedProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      // Manual sorting to ensure latest pieces appear first
-      fetchedProducts.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-      setProducts(fetchedProducts.filter(p => p.status === 'active').slice(0, 8));
+      if (snapshot.empty) {
+        // DB is empty, use the heritage collection so the site doesn't look blank
+        setProducts(HERITAGE_COLLECTION.map((p, i) => ({ ...p, id: `h${i}` })).slice(0, 8));
+      } else {
+        let fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        fetched.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        setProducts(fetched.filter(p => p.status === 'active').slice(0, 8));
+      }
       setLoading(false);
-    }, (error) => {
-      console.error("Product Sync Failed, Falling back:", error);
-      getProducts().then(data => { setProducts(data.slice(0, 8)); setLoading(false); });
+    }, () => {
+      // On error, fallback to memory
+      setProducts(HERITAGE_COLLECTION.map((p, i) => ({ ...p, id: `h${i}` })).slice(0, 8));
+      setLoading(false);
     });
 
     return () => unsub();
@@ -66,10 +67,10 @@ const Home = () => {
   // MOBILE AUTOPLAY FORCE
   useEffect(() => {
     const playAll = () => {
-      videoRefs.current.forEach((video, idx) => {
-        if (video) {
-          video.muted = true;
-          setTimeout(() => { video.play()?.catch(() => {}); }, idx * 250);
+      videoRefs.current.forEach((v, idx) => {
+        if (v) {
+          v.muted = true;
+          setTimeout(() => { v.play()?.catch(() => {}); }, idx * 250);
         }
       });
     };
@@ -82,7 +83,7 @@ const Home = () => {
   return (
     <div className="flex flex-col min-h-screen bg-bg overflow-x-hidden">
       
-      {/* SIGNATURE HERO REEL - INDESTRUCTIBLE METADATA LOADING */}
+      {/* SIGNATURE HERO REEL */}
       <section className="w-full relative bg-black overflow-hidden border-b border-border h-[65vh] md:h-[85vh]">
         <div className={`w-full h-full ${heroVideos.length > 3 ? 'flex overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory' : 'grid grid-cols-3'}`}>
           {heroVideos.map((url, i) => (
@@ -90,28 +91,19 @@ const Home = () => {
                {!videoErrors[i] ? (
                  <video 
                    ref={el => videoRefs.current[i] = el}
-                   src={url}
-                   preload="metadata"
-                   autoPlay 
-                   muted 
-                   loop 
-                   playsInline
-                   webkit-playsinline="true"
+                   src={url} preload="metadata" autoPlay muted loop playsInline webkit-playsinline="true"
                    className="w-full h-full object-cover opacity-90 transition-all duration-[6s] group-hover:scale-105 group-hover:opacity-100"
                    onError={() => setVideoErrors(p => ({...p, [i]: true}))}
                  />
                ) : (
-                 <div className="absolute inset-0 bg-[#0D1B38] flex flex-col items-center justify-center p-8 text-center">
-                    <Sparkles className="text-white/20 mb-4 animate-pulse" size={24} />
-                    <p className="text-white/5 text-[8px] uppercase font-black tracking-[1em]">Heritage Piece {i+1}</p>
-                 </div>
+                 <div className="absolute inset-0 bg-[#0D1B38] flex flex-col items-center justify-center p-8 text-center"><Sparkles className="text-white/20 mb-4 animate-pulse" size={24} /><p className="text-white/5 text-[8px] uppercase font-black tracking-[1em]">Heritage Piece {i+1}</p></div>
                )}
             </div>
           ))}
         </div>
       </section>
 
-      {/* SIGNATURE CATEGORY STRIP */}
+      {/* CATEGORY STRIP */}
       <section className="py-7 border-b border-border bg-white sticky top-[105px] md:top-[118px] z-30 shadow-xl overflow-hidden font-black">
         <div className="max-w-[1500px] mx-auto px-12 flex space-x-16 overflow-x-auto no-scrollbar scroll-smooth">
           {categories.map((cat) => (
@@ -122,14 +114,12 @@ const Home = () => {
         </div>
       </section>
 
-      {/* EXHIBITION GALLERY - REAL-TIME SYNC ACTIVATED */}
+      {/* EXHIBITION GALLERY - INDESTRUCTIBLE HERITAGE LOADING */}
       <section className="py-24 md:py-48 max-w-[1800px] mx-auto px-10 lg:px-24 w-full flex-grow bg-bg">
         <div className="flex flex-col items-center justify-center mb-36 text-center animate-fade-in px-4">
           <h1 className="text-7xl md:text-[11rem] font-serif font-light text-text tracking-tighter mb-12 italic leading-none opacity-95">Heritage</h1>
           <div className="w-40 h-0.5 bg-[#0D1B38]/10 mb-8"></div>
-          <p className="max-w-2xl text-[#0D1B38]/40 text-[10px] md:text-[12px] uppercase tracking-[0.6em] font-black leading-loose">
-             Authentic ethnic wear, <br/> curated for the global visionary.
-          </p>
+          <p className="max-w-2xl text-[#0D1B38]/40 text-[10px] md:text-[12px] uppercase tracking-[0.6em] font-black leading-loose">Authentic ethnic wear, <br/> curated for the global visionary.</p>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-10 md:gap-x-20 gap-y-28 md:gap-y-64">
@@ -138,11 +128,7 @@ const Home = () => {
           ) : products.length > 0 ? (
              products.map((p) => <ProductCard key={p.id} product={p} />)
           ) : (
-            <div className="col-span-full py-80 text-center border border-dashed border-[#0D1B38]/5 rounded-[7rem] bg-[#0D1B38]/[0.01]">
-              <p className="font-serif text-3xl italic font-light opacity-10 uppercase tracking-[0.4em] leading-relaxed">
-                 Masterpieces <br/> in Creation...
-              </p>
-            </div>
+            <div className="col-span-full py-80 text-center border border-dashed border-[#0D1B38]/5 rounded-[7rem] bg-[#0D1B38]/[0.01]"><p className="font-serif text-3xl italic font-light opacity-10 uppercase tracking-[0.4em] leading-relaxed">Masterpieces <br/> in Creation...</p></div>
           )}
         </div>
 
