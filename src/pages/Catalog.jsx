@@ -93,29 +93,28 @@ const Catalog = () => {
   return (
     <div className="min-h-screen bg-bg">
       {/* Page Header */}
-      <div className="bg-white border-b border-border py-12 md:py-20 overflow-hidden relative">
-        <div className="max-w-[1400px] mx-auto px-10 text-center space-y-6 relative z-10">
-          <h1 className="text-4xl md:text-7xl font-serif font-light text-text animate-fade-in tracking-tighter italic">
-            Heritage Gallery
+      <div className="bg-white border-b border-border py-10 md:py-16">
+        <div className="max-w-[1400px] mx-auto px-10 text-center space-y-4">
+          <h1 className="text-3xl md:text-5xl font-serif font-normal text-text tracking-tight animate-fade-in">
+            Our Collection
           </h1>
-          <div className="w-16 h-[1px] bg-text/20 mx-auto"></div>
-          <p className="text-[#0D1B38]/30 uppercase tracking-[0.6em] text-[10px] md:text-[11px] font-black">
-            Couture Tradition . Digital Exhibition
+          <div className="w-12 h-px bg-text/10 mx-auto"></div>
+          <p className="text-[#0D1B38]/30 uppercase tracking-[0.3em] text-[10px] md:text-[11px] font-black">
+            Premium Ethnic Designs
           </p>
         </div>
-        <Sparkles className="absolute -right-10 top-1/2 -translate-y-1/2 opacity-[0.03] scale-[8]" />
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-4 md:px-10 py-12">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-10 py-10">
         {/* Toolbar */}
-        <div className="flex flex-col md:flex-row items-center justify-between mb-16 gap-10">
+        <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-8">
           <div className="flex items-center gap-6 order-2 md:order-1">
              <div className="flex items-center gap-2 border border-border/40 rounded-full px-4 py-2 bg-white/50">
                <button onClick={() => setGridCols(3)} className={`p-2 transition-all ${gridCols === 3 ? 'text-primary' : 'text-gray-300 hover:text-text'}`}><Grid3X3 size={18} /></button>
                <button onClick={() => setGridCols(2)} className={`p-2 transition-all ${gridCols === 2 ? 'text-primary' : 'text-gray-300 hover:text-text'}`}><List size={18} /></button>
              </div>
-             <span className="text-[10px] uppercase font-black tracking-[0.2em] text-[#0D1B38]/30">
-               <span className="text-[#0D1B38] font-black">{filteredProducts.length}</span> Masterpieces
+             <span className="text-[10px] uppercase font-black tracking-widest text-[#0D1B38]/30">
+               <span className="text-[#0D1B38]">{filteredProducts.length}</span> Products
              </span>
           </div>
 

@@ -72,40 +72,44 @@ const ProductCard = ({ product }) => {
             e.target.parentElement.innerHTML += `<div class="absolute inset-0 bg-gradient-to-tr from-gray-100 to-gray-200 flex items-center justify-center"><span class="text-4xl font-serif text-gray-300">${product.name.charAt(0)}</span></div>`;
           }}
         />
-        
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 pointer-events-none">
-          {product.featured && (
-            <span className="bg-[#0D1B38] text-white text-[9px] font-semibold px-3 py-1 uppercase tracking-[0.15em]">
-              Best Selling
-            </span>
-          )}
-        </div>
-
-        {/* Quick Enquiry on hover */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-10">
-          <WhatsAppButton 
-            productName={product.name}
-            className="w-full text-[10px] py-3 bg-white text-text hover:bg-[#0D1B38] hover:text-white shadow-lg tracking-[0.15em] uppercase font-semibold transition-colors justify-center"
-          />
-        </div>
       </div>
-
+        
       {/* Info */}
-      <div className="pt-3 pb-1 space-y-1.5">
-        <h3 className="font-serif text-[15px] md:text-base font-normal text-text leading-snug hover:text-primary transition-colors line-clamp-2">
-          {product.name}
-        </h3>
+      <div className="pt-5 pb-3 space-y-2">
+        <div className="flex justify-between items-start gap-4">
+           <h3 className="font-serif text-[15px] md:text-[17px] font-normal text-text leading-tight group-hover:text-primary transition-colors flex-1">
+             {product.name}
+           </h3>
+           <button 
+             onClick={(e) => {
+               e.preventDefault();
+               e.stopPropagation();
+               toggleWishlist(product.id);
+             }}
+             className={`transition-all ${saved ? 'text-red-500 scale-110' : 'text-gray-200 hover:text-red-400 opacity-0 group-hover:opacity-100'}`}
+             aria-label="Save to Wishlist"
+           >
+             <Heart size={18} className={saved ? 'fill-red-500' : ''} strokeWidth={1.5} />
+           </button>
+        </div>
         
-        {product.fabric && (
-          <p className="text-[11px] uppercase tracking-[0.15em] text-muted">{product.fabric}</p>
-        )}
-        
-        {product.price ? (
-          <p className="text-sm font-medium text-text">₹{product.price.toLocaleString('en-IN')}</p>
-        ) : (
-          <p className="text-sm italic text-muted">Price on Request</p>
-        )}
+        <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.2em] pt-1">
+           {product.fabric && (
+             <p className="text-muted/60">{product.fabric}</p>
+           )}
+           {product.price ? (
+             <p className="font-black text-text">₹{product.price.toLocaleString('en-IN')}</p>
+           ) : (
+             <p className="italic text-muted/30">Price on Request</p>
+           )}
+        </div>
+
+        <div className="pt-6">
+           <WhatsAppButton 
+             productName={product.name}
+             className="w-full text-[9px] py-3.5 bg-transparent border border-border/60 text-[#0D1B38]/40 hover:bg-[#0D1B38] hover:text-white hover:border-[#0D1B38] shadow-none uppercase tracking-[0.3em] font-black transition-all justify-center rounded-sm"
+           />
+        </div>
       </div>
     </div>
   );

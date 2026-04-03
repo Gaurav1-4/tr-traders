@@ -56,9 +56,6 @@ const Navbar = ({ onOpenWishlist }) => {
                 alt="TR TRADERS" 
                 className="h-10 md:h-12 object-contain transition-transform group-hover:scale-105"
               />
-              <span className="font-serif text-[10px] md:text-xs tracking-[0.35em] uppercase text-muted mt-1 hidden sm:block">
-                Premium Ethnic Wear
-              </span>
             </Link>
 
             {/* Right: WhatsApp, Profile, Wishlist */}
@@ -114,7 +111,7 @@ const Navbar = ({ onOpenWishlist }) => {
                 autoFocus
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search our heritage collection..."
+                placeholder="Search collection..."
                 className="flex-1 text-lg font-serif font-light border-none outline-none bg-transparent placeholder:text-muted/50"
               />
               <button onClick={() => { setSearchOpen(false); setSearchQuery(''); }} className="text-muted hover:text-text">

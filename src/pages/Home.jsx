@@ -130,9 +130,9 @@ const Home = () => {
           )}
         </div>
 
-        <div className="mt-56 flex justify-center pb-24 px-4">
-          <Link to="/catalog" className="w-full md:w-auto text-center group border-[3px] border-[#0D1B38] text-[#0D1B38] md:px-40 py-16 hover:bg-[#0D1B38] hover:text-white transition-all duration-1000 uppercase tracking-[0.8em] text-[15px] font-black shadow-2xl active:scale-95 block">
-            Enter The Vault <ArrowRight size={24} className="inline ml-10 group-hover:translate-x-6 transition-all duration-700" />
+        <div className="mt-40 flex justify-center pb-24 px-4">
+          <Link to="/catalog" className="w-full md:w-auto text-center group border-2 border-[#0D1B38] text-[#0D1B38] md:px-24 py-8 hover:bg-[#0D1B38] hover:text-white transition-all duration-500 uppercase tracking-[0.4em] text-[13px] font-black active:scale-95 block">
+            Shop Collection <ArrowRight size={18} className="inline ml-6 group-hover:translate-x-3 transition-all duration-300" />
           </Link>
         </div>
       </section>
