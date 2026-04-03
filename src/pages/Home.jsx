@@ -116,11 +116,9 @@ const Home = () => {
 
       {/* EXHIBITION GALLERY - INDESTRUCTIBLE HERITAGE LOADING */}
       <section className="py-24 md:py-48 max-w-[1800px] mx-auto px-10 lg:px-24 w-full flex-grow bg-bg">
-        <div className="flex flex-col items-center justify-center mb-36 text-center animate-fade-in px-4">
-          <h1 className="text-7xl md:text-[11rem] font-serif font-light text-text tracking-tighter mb-12 italic leading-none opacity-95">Heritage</h1>
-          <div className="w-40 h-0.5 bg-[#0D1B38]/10 mb-8"></div>
-          <p className="max-w-2xl text-[#0D1B38]/40 text-[10px] md:text-[12px] uppercase tracking-[0.6em] font-black leading-loose">Authentic ethnic wear, <br/> curated for the global visionary.</p>
-        </div>
+        {/* Hero-to-Gallery Spacer */}
+        <div className="mb-24 h-px bg-transparent"></div>
+
 
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-10 md:gap-x-20 gap-y-28 md:gap-y-64">
           {loading ? (
