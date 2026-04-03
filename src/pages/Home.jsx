@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { getProducts, HERITAGE_COLLECTION } from '../services/productService';
-import { ArrowRight, Loader2, Sparkles } from 'lucide-react';
+import { ArrowRight, Loader2, Sparkles, Video as VideoIcon } from 'lucide-react';
 import { db, isMockMode } from '../services/firebase';
 import { doc, getDoc, onSnapshot, collection, query, limit } from 'firebase/firestore';
 
@@ -19,6 +19,7 @@ const Home = () => {
   const [heroVideos, setHeroVideos] = useState(DEFAULT_VIDEOS);
   const [categories, setCategories] = useState(['All', 'Sarees', 'Suits', 'Lehengas', 'Kurta Sets', 'Unstitched']);
   const [videoErrors, setVideoErrors] = useState({});
+  const [activeVideoIndices, setActiveVideoIndices] = useState([0]); // Only load 1st video initially
   const videoRefs = useRef([]);
 
   // REAL-TIME CINEMA SYNC 
@@ -36,6 +37,18 @@ const Home = () => {
     return () => unsub();
   }, []);
 
+  // SEQUENTIAL VIDEO LOADING (TURBO SPEED)
+  useEffect(() => {
+    // Reveal 2nd video after 800ms
+    const t1 = setTimeout(() => setActiveVideoIndices(prev => [...prev, 1]), 800);
+    // Reveal 3rd and rest after 1600ms
+    const t2 = setTimeout(() => {
+      const all = heroVideos.map((_, i) => i);
+      setActiveVideoIndices(all);
+    }, 1600);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [heroVideos]);
+
   // INDESTRUCTIBLE HERITAGE SYNC (NEVER EMPTY)
   useEffect(() => {
     if (isMockMode) {
@@ -43,11 +56,9 @@ const Home = () => {
       setLoading(false);
       return;
     }
-
     const q = query(collection(db, "products"), limit(12));
     const unsub = onSnapshot(q, (snapshot) => {
       if (snapshot.empty) {
-        // DB is empty, use the heritage collection so the site doesn't look blank
         setProducts(HERITAGE_COLLECTION.map((p, i) => ({ ...p, id: `h${i}` })).slice(0, 8));
       } else {
         let fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -56,11 +67,9 @@ const Home = () => {
       }
       setLoading(false);
     }, () => {
-      // On error, fallback to memory
       setProducts(HERITAGE_COLLECTION.map((p, i) => ({ ...p, id: `h${i}` })).slice(0, 8));
       setLoading(false);
     });
-
     return () => unsub();
   }, []);
 
@@ -68,9 +77,9 @@ const Home = () => {
   useEffect(() => {
     const playAll = () => {
       videoRefs.current.forEach((v, idx) => {
-        if (v) {
+        if (v && activeVideoIndices.includes(idx)) {
           v.muted = true;
-          setTimeout(() => { v.play()?.catch(() => {}); }, idx * 250);
+          v.play()?.catch(() => {});
         }
       });
     };
@@ -78,25 +87,29 @@ const Home = () => {
     const actions = ['touchstart', 'click', 'scroll'];
     actions.forEach(a => window.addEventListener(a, playAll, { once: true }));
     return () => actions.forEach(a => window.removeEventListener(a, playAll));
-  }, [heroVideos]);
+  }, [heroVideos, activeVideoIndices]);
 
   return (
     <div className="flex flex-col min-h-screen bg-bg overflow-x-hidden">
       
-      {/* SIGNATURE HERO REEL */}
+      {/* SIGNATURE HERO REEL - TURBO SEQUENTIAL LOADING */}
       <section className="w-full relative bg-black overflow-hidden border-b border-border h-[65vh] md:h-[85vh]">
         <div className={`w-full h-full ${heroVideos.length > 3 ? 'flex overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory' : 'grid grid-cols-3'}`}>
           {heroVideos.map((url, i) => (
-            <div key={`${url}-${i}`} className={`relative h-full overflow-hidden group bg-black transition-all duration-1000 ${heroVideos.length > 3 ? 'flex-shrink-0 w-[85vw] md:w-[33.33vw] snap-center border-r border-white/10' : 'w-full border-r border-white/5 last:border-r-0'}`}>
-               {!videoErrors[i] ? (
+            <div key={`${url}-${i}`} className={`relative h-full overflow-hidden group bg-[#0D1B38] transition-all duration-1000 ${heroVideos.length > 3 ? 'flex-shrink-0 w-[85vw] md:w-[33.33vw] snap-center border-r border-white/10' : 'w-full border-r border-white/5 last:border-r-0'}`}>
+               {activeVideoIndices.includes(i) && !videoErrors[i] ? (
                  <video 
                    ref={el => videoRefs.current[i] = el}
-                   src={url} preload="metadata" autoPlay muted loop playsInline webkit-playsinline="true"
-                   className="w-full h-full object-cover opacity-90 transition-all duration-[6s] group-hover:scale-105 group-hover:opacity-100"
+                   src={url} preload={i === 0 ? "auto" : "metadata"} autoPlay muted loop playsInline webkit-playsinline="true"
+                   className={`w-full h-full object-cover transition-all opacity-0 duration-1000 ${activeVideoIndices.includes(i) ? 'opacity-90 grayscale-[0.2]' : ''} group-hover:scale-105 group-hover:opacity-100 group-hover:grayscale-0`}
+                   onCanPlay={(e) => e.target.classList.add('opacity-90')}
                    onError={() => setVideoErrors(p => ({...p, [i]: true}))}
                  />
                ) : (
-                 <div className="absolute inset-0 bg-[#0D1B38] flex flex-col items-center justify-center p-8 text-center"><Sparkles className="text-white/20 mb-4 animate-pulse" size={24} /><p className="text-white/5 text-[8px] uppercase font-black tracking-[1em]">Heritage Piece {i+1}</p></div>
+                 <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-[#0D1B38]">
+                    <VideoIcon className="text-white/5 mb-4 animate-pulse" size={40} />
+                    <p className="text-white/5 text-[8px] uppercase font-black tracking-[1em]">Collection Piece {i+1}</p>
+                 </div>
                )}
             </div>
           ))}
@@ -105,7 +118,7 @@ const Home = () => {
 
       {/* CATEGORY STRIP */}
       <section className="py-7 border-b border-border bg-white sticky top-[105px] md:top-[118px] z-30 shadow-xl overflow-hidden font-black">
-        <div className="max-w-[1500px] mx-auto px-12 flex space-x-16 overflow-x-auto no-scrollbar scroll-smooth">
+        <div className="max-w-[1400px] mx-auto px-12 flex space-x-16 overflow-x-auto no-scrollbar scroll-smooth">
           {categories.map((cat) => (
             <button key={cat} className="relative flex-shrink-0 py-2 uppercase tracking-[0.4em] text-[10px] md:text-[11px] text-[#0D1B38]/30 hover:text-[#0D1B38] transition-all">
               {cat}
@@ -114,11 +127,9 @@ const Home = () => {
         </div>
       </section>
 
-      {/* EXHIBITION GALLERY - INDESTRUCTIBLE HERITAGE LOADING */}
-      <section className="py-24 md:py-48 max-w-[1800px] mx-auto px-10 lg:px-24 w-full flex-grow bg-bg">
-        {/* Hero-to-Gallery Spacer */}
-        <div className="mb-24 h-px bg-transparent"></div>
-
+      {/* EXHIBITION GALLERY */}
+      <section className="py-12 md:py-24 max-w-[1800px] mx-auto px-10 lg:px-24 w-full flex-grow bg-bg">
+        <div className="mb-12 h-px bg-transparent"></div>
 
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-10 md:gap-x-20 gap-y-28 md:gap-y-64">
           {loading ? (
