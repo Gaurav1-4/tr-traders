@@ -3,29 +3,24 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAuth } from 'firebase/auth';
 
-// Your web app's Firebase configuration will go here
+// Your web app's Firebase configuration 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "mock-key",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "mock-domain",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "mock-project",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "mock-bucket",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "mock-sender",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "mock-app"
+  apiKey: "AIzaSyAjn-agEClov6wuxAPDWS_AFakWEDB9ORg",
+  authDomain: "gen-lang-client-0494313442.firebaseapp.com",
+  projectId: "gen-lang-client-0494313442",
+  storageBucket: "gen-lang-client-0494313442.firebasestorage.app",
+  messagingSenderId: "795033785414",
+  appId: "1:795033785414:web:584a196393d0872fd76647"
 };
 
-// Initialize Firebase only if true credentials are provided, 
-// else we rely on our mock service
-export const isMockMode = firebaseConfig.apiKey === "mock-key";
+// Mode discovery
+export const isMockMode = false; // FORCED TO FALSE
 
-let app, db, storage, auth;
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
+const auth = getAuth(app);
 
-if (!isMockMode) {
-  app = initializeApp(firebaseConfig);
-  db = getFirestore(app);
-  storage = getStorage(app);
-  auth = getAuth(app);
-} else {
-  console.log("Running in Mock Mode. Firebase is not initialized.");
-}
+console.log("Firebase initialized successfully with provided keys.");
 
 export { db, storage, auth };
