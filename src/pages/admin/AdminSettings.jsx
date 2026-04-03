@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Save, Phone, Mail, MapPin, Store, Settings as SettingsIcon, Video, Trash2, Plus, Link as LinkIcon, Eye } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Save, Phone, Mail, MapPin, Store, Settings as SettingsIcon, Video, Trash2, Plus, Link as LinkIcon, Eye, Upload, Loader2 } from 'lucide-react';
 import { useToast } from '../../components/Toast';
+import { storage, isMockMode } from '../../services/firebase';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 const DEFAULT_VIDEOS = [
   'https://videos.pexels.com/video-files/4620563/4620563-uhd_1440_2560_30fps.mp4',
@@ -11,9 +13,12 @@ const DEFAULT_VIDEOS = [
 const AdminSettings = () => {
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [uploadingIndex, setUploadingIndex] = useState(null);
+  const fileInputRef = useRef(null);
+  
   const [settings, setSettings] = useState({
     storeName: 'TR Traders',
-    whatsappNumber: '919876543210',
+    whatsappNumber: '919208275274',
     email: 'contact@trtraders.com',
     address: '123 Heritage Lane, Chandni Chowk, Delhi 110006',
     currency: 'INR',
@@ -31,6 +36,60 @@ const AdminSettings = () => {
       if (Array.isArray(parsed) && parsed.length > 0) setHeroVideos(parsed);
     }
   }, []);
+
+  const handleFileUpload = async (e, index) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Check size (optional, e.g., 20MB limit)
+    if (file.size > 20 * 1024 * 1024) {
+      showToast('Video too large (Max 20MB)', 'error');
+      return;
+    }
+
+    if (!file.type.startsWith('video/')) {
+      showToast('Please upload a video file (.mp4, etc.)', 'error');
+      return;
+    }
+
+    setUploadingIndex(index);
+
+    if (isMockMode) {
+      // Simulate upload in mock mode
+      setTimeout(() => {
+        showToast('Direct upload requires Firebase API keys. Using local preview.', 'info');
+        const localPreviewUrl = URL.createObjectURL(file);
+        handleVideoChange(index, localPreviewUrl);
+        setUploadingIndex(null);
+      }, 1500);
+      return;
+    }
+
+    try {
+      const storageRef = ref(storage, `hero-videos/video-${Date.now()}-${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        'state_changed',
+        null,
+        (error) => {
+          console.error(error);
+          showToast('Upload failed. Check Firebase permissions.', 'error');
+          setUploadingIndex(null);
+        },
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          handleVideoChange(index, downloadURL);
+          showToast('Video uploaded successfully!', 'success');
+          setUploadingIndex(null);
+        }
+      );
+    } catch (err) {
+      console.error(err);
+      showToast('Error initializing upload', 'error');
+      setUploadingIndex(null);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -88,27 +147,21 @@ const AdminSettings = () => {
             Hero Videos
           </h2>
           <p className="text-sm text-muted mb-5 border-b border-border pb-4">
-            Add video URLs for the landing page hero section. Videos auto-play muted in a grid below the logo. Supports MP4 links (YouTube/Vimeo links won't work — use direct <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded">.mp4</code> URLs).
+            Upload videos for the landing page hero section. They will play automagically. Best results with 3 or more videos.
           </p>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             {heroVideos.map((url, index) => (
-              <div key={index} className="flex gap-3 items-start">
-                <div className="flex-1 space-y-2">
-                  <label className="text-xs font-semibold text-text uppercase tracking-wider flex items-center gap-2">
-                    <LinkIcon size={12} className="text-gray-400" />
-                    Video {index + 1}
-                  </label>
-                  <input
-                    type="url"
-                    value={url}
-                    onChange={(e) => handleVideoChange(index, e.target.value)}
-                    placeholder="Paste direct .mp4 video URL..."
-                    className="w-full p-2.5 bg-gray-50 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
-                  />
-                  {/* Preview */}
-                  {url.trim() && (
-                    <div className="relative rounded-lg overflow-hidden bg-black aspect-video max-w-xs">
+              <div key={index} className="p-4 bg-gray-50 rounded-xl border border-dashed border-gray-300 relative group">
+                <div className="flex flex-col md:flex-row gap-5">
+                  {/* Left: Preview */}
+                  <div className="w-full md:w-48 aspect-[9/16] md:aspect-[3/4] bg-black rounded-lg overflow-hidden relative shadow-inner">
+                    {uploadingIndex === index ? (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-white gap-2 bg-black/40">
+                        <Loader2 className="animate-spin" size={24} />
+                        <span className="text-[10px] uppercase font-bold tracking-widest">Uploading...</span>
+                      </div>
+                    ) : url ? (
                       <video
                         src={url}
                         muted
@@ -118,42 +171,82 @@ const AdminSettings = () => {
                         className="w-full h-full object-cover"
                         onError={(e) => { e.target.style.display = 'none'; }}
                       />
-                      <div className="absolute top-2 left-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded flex items-center gap-1">
-                        <Eye size={10} /> Preview
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center opacity-20">
+                        <Video size={40} className="text-white" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right: Controls */}
+                  <div className="flex-1 flex flex-col justify-between py-1">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                         <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted">Video Slot {index + 1}</span>
+                         {heroVideos.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeVideoSlot(index)}
+                              className="text-red-400 hover:text-red-600 transition-colors"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                         )}
+                      </div>
+
+                      <div className="flex flex-col gap-3">
+                        {/* URL input */}
+                        <div className="flex items-center gap-2 bg-white border border-border rounded-lg p-1 px-3">
+                          <LinkIcon size={14} className="text-gray-400 flex-shrink-0" />
+                          <input
+                            type="url"
+                            value={url}
+                            onChange={(e) => handleVideoChange(index, e.target.value)}
+                            placeholder="Video URL or upload file..."
+                            className="w-full py-1.5 text-xs outline-none bg-transparent"
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <div className="h-px bg-border flex-grow"></div>
+                          <span className="text-[10px] uppercase text-muted font-bold tracking-widest">OR</span>
+                          <div className="h-px bg-border flex-grow"></div>
+                        </div>
+
+                        {/* File upload trigger */}
+                        <label className="cursor-pointer group/btn">
+                          <input 
+                            type="file" 
+                            accept="video/*" 
+                            className="hidden" 
+                            onChange={(e) => handleFileUpload(e, index)}
+                            disabled={uploadingIndex !== null}
+                          />
+                          <div className="flex items-center justify-center gap-2 py-2.5 px-4 bg-white border border-primary text-primary hover:bg-primary-light transition-all rounded-lg text-xs font-bold tracking-widest uppercase">
+                            <Upload size={14} />
+                            Upload Video File
+                          </div>
+                        </label>
                       </div>
                     </div>
-                  )}
+
+                    <p className="text-[10px] text-muted italic mt-4">
+                      Direct upload uses cloud storage. MP4 format is recommended.
+                    </p>
+                  </div>
                 </div>
-                {heroVideos.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeVideoSlot(index)}
-                    className="mt-7 p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Remove video"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                )}
               </div>
             ))}
           </div>
 
-          {heroVideos.length < 5 && (
-            <button
-              type="button"
-              onClick={addVideoSlot}
-              className="mt-4 flex items-center gap-2 text-sm text-primary hover:text-primary/80 font-medium transition-colors"
-            >
-              <Plus size={16} />
-              Add Another Video
-            </button>
-          )}
-
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-            <p className="text-xs text-blue-700">
-              <strong>Tip:</strong> Use 3 videos for the best look. Videos from <a href="https://www.pexels.com/videos/" target="_blank" rel="noopener noreferrer" className="underline">Pexels</a> work great — right-click a video → "Copy video address" to get the direct .mp4 URL.
-            </p>
-          </div>
+          <button
+            type="button"
+            onClick={addVideoSlot}
+            className="mt-6 flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-gray-200 rounded-xl text-muted hover:border-primary hover:text-primary transition-all group"
+          >
+            <Plus size={18} className="group-hover:scale-110 transition-transform" />
+            <span className="text-xs font-bold uppercase tracking-widest">Add Video Slot</span>
+          </button>
         </div>
 
         {/* General Store Info */}
@@ -177,8 +270,6 @@ const AdminSettings = () => {
                 className="w-full p-2.5 bg-gray-50 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all">
                 <option value="INR">INR (₹)</option>
                 <option value="USD">USD ($)</option>
-                <option value="EUR">EUR (€)</option>
-                <option value="GBP">GBP (£)</option>
               </select>
             </div>
           </div>
@@ -195,9 +286,7 @@ const AdminSettings = () => {
                 <Phone size={16} className="text-gray-400"/> WhatsApp Number
               </label>
               <input type="text" name="whatsappNumber" value={settings.whatsappNumber} onChange={handleChange}
-                placeholder="919876543210"
                 className="w-full p-2.5 bg-gray-50 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" required />
-              <p className="text-xs text-muted">Include country code without + (e.g., 9198...)</p>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-text flex items-center gap-2">
@@ -216,12 +305,12 @@ const AdminSettings = () => {
           </div>
         </div>
 
-        {/* Save */}
+        {/* Action Bar */}
         <div className="flex justify-end pt-4">
-          <button type="submit" disabled={loading}
-            className="flex items-center gap-2 px-6 py-3 bg-accent text-white rounded-lg font-medium hover:bg-accent/90 focus:ring-4 focus:ring-accent/20 transition-all shadow-sm">
-            {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={18} />}
-            Save Configuration
+          <button type="submit" disabled={loading || uploadingIndex !== null}
+            className="flex items-center gap-2 px-8 py-3.5 bg-accent text-white rounded-xl font-bold uppercase tracking-[0.2em] text-xs hover:bg-accent/90 focus:ring-4 focus:ring-accent/20 transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:grayscale">
+            {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+            Push Changes Live
           </button>
         </div>
       </form>
