@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import { Save, Phone, Mail, MapPin, Store, Settings as SettingsIcon, Video, Trash2, Plus, Link as LinkIcon, Eye, Upload, Loader2, Tags, Layers, AlertCircle, ExternalLink, Sparkles } from 'lucide-react';
+import { Save, Phone, Mail, MapPin, Store, Settings as SettingsIcon, Video, Trash2, Plus, Link as LinkIcon, Eye, Upload, Loader2, Tags, Layers, AlertCircle, ExternalLink, Sparkles, RefreshCcw } from 'lucide-react';
 import { useToast } from '../../components/Toast';
 import { db, storage, isMockMode } from '../../services/firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 const DEFAULT_VIDEOS = [
+  'https://www.dropbox.com/scl/fi/687aazjfn2rfo6ju5lhc1/Women-s_suit_promotional_202604031753-ezremove.mp4?rlkey=ic8vrq3ryp2pue7jj6iukmkod&st=f46x37jg&raw=1',
   'https://assets.mixkit.co/videos/preview/mixkit-girl-in-a-traditional-indian-dress-walking-41007-large.mp4',
   'https://assets.mixkit.co/videos/preview/mixkit-woman-showing-off-her-indian-dress-41014-large.mp4',
-  'https://assets.mixkit.co/videos/preview/mixkit-indian-woman-posing-with-a-sari-41011-large.mp4',
 ];
 
 const AdminSettings = () => {
@@ -17,6 +17,7 @@ const AdminSettings = () => {
   const [fetching, setFetching] = useState(true);
   const [uploadProgress, setUploadProgress] = useState({});
   const [uploadingIndex, setUploadingIndex] = useState(null);
+  const [key, setKey] = useState(0); // For forcing re-renders of videos
   
   const [settings, setSettings] = useState({
     storeName: 'TR Traders',
@@ -53,50 +54,22 @@ const AdminSettings = () => {
 
   const handleVideoLinkChange = (index, value) => {
     let cleanUrl = value.trim();
-    
-    // Gdrive conversion
     if (cleanUrl.includes('drive.google.com')) {
       const gmatch = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || cleanUrl.match(/id=([a-zA-Z0-9_-]+)/);
-      if (gmatch) {
-        cleanUrl = `https://drive.google.com/uc?export=download&id=${gmatch[1]}`;
-        showToast('Converted for direct streaming!', 'success');
-      }
+      if (gmatch) cleanUrl = `https://drive.google.com/uc?export=download&id=${gmatch[1]}`;
     }
-    // Advanced Dropbox conversion (?raw=1)
     if (cleanUrl.includes('dropbox.com')) {
-      cleanUrl = cleanUrl.split('?')[0]; // Remove existing params
+      cleanUrl = cleanUrl.split('?')[0];
       const params = value.includes('?') ? value.split('?')[1].replace('dl=0', '').replace('dl=1', '') : '';
       cleanUrl = cleanUrl + '?' + (params ? params + '&' : '') + 'raw=1';
       cleanUrl = cleanUrl.replace('&&', '&').replace('?&', '?');
-      showToast('Dropbox stream optimized!', 'success');
     }
-
     setHeroVideos(p => {
       const next = [...p];
       next[index] = cleanUrl;
       return next;
     });
-  };
-
-  const handleFileUpload = async (e, index) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploadingIndex(index);
-    setUploadProgress(prev => ({ ...prev, [index]: 0 }));
-    try {
-      const storageRef = ref(storage, `hero-videos/v-${Date.now()}`);
-      const uploadTask = uploadBytesResumable(storageRef, file);
-      uploadTask.on('state_changed', (snap) => {
-        setUploadProgress(p => ({ ...p, [index]: Math.round((snap.bytesTransferred / snap.totalBytes) * 100) }));
-      }, (err) => {
-        setUploadingIndex(null);
-        showToast('Region restricted. Please paste a Dropbox link below!', 'error');
-      }, async () => {
-        const url = await getDownloadURL(uploadTask.snapshot.ref);
-        handleVideoLinkChange(index, url);
-        setUploadingIndex(null);
-      });
-    } catch (err) { setUploadingIndex(null); }
+    setKey(k => k + 1); // Force preview reload
   };
 
   const handleSave = async (e) => {
@@ -105,68 +78,60 @@ const AdminSettings = () => {
     try {
       const docRef = doc(db, 'settings', 'global');
       await setDoc(docRef, { store: settings, heroVideos: heroVideos, categories: categories, updatedAt: new Date().toISOString() });
-      showToast('Brand synchronized live!', 'success');
+      showToast('Universe Synchronized!', 'success');
     } catch (error) { 
-      showToast('Cloud connection error. Check your Firebase Rules.', 'error');
+      showToast('Check Project Permissions (Rules)', 'error');
     } finally { setLoading(false); }
   };
 
-  if (fetching) return <div className="h-[60vh] flex flex-col items-center justify-center gap-6 text-primary animate-pulse">Establishing Cinema Engine...</div>;
+  if (fetching) return <div className="h-[60vh] flex flex-col items-center justify-center p-10 text-center animate-fade-in"><Loader2 className="animate-spin text-primary mb-6" size={48} /><p className="text-[10px] font-black uppercase tracking-[0.5em] text-muted">Awaiting TR TRADERS LIVE Cloud Connection...</p></div>;
 
   return (
-    <div className="max-w-7xl mx-auto px-8 pb-48">
-      <div className="mb-16 flex flex-col md:flex-row md:items-center justify-between bg-[#FDFCFB] rounded-[3rem] p-12 shadow-soft border border-border border-l-[12px] border-[#0D1B38]">
+    <div className="max-w-7xl mx-auto px-6 pb-48">
+      <div className="mb-20 flex flex-col md:flex-row md:items-center justify-between bg-white rounded-[3.5rem] p-12 shadow-[0_20px_80px_rgba(0,0,0,0.06)] border border-border mt-10">
         <div className="flex items-center gap-10">
-          <div className="w-16 h-16 bg-[#0D1B38] text-white rounded-3xl flex items-center justify-center shadow-2xl"><SettingsIcon size={32} /></div>
+          <div className="w-16 h-16 bg-[#0D1B38] text-white rounded-[1.5rem] flex items-center justify-center shadow-2xl scale-110"><SettingsIcon size={32} /></div>
           <div>
-            <h1 className="text-4xl font-serif text-text mb-2 tracking-tight">E-commerce Heritage</h1>
-            <p className="text-[10px] text-muted tracking-[0.5em] uppercase font-black opacity-80">Connected to tr-traders-live-33109</p>
+            <h1 className="text-4xl md:text-5xl font-serif text-text mb-2 tracking-tighter">Cinema Portal</h1>
+            <p className="text-[10px] text-muted tracking-[0.6em] uppercase font-black opacity-60">tr-traders-live-33109</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 py-3 px-8 bg-black text-white rounded-full text-[10px] uppercase font-black tracking-widest shadow-2xl self-start md:self-center">
-           <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" /> Real-time Status
+        <div className="flex items-center gap-6 self-start md:self-center mt-6 md:mt-0">
+           <div className="w-3 h-3 bg-green-500 rounded-full animate-ping" />
+           <span className="text-[11px] font-black uppercase tracking-[0.3em] text-green-700">Cloud Sync Active</span>
         </div>
       </div>
 
       <form onSubmit={handleSave} className="space-y-20">
-        <div className="bg-white rounded-[4.5rem] p-16 md:p-24 shadow-soft border border-border">
-          <div className="pb-16 mb-20 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-10">
-            <div className="max-w-xl">
-               <h2 className="text-3xl font-serif text-text mb-4 flex items-center gap-6"><Video size={40} className="text-primary"/> Film & Cinema Matrix</h2>
-               <p className="text-lg text-muted font-light leading-relaxed">Update your storefront background films. Paste your Dropbox links, and our engine will **Auto-Refine** them for streaming.</p>
+        <div className="bg-white rounded-[5rem] p-16 md:p-28 shadow-soft border border-border relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-[15px] bg-[#0D1B38]" />
+          
+          <div className="pb-16 mb-24 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-12 text-center md:text-left">
+            <div className="max-w-2xl">
+               <h2 className="text-4xl font-serif text-text mb-4">Hero Exhibition</h2>
+               <p className="text-lg text-muted font-light leading-relaxed max-w-lg">Manage the 3 primary films that introduce your brand heritage. For security, please use direct stream links.</p>
             </div>
-            <div className="flex gap-4">
-              <a href="https://dropbox.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-[11px] font-black uppercase tracking-widest text-[#0D1B38] hover:bg-[#0D1B38] hover:text-white py-4 px-8 border-2 border-[#0D1B38] rounded-3xl transition-all shadow-xl">
-                 <ExternalLink size={18} /> Dropbox
-              </a>
-            </div>
+            <button type="button" onClick={() => setKey(k => k + 1)} className="flex items-center gap-3 text-[11px] font-black uppercase tracking-widest text-[#0D1B38] hover:text-primary transition-all py-3 border-b-2 border-[#0D1B38]/10 hover:border-primary">
+               <RefreshCcw size={18} /> Reload Previews
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-20">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-24">
             {heroVideos.slice(0, 3).map((url, i) => (
-              <div key={i} className="flex flex-col gap-10 group animate-fade-in" style={{animationDelay: `${i * 0.15}s`}}>
-                <div className="aspect-[9/16] md:aspect-[3/4] bg-black rounded-[4rem] overflow-hidden relative shadow-[0_60px_120px_-30px_rgba(0,0,0,0.7)] hover:shadow-primary/30 transition-all duration-1000 group-hover:-translate-y-5 border-2 border-white/5">
-                  {uploadingIndex === i ? (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-10 bg-[#0D1B38]/95 backdrop-blur-3xl px-16">
-                      <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                        <div className="h-full bg-white transition-all duration-300" style={{ width: `${uploadProgress[i]}%` }} />
-                      </div>
-                      <span className="text-5xl font-black tracking-tighter text-white">{uploadProgress[i]}%</span>
-                    </div>
-                  ) : (
-                    <video key={url} src={url} autoPlay muted loop playsInline className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-1000 scale-[1.01]" />
-                  )}
-                  <div className="absolute top-10 left-10"><span className="text-[10px] font-black tracking-[0.6em] uppercase text-white/50">CINEMA {i+1}</span></div>
+              <div key={`${i}-${key}`} className="flex flex-col gap-10 animate-fade-in" style={{animationDelay: `${i * 0.2}s`}}>
+                <div className="aspect-[9/16] md:aspect-[3/4] bg-black rounded-[4.5rem] overflow-hidden relative shadow-[0_60px_130px_-30px_rgba(0,0,0,1)] border-4 border-[#0D1B38]/5">
+                  <video src={url} autoPlay muted loop playsInline className="w-full h-full object-cover transition-opacity duration-1000 opacity-90 group-hover:opacity-100" />
+                  <div className="absolute top-12 left-12 text-white/30 text-[10px] font-black uppercase tracking-[0.5em]">FILM {i+1}</div>
                 </div>
                 
-                <div className="space-y-8 px-4">
-                  <div className="relative">
-                    <div className="absolute -top-3 left-8 px-4 bg-white text-[10px] font-black uppercase tracking-[0.3em] text-primary z-10 flex items-center gap-3">
-                       <Sparkles size={14} className="animate-pulse" /> Auto-Correction
+                <div className="space-y-8 px-6">
+                  <div className="relative group">
+                    <div className="absolute -top-3 left-8 px-4 bg-white text-[10px] font-black uppercase tracking-[0.4em] text-primary z-10 flex items-center gap-3">
+                       <Sparkles size={16} /> Heritage Engine
                     </div>
-                    <div className="flex items-center gap-5 px-8 py-6 bg-gray-50 border border-border rounded-[2.5rem] group focus-within:border-primary transition-all duration-700 shadow-sm">
-                      <LinkIcon size={20} className="text-muted group-focus-within:text-primary transition-colors" />
-                      <input type="text" value={url} onChange={(e) => handleVideoLinkChange(i, e.target.value)} placeholder="Paste Dropbox Link" className="bg-transparent w-full text-[12px] font-black tracking-[0.15em] outline-none text-[#0D1B38] placeholder:text-muted/30" />
+                    <div className="flex items-center gap-6 px-10 py-7 bg-gray-50 border border-border shadow-sm rounded-[3rem] focus-within:border-primary transition-all duration-700">
+                      <LinkIcon size={24} className="text-muted group-focus-within:text-primary transition-all duration-500" />
+                      <input type="text" value={url} onChange={(e) => handleVideoLinkChange(i, e.target.value)} placeholder="Paste Direct .mp4 Link" className="bg-transparent w-full text-[12px] font-black tracking-[0.1em] outline-none text-[#0D1B38] placeholder:text-muted/20" />
                     </div>
                   </div>
                 </div>
@@ -175,15 +140,15 @@ const AdminSettings = () => {
           </div>
         </div>
 
-        {/* Global Save Button */}
-        <div className="sticky bottom-12 left-0 right-0 z-40 mx-8">
-          <button type="submit" disabled={loading || uploadingIndex !== null}
-            className="w-full group relative overflow-hidden flex items-center justify-center gap-10 py-10 bg-[#0D1B38] text-white rounded-[3rem] font-black uppercase tracking-[0.6em] text-[16px] shadow-[0_40px_100px_-20px_rgba(13,27,56,0.5)] hover:-translate-y-2 transition-all active:scale-95 disabled:opacity-50">
-            {loading ? <Loader2 size={30} className="animate-spin" /> : (
-              <>
-                 Synchronize All Devices
-                 <Save size={28} className="group-hover:rotate-12 transition-transform" />
-              </>
+        {/* Floating Sync Button */}
+        <div className="sticky bottom-16 left-0 right-0 z-40 mx-4 md:mx-auto max-w-5xl">
+          <button type="submit" disabled={loading}
+            className="w-full relative overflow-hidden flex items-center justify-center gap-10 py-10 bg-[#0D1B38] text-white rounded-[4rem] font-black uppercase tracking-[0.6em] text-[16px] shadow-[0_40px_100px_-20px_rgba(13,27,56,0.5)] hover:-translate-y-2 transition-all active:scale-95 disabled:opacity-50 border border-white/5">
+            {loading ? <Loader2 size={32} className="animate-spin text-white" /> : (
+              <div className="flex flex-col items-center gap-1">
+                 <span>PUBLISH WORLDWIDE</span>
+                 <span className="text-[9px] opacity-40 font-black tracking-[0.6em]">Instant Heritage Synchronization</span>
+              </div>
             )}
             <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
           </button>
@@ -192,7 +157,7 @@ const AdminSettings = () => {
       
       <style>{`
         .shadow-soft {
-          box-shadow: 0 30px 90px -20px rgba(0,0,0,0.04);
+          box-shadow: 0 40px 100px -20px rgba(0,0,0,0.03);
         }
       `}</style>
     </div>
