@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suits Collection — SHRI VRINDAVAN GARMENTS</title>
+<meta name="description" content="Explore our curated collection of premium Indian suits. Handcrafted elegance in silk, chiffon, velvet and organza.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="collection-styles.css">
+</head>
+<body>
+
+<!-- Announcement Bar -->
+<div class="announcement-bar">
+  <p>Complimentary Shipping on Orders Above ₹2,999 · <span style="text-decoration:underline;cursor:pointer">Shop Now</span></p>
+</div>
+
+<!-- Header -->
+<header class="header" id="main-header">
+  <div class="header-inner">
+    <div class="header-left">
+      <button class="icon-btn" id="search-toggle" aria-label="Search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </button>
+    </div>
+    <div class="header-center">
+      <a href="/" class="logo-text">SHRI VRINDAVAN<br><span class="logo-sub">GARMENTS</span></a>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" aria-label="Wishlist">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="Account">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav class="main-nav">
+    <a href="#" class="nav-link">Sarees</a>
+    <a href="#" class="nav-link">Kurta Sets</a>
+    <a href="#" class="nav-link active">Suits</a>
+    <a href="#" class="nav-link">Lehengas</a>
+    <a href="#" class="nav-link">Indo-Western</a>
+    <a href="#" class="nav-link">New Arrivals</a>
+  </nav>
+</header>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="search-overlay">
+  <div class="search-container">
+    <input type="text" class="search-input" placeholder="Search for suits, sarees, lehengas..." id="search-input" autocomplete="off">
+    <button class="search-close" id="search-close">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Hero Banner -->
+<section class="hero" id="hero-section">
+  <div class="hero-image-wrapper">
+    <img src="/collection-images/hero-banner.png" alt="Suits Collection" class="hero-img">
+    <div class="hero-overlay"></div>
+  </div>
+  <div class="hero-content">
+    <span class="hero-eyebrow">The Collection</span>
+    <h1 class="hero-title">Suits</h1>
+    <p class="hero-subtitle">Handcrafted elegance woven in tradition</p>
+    <div class="hero-scroll-indicator">
+      <span>Explore</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+    </div>
+  </div>
+</section>
+
+<!-- Breadcrumb -->
+<div class="breadcrumb-bar">
+  <div class="container">
+    <a href="/">Home</a> <span class="sep">/</span> <a href="#">Collections</a> <span class="sep">/</span> <span class="current">Suits</span>
+    <span class="product-count">24 pieces</span>
+  </div>
+</div>
+
+<!-- Collection Section -->
+<section class="collection-section" id="collection">
+  <div class="collection-layout">
+
+    <!-- Filter Sidebar -->
+    <aside class="filter-sidebar" id="filter-sidebar">
+      <div class="filter-header">
+        <h3>Refine By</h3>
+        <button class="filter-clear" id="clear-filters">Clear All</button>
+      </div>
+
+      <div class="filter-group" data-filter="category">
+        <button class="filter-title">
+          <span>Category</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="filter-options open">
+          <label class="filter-option"><input type="checkbox" value="straight-cut" checked> <span>Straight Cut</span></label>
+          <label class="filter-option"><input type="checkbox" value="anarkali"> <span>Anarkali</span></label>
+          <label class="filter-option"><input type="checkbox" value="sharara"> <span>Sharara Set</span></label>
+          <label class="filter-option"><input type="checkbox" value="palazzo"> <span>Palazzo Set</span></label>
+          <label class="filter-option"><input type="checkbox" value="gharara"> <span>Gharara Set</span></label>
+        </div>
+      </div>
+
+      <div class="filter-group" data-filter="price">
+        <button class="filter-title">
+          <span>Price</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="filter-options open">
+          <label class="filter-option"><input type="checkbox" value="under-1000"> <span>Under ₹1,000</span></label>
+          <label class="filter-option"><input type="checkbox" value="1000-2500"> <span>₹1,000 – ₹2,500</span></label>
+          <label class="filter-option"><input type="checkbox" value="2500-5000"> <span>₹2,500 – ₹5,000</span></label>
+          <label class="filter-option"><input type="checkbox" value="above-5000"> <span>Above ₹5,000</span></label>
+        </div>
+      </div>
+
+      <div class="filter-group" data-filter="fabric">
+        <button class="filter-title">
+          <span>Fabric</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="filter-options open">
+          <label class="filter-option"><input type="checkbox" value="silk"> <span>Silk</span></label>
+          <label class="filter-option"><input type="checkbox" value="chiffon"> <span>Chiffon</span></label>
+          <label class="filter-option"><input type="checkbox" value="georgette"> <span>Georgette</span></label>
+          <label class="filter-option"><input type="checkbox" value="cotton"> <span>Cotton</span></label>
+          <label class="filter-option"><input type="checkbox" value="velvet"> <span>Velvet</span></label>
+          <label class="filter-option"><input type="checkbox" value="organza"> <span>Organza</span></label>
+        </div>
+      </div>
+
+      <div class="filter-group" data-filter="color">
+        <button class="filter-title">
+          <span>Color</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="filter-options open">
+          <div class="color-swatches-filter">
+            <button class="color-swatch-btn active" data-color="all" style="background:linear-gradient(135deg,#e8d5c4,#c9a87c,#8b6f47)" title="All"></button>
+            <button class="color-swatch-btn" data-color="red" style="background:#8b2252" title="Maroon/Red"></button>
+            <button class="color-swatch-btn" data-color="green" style="background:#8fbc8f" title="Green"></button>
+            <button class="color-swatch-btn" data-color="blue" style="background:#2563eb" title="Blue"></button>
+            <button class="color-swatch-btn" data-color="pink" style="background:#e8b4b8" title="Pink"></button>
+            <button class="color-swatch-btn" data-color="yellow" style="background:#d4a017" title="Mustard/Yellow"></button>
+            <button class="color-swatch-btn" data-color="black" style="background:#1a1a1a" title="Black"></button>
+            <button class="color-swatch-btn" data-color="white" style="background:#f5f0e8; border:1px solid #d4c5b0" title="Ivory/White"></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-group" data-filter="occasion">
+        <button class="filter-title">
+          <span>Occasion</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="filter-options">
+          <label class="filter-option"><input type="checkbox" value="wedding"> <span>Wedding</span></label>
+          <label class="filter-option"><input type="checkbox" value="festive"> <span>Festive</span></label>
+          <label class="filter-option"><input type="checkbox" value="casual"> <span>Casual</span></label>
+          <label class="filter-option"><input type="checkbox" value="office"> <span>Office</span></label>
+        </div>
+      </div>
+
+      <div class="filter-group" data-filter="size">
+        <button class="filter-title">
+          <span>Size</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="filter-options">
+          <div class="size-pills">
+            <button class="size-pill">XS</button>
+            <button class="size-pill">S</button>
+            <button class="size-pill active">M</button>
+            <button class="size-pill">L</button>
+            <button class="size-pill">XL</button>
+            <button class="size-pill">XXL</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Product Grid -->
+    <div class="product-grid-wrapper">
+      <div class="grid-toolbar">
+        <div class="sort-bar">
+          <span class="sort-label">Sort by</span>
+          <select class="sort-select" id="sort-select">
+            <option>Recommended</option>
+            <option>Price: Low to High</option>
+            <option>Price: High to Low</option>
+            <option>Newest First</option>
+          </select>
+        </div>
+        <button class="mobile-filter-btn" id="mobile-filter-toggle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+          Filters
+        </button>
+      </div>
+
+      <div class="product-grid" id="product-grid">
+
+        <div class="product-card" data-aos="fade-up">
+          <div class="product-image-wrap">
+            <img src="/collection-images/suit-maroon-velvet.png" alt="Zardozi Velvet Suit Set" class="product-img" loading="lazy">
+            <div class="product-actions-overlay">
+              <button class="quick-view-btn">Quick View</button>
+            </div>
+            <button class="wishlist-btn" aria-label="Add to wishlist">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </button>
+            <span class="product-badge">Bestseller</span>
+          </div>
+          <div class="product-info">
+            <h3 class="product-name">Zardozi Velvet Suit Set</h3>
+            <p class="product-fabric">Velvet · Heavy Embroidery</p>
+            <p class="product-price">₹4,599</p>
+            <div class="product-swatches">
+              <span class="swatch" style="background:#4a1528" title="Maroon"></span>
+              <span class="swatch" style="background:#1a1a2e" title="Navy"></span>
+              <span class="swatch" style="background:#2d5016" title="Emerald"></span>
+            </div>
+            <div class="product-sizes">
+              <span class="size-tag">S</span><span class="size-tag">M</span><span class="size-tag">L</span><span class="size-tag">XL</span>
+            </div>
+            <div class="product-cta">
+              <button class="btn-enquiry" onclick="openEnquiry('Zardozi Velvet Suit Set','₹4,599')">Send Enquiry</button>
+              <button class="btn-details">View Details</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-card" data-aos="fade-up" data-aos-delay="100">
+          <div class="product-image-wrap">
+            <img src="/collection-images/suit-sage-chiffon.png" alt="Sage Chiffon Embroidered Set" class="product-img" loading="lazy">
+            <div class="product-actions-overlay"><button class="quick-view-btn">Quick View</button></div>
+            <button class="wishlist-btn" aria-label="Add to wishlist"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+            <span class="product-badge new">New</span>
+          </div>
+          <div class="product-info">
+            <h3 class="product-name">Sage Chiffon Embroidered Set</h3>
+            <p class="product-fabric">Chiffon · Silver Thread</p>
+            <p class="product-price">₹2,899</p>
+            <div class="product-swatches">
+              <span class="swatch" style="background:#8fbc8f" title="Sage"></span>
+              <span class="swatch" style="background:#c9b1a0" title="Beige"></span>
+              <span class="swatch" style="background:#b0c4de" title="Powder Blue"></span>
+            </div>
+            <div class="product-sizes"><span class="size-tag">M</span><span class="size-tag">L</span><span class="size-tag">XL</span></div>
+            <div class="product-cta">
+              <button class="btn-enquiry" onclick="openEnquiry('Sage Chiffon Embroidered Set','₹2,899')">Send Enquiry</button>
+              <button class="btn-details">View Details</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-card" data-aos="fade-up" data-aos-delay="200">
+          <div class="product-image-wrap">
+            <img src="/collection-images/suit-royal-blue.png" alt="Royal Silk Paisley Suit" class="product-img" loading="lazy">
+            <div class="product-actions-overlay"><button class="quick-view-btn">Quick View</button></div>
+            <button class="wishlist-btn" aria-label="Add to wishlist"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+          </div>
+          <div class="product-info">
+            <h3 class="product-name">Royal Silk Paisley Suit</h3>
+            <p class="product-fabric">Pure Silk · Zari Work</p>
+            <p class="product-price">₹5,299</p>
+            <div class="product-swatches">
+              <span class="swatch" style="background:#1e40af" title="Royal Blue"></span>
+              <span class="swatch" style="background:#7c2d12" title="Rust"></span>
+            </div>
+            <div class="product-sizes"><span class="size-tag">S</span><span class="size-tag">M</span><span class="size-tag">L</span><span class="size-tag">XL</span><span class="size-tag">XXL</span></div>
+            <div class="product-cta">
+              <button class="btn-enquiry" onclick="openEnquiry('Royal Silk Paisley Suit','₹5,299')">Send Enquiry</button>
+              <button class="btn-details">View Details</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-card" data-aos="fade-up">
+          <div class="product-image-wrap">
+            <img src="/collection-images/suit-blush-pink.png" alt="Blush Organza Floral Set" class="product-img" loading="lazy">
+            <div class="product-actions-overlay"><button class="quick-view-btn">Quick View</button></div>
+            <button class="wishlist-btn" aria-label="Add to wishlist"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+            <span class="product-badge new">Bridal</span>
+          </div>
+          <div class="product-info">
+            <h3 class="product-name">Blush Organza Floral Set</h3>
+            <p class="product-fabric">Organza · Hand Embroidery</p>
+            <p class="product-price">₹6,499</p>
+            <div class="product-swatches">
+              <span class="swatch" style="background:#e8b4b8" title="Blush"></span>
+              <span class="swatch" style="background:#f5f0e8" title="Ivory"></span>
+            </div>
+            <div class="product-sizes"><span class="size-tag">S</span><span class="size-tag">M</span><span class="size-tag">L</span></div>
+            <div class="product-cta">
+              <button class="btn-enquiry" onclick="openEnquiry('Blush Organza Floral Set','₹6,499')">Send Enquiry</button>
+              <button class="btn-details">View Details</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-card" data-aos="fade-up" data-aos-delay="100">
+          <div class="product-image-wrap">
+            <img src="/collection-images/suit-mustard-cotton.png" alt="Mustard Block Print Set" class="product-img" loading="lazy">
+            <div class="product-actions-overlay"><button class="quick-view-btn">Quick View</button></div>
+            <button class="wishlist-btn" aria-label="Add to wishlist"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+          </div>
+          <div class="product-info">
+            <h3 class="product-name">Mustard Block Print Set</h3>
+            <p class="product-fabric">Cotton · Block Print</p>
+            <p class="product-price">₹1,499</p>
+            <div class="product-swatches">
+              <span class="swatch" style="background:#d4a017" title="Mustard"></span>
+              <span class="swatch" style="background:#8b4513" title="Brown"></span>
+            </div>
+            <div class="product-sizes"><span class="size-tag">S</span><span class="size-tag">M</span><span class="size-tag">L</span><span class="size-tag">XL</span></div>
+            <div class="product-cta">
+              <button class="btn-enquiry" onclick="openEnquiry('Mustard Block Print Set','₹1,499')">Send Enquiry</button>
+              <button class="btn-details">View Details</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-card" data-aos="fade-up" data-aos-delay="200">
+          <div class="product-image-wrap">
+            <img src="/collection-images/suit-black-gold.png" alt="Noir Zari Anarkali" class="product-img" loading="lazy">
+            <div class="product-actions-overlay"><button class="quick-view-btn">Quick View</button></div>
+            <button class="wishlist-btn" aria-label="Add to wishlist"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+            <span class="product-badge">Festive</span>
+          </div>
+          <div class="product-info">
+            <h3 class="product-name">Noir Zari Anarkali</h3>
+            <p class="product-fabric">Silk · Zari & Sequin</p>
+            <p class="product-price">₹7,999</p>
+            <div class="product-swatches">
+              <span class="swatch" style="background:#1a1a1a" title="Black"></span>
+              <span class="swatch" style="background:#c9a87c" title="Gold"></span>
+            </div>
+            <div class="product-sizes"><span class="size-tag">M</span><span class="size-tag">L</span><span class="size-tag">XL</span></div>
+            <div class="product-cta">
+              <button class="btn-enquiry" onclick="openEnquiry('Noir Zari Anarkali','₹7,999')">Send Enquiry</button>
+              <button class="btn-details">View Details</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Enquiry Modal -->
+<div class="modal-overlay" id="enquiry-modal">
+  <div class="modal-card">
+    <button class="modal-close" id="modal-close"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <h2 class="modal-title">Request Details</h2>
+    <p class="modal-product-name" id="modal-product-name"></p>
+    <p class="modal-product-price" id="modal-product-price"></p>
+    <form class="enquiry-form" id="enquiry-form">
+      <input type="text" placeholder="Your Name" required class="form-input">
+      <input type="tel" placeholder="Phone / WhatsApp Number" required class="form-input">
+      <input type="email" placeholder="Email (optional)" class="form-input">
+      <textarea placeholder="Message (size, color preference, etc.)" rows="3" class="form-input"></textarea>
+      <button type="submit" class="btn-submit-enquiry">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        Send Enquiry
+      </button>
+      <a href="#" class="whatsapp-link" id="whatsapp-link" target="_blank">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Or chat on WhatsApp
+      </a>
+    </form>
+  </div>
+</div>
+
+<!-- Editorial Footer Banner -->
+<section class="editorial-banner">
+  <div class="editorial-content">
+    <span class="editorial-eyebrow">The Art of Tradition</span>
+    <h2 class="editorial-title">Crafted Elegance,<br>Woven Heritage</h2>
+    <p class="editorial-desc">Each piece from our collection tells a story — of artisans who pour their hearts into every stitch, of traditions passed through generations, of fabrics that speak the language of grace.</p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-col">
+      <h4>SHRI VRINDAVAN GARMENTS</h4>
+      <p class="footer-tagline">Premium ethnic wear, handcrafted with love.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Collections</h5>
+      <a href="#">Sarees</a><a href="#">Suits</a><a href="#">Lehengas</a><a href="#">Kurta Sets</a>
+    </div>
+    <div class="footer-col">
+      <h5>Help</h5>
+      <a href="#">Contact Us</a><a href="#">Shipping</a><a href="#">Returns</a><a href="#">FAQs</a>
+    </div>
+    <div class="footer-col">
+      <h5>Connect</h5>
+      <div class="social-links">
+        <a href="#" aria-label="Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg></a>
+        <a href="#" aria-label="Facebook"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+        <a href="#" aria-label="YouTube"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg></a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Shri Vrindavan Garments. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="collection-script.js"></script>
+</body>
+</html>
