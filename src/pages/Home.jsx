@@ -21,97 +21,91 @@ const Home = () => {
   const [videoErrors, setVideoErrors] = useState({});
   const videoRefs = useRef([]);
 
-  // Robust Link Upgrader (Fixes Dropbox logic on-the-fly)
-  const upgradeVideoLink = (url) => {
-    if (!url || typeof url !== 'string' || url.length < 5) return null;
-    if (url.includes('dropbox.com') && !url.includes('raw=1')) {
-      const base = url.split('?')[0];
-      const params = url.includes('?') ? url.split('?')[1].replace('dl=0', '').replace('dl=1', '') : '';
-      return `${base}?${params ? params + '&' : ''}raw=1`.replace('&&', '&').replace('?&', '?');
-    }
-    return url;
-  };
-
-  // REAL-TIME SYNC - Listen for Admin Changes Instantly
+  // REAL-TIME SYNC ENGINE
   useEffect(() => {
     if (isMockMode) return;
-
-    const docRef = doc(db, 'settings', 'global');
-    const unsub = onSnapshot(docRef, (docSnap) => {
+    const unsub = onSnapshot(doc(db, 'settings', 'global'), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         if (data.heroVideos && data.heroVideos.length > 0) {
-          const refinedLinks = data.heroVideos
-            .map(v => upgradeVideoLink(v))
-            .filter(v => v !== null);
-          
-          if (refinedLinks.length > 0) {
-            setHeroVideos(refinedLinks);
-          }
+          const refinedLinks = data.heroVideos.map(v => {
+            if (v && v.includes('dropbox.com') && !v.includes('raw=1')) {
+              const base = v.split('?')[0];
+              const params = v.includes('?') ? v.split('?')[1].replace('dl=0', '').replace('dl=1', '') : '';
+              return `${base}?${params ? params + '&' : ''}raw=1`.replace('&&', '&').replace('?&', '?');
+            }
+            return v;
+          }).filter(v => v);
+          if (refinedLinks.length > 0) setHeroVideos(refinedLinks);
         }
       }
     });
-
     return () => unsub();
   }, []);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const data = await getProducts();
-        setProducts(data.slice(0, 8));
-      } catch (e) { console.error(e); } 
-      finally { setLoading(false); }
-    };
-    fetchProducts();
+    getProducts().then(data => {
+      setProducts(data.slice(0, 8));
+      setLoading(false);
+    });
   }, []);
 
-  // Force Autoplay whenever videos change
+  // THE MOBILE AUTOPLAY MASTER KEY
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const forcePlay = () => {
       videoRefs.current.forEach(video => {
         if (video) {
           video.muted = true;
-          const playPromise = video.play();
-          if (playPromise !== undefined) {
-            playPromise.catch(() => {});
-          }
+          video.play()?.catch(() => {});
         }
       });
-    }, 1000);
-    return () => clearTimeout(timer);
+    };
+
+    // Attempt immediately
+    forcePlay();
+
+    // The Secret: Listening for the first user interaction (Touch or Click)
+    // This unlocks the "Autoplay Budget" on iOS/Android
+    window.addEventListener('touchstart', forcePlay, { once: true });
+    window.addEventListener('click', forcePlay, { once: true });
+    window.addEventListener('scroll', forcePlay, { once: true });
+
+    return () => {
+      window.removeEventListener('touchstart', forcePlay);
+      window.removeEventListener('click', forcePlay);
+      window.removeEventListener('scroll', forcePlay);
+    };
   }, [heroVideos]);
 
   return (
     <div className="flex flex-col min-h-screen bg-bg overflow-x-hidden">
       
-      {/* SIGNATURE HERO REEL - INDESTRUCTIBLE REAL-TIME SYNC */}
+      {/* SIGNATURE HERO REEL - INDESTRUCTIBLE MOBILE ENGINE */}
       <section className="w-full relative bg-black overflow-hidden border-b border-border h-[65vh] md:h-[85vh]">
-        <div className={`w-full h-full ${heroVideos.length > 3 ? 'flex overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory px-0 gap-0' : 'grid grid-cols-3'}`}>
+        <div className={`w-full h-full ${heroVideos.length > 3 ? 'flex overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory' : 'grid grid-cols-3'}`}>
           {heroVideos.map((url, i) => (
-            <div key={`${url}-${i}`} className={`relative h-full overflow-hidden group bg-black transition-all duration-1000 ${heroVideos.length > 3 ? 'flex-shrink-0 w-[85vw] md:w-[33.33vw] snap-center border-r border-white/10' : 'w-full border-r border-white/5 last:border-r-0'}`}>
-               
+            <div key={i} className={`relative h-full overflow-hidden group bg-black transition-all duration-1000 ${heroVideos.length > 3 ? 'flex-shrink-0 w-[85vw] md:w-[33.33vw] snap-center border-r border-white/10' : 'w-full border-r border-white/5 last:border-r-0'}`}>
                {!videoErrors[i] ? (
                  <video 
                    ref={el => videoRefs.current[i] = el}
+                   src={url}
                    preload="auto"
                    autoPlay 
                    muted 
                    loop 
                    playsInline
                    webkit-playsinline="true"
+                   x5-playsinline="true"
                    className="w-full h-full object-cover opacity-90 transition-all duration-[6s] group-hover:scale-105 group-hover:opacity-100"
+                   onLoadedData={(e) => e.target.play()}
                    onError={() => setVideoErrors(p => ({...p, [i]: true}))}
-                 >
-                   <source src={url} type="video/mp4" />
-                 </video>
+                 />
                ) : (
-                 <div className="absolute inset-0 bg-[#0D1B38] flex flex-col items-center justify-center p-8 text-center animate-fade-in">
+                 <div className="absolute inset-0 bg-[#0D1B38] flex flex-col items-center justify-center p-8 text-center">
                     <Sparkles className="text-white/20 mb-4 animate-pulse" size={24} />
                     <p className="text-white/5 text-[8px] uppercase font-black tracking-[1em]">Heritage Piece {i+1}</p>
                  </div>
                )}
-               
                <div className="absolute inset-x-0 bottom-0 py-16 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 select-none hidden md:flex flex-col items-center">
                   <span className="text-white font-black text-[9px] uppercase tracking-[0.6em]">Heritage Piece {i+1}</span>
                </div>
