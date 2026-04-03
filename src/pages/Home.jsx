@@ -17,9 +17,8 @@ const Home = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [heroVideos, setHeroVideos] = useState(DEFAULT_VIDEOS);
-  const [categories, setCategories] = useState(['All', 'Sarees', 'Suits', 'Lehengas', 'Kurta Sets', 'Unstitched']);
   const [videoErrors, setVideoErrors] = useState({});
-  const [activeVideoIndices, setActiveVideoIndices] = useState([0]); // Only load 1st video initially
+  const [activeVideoIndices, setActiveVideoIndices] = useState([0]); 
   const videoRefs = useRef([]);
 
   // REAL-TIME CINEMA SYNC 
@@ -37,29 +36,20 @@ const Home = () => {
     return () => unsub();
   }, []);
 
-  // SEQUENTIAL VIDEO LOADING (TURBO SPEED)
+  // SEQUENTIAL VIDEO LOADING
   useEffect(() => {
-    // Reveal 2nd video after 800ms
-    const t1 = setTimeout(() => setActiveVideoIndices(prev => [...prev, 1]), 800);
-    // Reveal 3rd and rest after 1600ms
-    const t2 = setTimeout(() => {
-      const all = heroVideos.map((_, i) => i);
-      setActiveVideoIndices(all);
-    }, 1600);
+    const t1 = setTimeout(() => setActiveVideoIndices(p => [...p, 1]), 800);
+    const t2 = setTimeout(() => { setActiveVideoIndices(heroVideos.map((_, i) => i)); }, 1600);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [heroVideos]);
 
-  // INDESTRUCTIBLE HERITAGE SYNC (NEVER EMPTY)
+  // UNIFIED PRODUCT SYNC (NEVER EMPTY)
   useEffect(() => {
-    if (isMockMode) {
-      setProducts(HERITAGE_COLLECTION.slice(0, 8));
-      setLoading(false);
-      return;
-    }
+    if (isMockMode) { setProducts(HERITAGE_COLLECTION.slice(0, 8)); setLoading(false); return; }
     const q = query(collection(db, "products"), limit(12));
     const unsub = onSnapshot(q, (snapshot) => {
       if (snapshot.empty) {
-        setProducts(HERITAGE_COLLECTION.map((p, i) => ({ ...p, id: `h${i}` })).slice(0, 8));
+        setProducts(HERITAGE_COLLECTION.slice(0, 8));
       } else {
         let fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         fetched.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
@@ -67,7 +57,7 @@ const Home = () => {
       }
       setLoading(false);
     }, () => {
-      setProducts(HERITAGE_COLLECTION.map((p, i) => ({ ...p, id: `h${i}` })).slice(0, 8));
+      setProducts(HERITAGE_COLLECTION.slice(0, 8));
       setLoading(false);
     });
     return () => unsub();
@@ -77,10 +67,7 @@ const Home = () => {
   useEffect(() => {
     const playAll = () => {
       videoRefs.current.forEach((v, idx) => {
-        if (v && activeVideoIndices.includes(idx)) {
-          v.muted = true;
-          v.play()?.catch(() => {});
-        }
+        if (v && activeVideoIndices.includes(idx)) { v.muted = true; v.play()?.catch(() => {}); }
       });
     };
     playAll();
@@ -92,7 +79,7 @@ const Home = () => {
   return (
     <div className="flex flex-col min-h-screen bg-bg overflow-x-hidden">
       
-      {/* SIGNATURE HERO REEL - TURBO SEQUENTIAL LOADING */}
+      {/* SIGNATURE HERO REEL */}
       <section className="w-full relative bg-black overflow-hidden border-b border-border h-[65vh] md:h-[85vh]">
         <div className={`w-full h-full ${heroVideos.length > 3 ? 'flex overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory' : 'grid grid-cols-3'}`}>
           {heroVideos.map((url, i) => (
@@ -101,8 +88,7 @@ const Home = () => {
                  <video 
                    ref={el => videoRefs.current[i] = el}
                    src={url} preload={i === 0 ? "auto" : "metadata"} autoPlay muted loop playsInline webkit-playsinline="true"
-                   className={`w-full h-full object-cover transition-all opacity-0 duration-1000 ${activeVideoIndices.includes(i) ? 'opacity-90 grayscale-[0.2]' : ''} group-hover:scale-105 group-hover:opacity-100 group-hover:grayscale-0`}
-                   onCanPlay={(e) => e.target.classList.add('opacity-90')}
+                   className={`w-full h-full object-cover transition-all opacity-0 duration-[1.5s] ${activeVideoIndices.includes(i) ? 'opacity-90' : ''} group-hover:scale-105 group-hover:opacity-100`}
                    onError={() => setVideoErrors(p => ({...p, [i]: true}))}
                  />
                ) : (
@@ -116,33 +102,22 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CATEGORY STRIP */}
-      <section className="py-7 border-b border-border bg-white sticky top-[105px] md:top-[118px] z-30 shadow-xl overflow-hidden font-black">
-        <div className="max-w-[1400px] mx-auto px-12 flex space-x-16 overflow-x-auto no-scrollbar scroll-smooth">
-          {categories.map((cat) => (
-            <button key={cat} className="relative flex-shrink-0 py-2 uppercase tracking-[0.4em] text-[10px] md:text-[11px] text-[#0D1B38]/30 hover:text-[#0D1B38] transition-all">
-              {cat}
-            </button>
-          ))}
-        </div>
-      </section>
-
       {/* EXHIBITION GALLERY */}
-      <section className="py-12 md:py-24 max-w-[1800px] mx-auto px-10 lg:px-24 w-full flex-grow bg-bg">
-        <div className="mb-12 h-px bg-transparent"></div>
+      <section className="py-24 md:py-40 max-w-[1500px] mx-auto px-6 lg:px-24 w-full flex-grow bg-bg">
+        <div className="mb-24 h-px bg-[#0D1B38]/5"></div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-10 md:gap-x-20 gap-y-28 md:gap-y-64">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-10 md:gap-x-16 gap-y-24 md:gap-y-48">
           {loading ? (
              <SkeletonLoader count={4} />
           ) : products.length > 0 ? (
              products.map((p) => <ProductCard key={p.id} product={p} />)
           ) : (
-            <div className="col-span-full py-80 text-center border border-dashed border-[#0D1B38]/5 rounded-[7rem] bg-[#0D1B38]/[0.01]"><p className="font-serif text-3xl italic font-light opacity-10 uppercase tracking-[0.4em] leading-relaxed">Masterpieces <br/> in Creation...</p></div>
+            <div className="col-span-full py-40 text-center border border-dashed border-[#0D1B38]/5 rounded-3xl bg-[#0D1B38]/[0.01]"><p className="font-serif text-3xl italic font-light opacity-10">Collections in Creation...</p></div>
           )}
         </div>
 
         <div className="mt-40 flex justify-center pb-24 px-4">
-          <Link to="/catalog" className="w-full md:w-auto text-center group border-2 border-[#0D1B38] text-[#0D1B38] md:px-24 py-8 hover:bg-[#0D1B38] hover:text-white transition-all duration-500 uppercase tracking-[0.4em] text-[13px] font-black active:scale-95 block">
+          <Link to="/catalog" className="w-full md:w-auto text-center group border-2 border-[#0D1B38] text-[#0D1B38] md:px-24 py-8 hover:bg-[#0D1B38] hover:text-white transition-all duration-500 uppercase tracking-[0.4em] text-[12px] font-black active:scale-95 block">
             Shop Collection <ArrowRight size={18} className="inline ml-6 group-hover:translate-x-3 transition-all duration-300" />
           </Link>
         </div>
