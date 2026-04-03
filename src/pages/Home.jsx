@@ -1,31 +1,46 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { getProducts } from '../services/productService';
-import { ArrowRight, Play } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 const categories = ['All', 'Casual', 'Formal', 'Bridal', 'Festive', 'Winter', 'Cotton'];
 
-// Free stock videos for hero (fashion/textile themed)
-const heroVideos = [
+const DEFAULT_VIDEOS = [
   'https://videos.pexels.com/video-files/4620563/4620563-uhd_1440_2560_30fps.mp4',
   'https://videos.pexels.com/video-files/5710432/5710432-uhd_1440_2560_30fps.mp4',
   'https://videos.pexels.com/video-files/4620571/4620571-uhd_1440_2560_30fps.mp4',
 ];
 
-// Fallback images if videos don't load
-const heroFallbacks = [
+const fallbackImages = [
   '/collection-images/suit-maroon-velvet.png',
   '/collection-images/suit-sage-chiffon.png',
   '/collection-images/suit-blush-pink.png',
+  '/collection-images/suit-royal-blue.png',
+  '/collection-images/suit-black-gold.png',
 ];
 
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('All');
-  const [videosLoaded, setVideosLoaded] = useState([false, false, false]);
+  const [heroVideos, setHeroVideos] = useState(DEFAULT_VIDEOS);
+  const [videoErrors, setVideoErrors] = useState({});
+
+  // Load videos from admin settings
+  useEffect(() => {
+    const loadVideos = () => {
+      const saved = localStorage.getItem('tr_traders_hero_videos');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) setHeroVideos(parsed);
+      }
+    };
+    loadVideos();
+    window.addEventListener('settingsUpdated', loadVideos);
+    return () => window.removeEventListener('settingsUpdated', loadVideos);
+  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -41,12 +56,8 @@ const Home = () => {
     fetchProducts();
   }, [activeCategory]);
 
-  const handleVideoLoaded = (index) => {
-    setVideosLoaded(prev => {
-      const next = [...prev];
-      next[index] = true;
-      return next;
-    });
+  const handleVideoError = (index) => {
+    setVideoErrors(prev => ({ ...prev, [index]: true }));
   };
 
   const scrollToCollection = () => {
@@ -55,75 +66,74 @@ const Home = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-bg">
-      
-      {/* ===== 1. HERO: 3-Column Video Section ===== */}
-      <section className="relative w-full h-[85vh] md:h-screen overflow-hidden">
-        {/* Video Columns */}
-        <div className="absolute inset-0 flex">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="flex-1 relative overflow-hidden group">
-              {/* Fallback Image */}
-              <img 
-                src={heroFallbacks[i]} 
-                alt="" 
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${videosLoaded[i] ? 'opacity-0' : 'opacity-100'}`}
-              />
+
+      {/* ===== 1. VIDEO STRIP — directly below navbar ===== */}
+      <section className="w-full relative">
+        <div className={`grid gap-0 ${
+          heroVideos.length === 1 ? 'grid-cols-1' :
+          heroVideos.length === 2 ? 'grid-cols-2' :
+          heroVideos.length === 4 ? 'grid-cols-2 md:grid-cols-4' :
+          heroVideos.length === 5 ? 'grid-cols-2 md:grid-cols-5' :
+          'grid-cols-1 md:grid-cols-3'
+        }`}>
+          {heroVideos.map((url, i) => (
+            <div key={i} className="relative aspect-[9/16] md:aspect-[3/4] overflow-hidden group bg-[#0D1B38]">
+              {/* Fallback image */}
+              {videoErrors[i] && (
+                <img 
+                  src={fallbackImages[i % fallbackImages.length]} 
+                  alt="" 
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              )}
               {/* Video */}
-              <video
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
-                onLoadedData={() => handleVideoLoaded(i)}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105"
-              >
-                <source src={heroVideos[i]} type="video/mp4" />
-              </video>
-              {/* Column separator lines */}
-              {i < 2 && <div className="absolute right-0 top-0 bottom-0 w-px bg-white/10 z-10"></div>}
+              {!videoErrors[i] && (
+                <video
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  onError={() => handleVideoError(i)}
+                  className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105"
+                >
+                  <source src={url} type="video/mp4" />
+                </video>
+              )}
+              {/* Subtle dark gradient at bottom */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none"></div>
             </div>
           ))}
         </div>
 
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60 z-10"></div>
-
-        {/* Hero Content */}
-        <div className="relative z-20 h-full flex flex-col items-center justify-center text-center px-6 md:px-12">
-          <div className="max-w-2xl mx-auto">
-            {/* Brand Eyebrow */}
+        {/* Overlay Content */}
+        <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+          <div className="bg-black/30 backdrop-blur-[2px] rounded-2xl px-8 md:px-14 py-10 md:py-14 text-center max-w-xl mx-4 pointer-events-auto">
             <p 
-              className="text-white/60 tracking-[0.5em] font-sans font-medium text-[10px] md:text-[11px] uppercase mb-8 opacity-0 animate-fade-up"
+              className="text-white/60 tracking-[0.5em] font-sans font-medium text-[10px] uppercase mb-5 opacity-0 animate-fade-up"
               style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}
             >
               The Festive Edit 2025
             </p>
-
-            {/* Main Title */}
             <h1 
-              className="text-white text-[clamp(3rem,7vw,6rem)] font-serif font-light leading-[0.95] tracking-tight opacity-0 animate-[letterIn_1s_ease-out_forwards]"
+              className="text-white text-[clamp(2.5rem,6vw,4.5rem)] font-serif font-light leading-[0.95] tracking-tight opacity-0 animate-[letterIn_1s_ease-out_forwards]"
               style={{ animationDelay: '0.4s' }}
             >
               Timeless.<br/>Elegance.
             </h1>
-
-            {/* Subtitle */}
             <p 
-              className="text-white/60 font-sans text-sm md:text-base max-w-md mx-auto mt-8 leading-relaxed font-light opacity-0 animate-fade-up"
+              className="text-white/50 font-sans text-xs md:text-sm max-w-sm mx-auto mt-5 leading-relaxed font-light opacity-0 animate-fade-up"
               style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}
             >
-              Discover our curated collection of hand-embroidered silks, pure cottons, and breathtaking designer organza suites tailored for the modern traditionalist.
+              Discover our curated collection of hand-embroidered silks, pure cottons, and breathtaking designer organza suites.
             </p>
-
-            {/* CTAs */}
             <div 
-              className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12 opacity-0 animate-fade-up"
+              className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8 opacity-0 animate-fade-up"
               style={{ animationDelay: '1s', animationFillMode: 'forwards' }}
             >
               <button 
                 onClick={scrollToCollection}
-                className="bg-white text-text px-10 py-4 hover:bg-white/90 transition-all duration-300 uppercase tracking-[0.25em] text-[11px] font-semibold min-w-[200px]"
+                className="bg-white text-text px-8 py-3 hover:bg-white/90 transition-all uppercase tracking-[0.2em] text-[11px] font-semibold w-full sm:w-auto"
               >
                 The Collection
               </button>
@@ -131,17 +141,11 @@ const Home = () => {
                 href="https://wa.me/919208275274?text=Hi!%20I%20would%20like%20to%20know%20more%20about%20your%20new%20collection."
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white border border-white/30 px-10 py-4 hover:bg-white/10 transition-all duration-300 uppercase tracking-[0.25em] text-[11px] font-semibold min-w-[200px]"
+                className="text-white border border-white/30 px-8 py-3 hover:bg-white/10 transition-all uppercase tracking-[0.2em] text-[11px] font-semibold w-full sm:w-auto text-center"
               >
                 Enquire Stylist
               </a>
             </div>
-          </div>
-
-          {/* Scroll hint */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/40 animate-bounce-hover">
-            <span className="text-[10px] tracking-[0.3em] uppercase">Scroll</span>
-            <svg width="12" height="20" viewBox="0 0 12 20" fill="none"><path d="M6 0v16M1 11l5 5 5-5" stroke="currentColor" strokeWidth="1.5"/></svg>
           </div>
         </div>
       </section>
