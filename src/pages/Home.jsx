@@ -21,19 +21,30 @@ const Home = () => {
   const [activeVideoIndices, setActiveVideoIndices] = useState([0]); 
   const videoRefs = useRef([]);
 
-  // REAL-TIME CINEMA SYNC 
+  // 🎥 REAL-TIME CINEMA SYNC 
   useEffect(() => {
     if (isMockMode) return;
-    const unsub = onSnapshot(doc(db, 'settings', 'global'), (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data.heroVideos && data.heroVideos.length > 0) {
-          const refinedLinks = data.heroVideos.map(v => (v && v.includes('dropbox.com') && !v.includes('raw=1')) ? v.split('?')[0] + '?raw=1' : v).filter(v => v);
-          if (refinedLinks.length > 0) setHeroVideos(refinedLinks);
+    try {
+      const unsub = onSnapshot(doc(db, 'settings', 'global'), (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data && Array.isArray(data.heroVideos) && data.heroVideos.length > 0) {
+            const refinedLinks = data.heroVideos
+              .filter(v => v && typeof v === 'string' && v.trim() !== '')
+              .map(v => (v.includes('dropbox.com') && !v.includes('raw=1')) ? v.split('?')[0] + '?raw=1' : v);
+            
+            if (refinedLinks.length > 0) {
+              setHeroVideos(refinedLinks);
+            }
+          }
         }
-      }
-    });
-    return () => unsub();
+      }, (err) => {
+        console.error("Firebase settings sync failed.", err);
+      });
+      return () => unsub();
+    } catch (err) {
+      console.error("Cinematic sync error:", err);
+    }
   }, []);
 
   // SEQUENTIAL VIDEO LOADING
@@ -43,11 +54,19 @@ const Home = () => {
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [heroVideos]);
 
-  // UNIFIED PRODUCT SYNC (NEVER EMPTY)
+  // 🏛️ UNIFIED PRODUCT SYNC (NEVER EMPTY)
   useEffect(() => {
+    setLoading(true);
     if (isMockMode) { setProducts(HERITAGE_COLLECTION.slice(0, 8)); setLoading(false); return; }
+
+    const safetyTimer = setTimeout(() => {
+      setProducts(HERITAGE_COLLECTION.slice(0, 8));
+      setLoading(false);
+    }, 5000);
+
     const q = query(collection(db, "products"), limit(12));
     const unsub = onSnapshot(q, (snapshot) => {
+      clearTimeout(safetyTimer);
       if (snapshot.empty) {
         setProducts(HERITAGE_COLLECTION.slice(0, 8));
       } else {
@@ -57,10 +76,14 @@ const Home = () => {
       }
       setLoading(false);
     }, () => {
+      clearTimeout(safetyTimer);
       setProducts(HERITAGE_COLLECTION.slice(0, 8));
       setLoading(false);
     });
-    return () => unsub();
+    return () => {
+      clearTimeout(safetyTimer);
+      unsub();
+    };
   }, []);
 
   // MOBILE AUTOPLAY FORCE
