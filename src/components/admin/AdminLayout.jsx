@@ -19,7 +19,7 @@ const AdminLayout = () => {
 
   const handleLogout = () => {
     sessionStorage.removeItem('tr_admin');
-    navigate('/admin/login');
+    navigate('/');
   };
 
   const navItems = [
