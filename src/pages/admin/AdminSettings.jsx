@@ -62,7 +62,7 @@ const AdminSettings = () => {
 
 
   const addVideoSlot = () => {
-    if (heroVideos.length >= 5) { showToast('Maximum 5 video slots allowed.', 'error'); return; }
+    if (heroVideos.length >= 3) { showToast('Maximum 3 video slots allowed.', 'error'); return; }
     setHeroVideos(p => [...p, '']);
   };
 
@@ -196,7 +196,7 @@ const AdminSettings = () => {
                     </div>
 
                     <div className="aspect-video bg-black rounded-[2.5rem] overflow-hidden relative shadow-[0_50px_130px_-30px_rgba(0,0,0,0.5)] transition-all duration-1000 group-hover:-translate-y-4 border border-white/5">
-                       <video src={url} autoPlay muted loop playsInline className="w-full h-full object-cover opacity-80" />
+                       <video src={url} key={url} autoPlay muted loop playsInline className="w-full h-full object-cover opacity-100" />
                     </div>
                     
                     <div className="px-4">

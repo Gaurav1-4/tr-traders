@@ -52,112 +52,76 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto px-10 pt-20">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-serif text-text font-medium">Dashboard Overview</h1>
-          <p className="text-muted text-sm mt-1">Welcome back. Here is what's happening today.</p>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-12 mb-20">
+        <div className="max-w-2xl">
+          <h2 className="text-4xl md:text-7xl font-serif font-light italic tracking-tight text-[#0D1B38] mb-6">Studio Analytics</h2>
+          <div className="w-16 h-px bg-[#0D1B38]/20 mb-6"></div>
+          <p className="text-[10px] md:text-[11px] uppercase tracking-[0.4em] font-black text-[#0D1B38]/30 italic">Real-time Exhibition Pulse / Global Inventory Sync</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-4">
           <Link 
             to="/" 
-            target="_blank"
-            className="px-4 py-2 text-sm border border-border bg-white text-text rounded-lg hover:bg-gray-50 flex items-center gap-2 transition-colors font-medium shadow-sm"
+            className="px-8 py-4 border border-[#0D1B38]/10 text-[#0D1B38]/40 hover:text-[#0D1B38] hover:border-[#0D1B38] transition-all text-[10px] font-black uppercase tracking-widest rounded-xl"
           >
-            <Eye size={16} /> View Store
+            Live Site
           </Link>
           <Link 
             to="/admin/products/new" 
-            className="flex items-center gap-2 bg-text text-white px-4 py-2 rounded-lg text-sm hover:bg-black transition-colors shadow-sm font-medium"
+            className="bg-[#0D1B38] text-white px-8 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-2xl hover:-translate-y-1 transition-all"
           >
-            <Plus size={16} /> Add Product
+            Add Design
           </Link>
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-border relative overflow-hidden group">
-          <div className="flex justify-between items-start relative z-10">
-            <div>
-              <p className="text-xs text-muted uppercase tracking-wider font-semibold">Total Products</p>
-              <h2 className="text-3xl font-serif mt-2 text-text">{loading ? '-' : stats.total}</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-20">
+        {[
+          { label: 'Total Designs', val: stats.total, icon: <Package size={20}/>, change: '+4 Today' },
+          { label: 'Active in Showroom', val: stats.active, icon: <Eye size={20}/>, change: 'Live' },
+          { label: 'Vault Categories', val: stats.categories, icon: <Tags size={20}/>, change: 'Curated' },
+          { label: 'Focus Required', val: stats.attention, icon: <AlertCircle size={20}/>, change: 'Action' },
+        ].map((kpi, i) => (
+          <div key={i} className="bg-white p-10 rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] border border-[#0D1B38]/5 group transition-all duration-700 hover:-translate-y-2">
+            <div className="flex justify-between items-start mb-8">
+              <div className="p-4 bg-[#FAF9F6] text-[#0D1B38] rounded-2xl group-hover:bg-[#0D1B38] group-hover:text-white transition-all duration-500">
+                {kpi.icon}
+              </div>
+              <span className="text-[8px] font-black uppercase tracking-widest text-green-600/60">{kpi.change}</span>
             </div>
-            <div className="p-3 bg-primary/10 rounded-lg text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
-              <Package size={22} />
-            </div>
+            <p className="text-[9px] uppercase tracking-[0.3em] font-black text-[#0D1B38]/20 mb-2">{kpi.label}</p>
+            <h3 className="text-4xl font-serif italic text-[#0D1B38]">{loading ? '-' : kpi.val}</h3>
           </div>
-          <p className="text-xs text-green-600 flex items-center gap-1 mt-4 font-medium"><TrendingUp size={14} /> +4 this week</p>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-border relative overflow-hidden group">
-          <div className="flex justify-between items-start relative z-10">
-            <div>
-              <p className="text-xs text-muted uppercase tracking-wider font-semibold">Active Listings</p>
-              <h2 className="text-3xl font-serif mt-2 text-text">{loading ? '-' : stats.active}</h2>
-            </div>
-            <div className="p-3 bg-green-50 rounded-lg text-green-600 group-hover:bg-green-500 group-hover:text-white transition-colors duration-300">
-              <Eye size={22} />
-            </div>
-          </div>
-          <p className="text-xs text-muted flex items-center gap-1 mt-4 font-medium">Visible to customers</p>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-border relative overflow-hidden group">
-          <div className="flex justify-between items-start relative z-10">
-            <div>
-              <p className="text-xs text-muted uppercase tracking-wider font-semibold">Categories</p>
-              <h2 className="text-3xl font-serif mt-2 text-text">{loading ? '-' : stats.categories}</h2>
-            </div>
-            <div className="p-3 bg-accent/10 rounded-lg text-accent group-hover:bg-accent group-hover:text-white transition-colors duration-300">
-              <Tags size={22} />
-            </div>
-          </div>
-          <p className="text-xs text-muted flex items-center gap-1 mt-4 font-medium">Across the store</p>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-border relative overflow-hidden group">
-          <div className="flex justify-between items-start relative z-10">
-            <div>
-              <p className="text-xs text-muted uppercase tracking-wider font-semibold">Require Attention</p>
-              <h2 className="text-3xl font-serif mt-2 text-text">{loading ? '-' : stats.attention}</h2>
-            </div>
-            <div className="p-3 bg-orange-50 rounded-lg text-orange-600 group-hover:bg-orange-500 group-hover:text-white transition-colors duration-300">
-              <AlertCircle size={22} />
-            </div>
-          </div>
-          <p className="text-xs text-orange-600 flex items-center gap-1 mt-4 font-medium">Low stock or hidden</p>
-        </div>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Activity / Products */}
-        <div className="bg-white rounded-xl shadow-sm border border-border lg:col-span-2 flex flex-col">
-          <div className="p-5 border-b border-border flex justify-between items-center">
-            <h3 className="font-serif font-medium text-lg text-text">Recently Added Products</h3>
-            <Link to="/admin/products" className="text-sm text-primary hover:text-primary-dark font-medium flex items-center gap-1">
-              View All <ChevronRight size={16} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 pb-48">
+        {/* Recent Activity */}
+        <div className="bg-white rounded-[3rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] border border-[#0D1B38]/5 lg:col-span-2 overflow-hidden">
+          <div className="p-10 border-b border-[#0D1B38]/5 flex justify-between items-center bg-[#FAF9F6]/30">
+            <h3 className="font-serif italic text-xl text-[#0D1B38]">Recent Showroom Additions</h3>
+            <Link to="/admin/products" className="text-[9px] font-black uppercase tracking-widest text-[#0D1B38]/30 hover:text-[#0D1B38] transition-colors">
+              Full Archive
             </Link>
           </div>
-          <div className="p-0 flex-1 overflow-auto">
+          <div className="p-0">
             {loading ? (
-              <div className="p-10 text-center text-muted text-sm">Loading activity...</div>
+              <div className="p-20 text-center text-[10px] uppercase font-black tracking-widest text-[#0D1B38]/10">Fetching Vault...</div>
             ) : stats.recentProducts.length > 0 ? (
-              <ul className="divide-y divide-border">
+              <ul className="divide-y divide-[#0D1B38]/5">
                 {stats.recentProducts.map((p) => (
-                  <li key={p.id} className="p-4 hover:bg-gray-50 flex items-center gap-4 transition-colors">
-                    <div className="w-12 h-16 bg-gray-100 rounded overflow-hidden shrink-0">
+                  <li key={p.id} className="p-8 hover:bg-[#FAF9F6]/50 flex items-center gap-8 transition-colors">
+                    <div className="w-16 h-20 bg-black rounded-xl overflow-hidden shadow-xl border border-white/5 shrink-0">
                       <img src={p.images?.[0]} alt={p.name} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-text truncate">{p.name}</p>
-                      <p className="text-xs text-muted mt-0.5">{p.category} &bull; {p.fabric}</p>
+                      <p className="font-serif text-lg text-[#0D1B38] italic truncate">{p.name}</p>
+                      <p className="text-[9px] font-black uppercase tracking-widest text-[#0D1B38]/20 mt-1">{p.category} &bull; {p.fabric}</p>
                     </div>
-                    <div className="shrink-0 text-right">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium capitalize ${
-                        p.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
+                    <div className="shrink-0">
+                      <span className="px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-widest bg-[#FAF9F6] border border-[#0D1B38]/5">
                         {p.status}
                       </span>
                     </div>
@@ -165,50 +129,49 @@ const AdminDashboard = () => {
                 ))}
               </ul>
             ) : (
-              <div className="p-10 text-center text-muted text-sm border-2 border-dashed border-gray-100 m-5 rounded-lg flex flex-col items-center justify-center">
-                <Package size={32} className="text-gray-300 mb-3" />
-                <p>No products added yet.</p>
-                <Link to="/admin/products/new" className="text-primary hover:underline mt-2">Start adding products</Link>
+              <div className="p-20 text-center">
+                <Package size={40} className="mx-auto text-[#0D1B38]/5 mb-6" />
+                <p className="text-[10px] uppercase font-black tracking-widest text-[#0D1B38]/20">Archive Empty</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Quick Actions & Tips */}
-        <div className="space-y-6">
-          <div className="bg-accent rounded-xl shadow-sm text-white overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -translate-y-10 translate-x-10"></div>
-            <div className="p-6 relative z-10">
-              <h3 className="font-serif text-xl font-medium mb-2">Need Help?</h3>
-              <p className="text-sm text-gray-200 mb-6 leading-relaxed">
-                Connect with our support team to optimize your store, add new features, or handle technical inquiries.
+        {/* Studio Assistance */}
+        <div className="space-y-12">
+          <div className="bg-[#0D1B38] rounded-[3rem] shadow-2xl text-white p-12 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -translate-y-24 translate-x-24 transition-transform duration-1000 group-hover:scale-125"></div>
+            <div className="relative z-10">
+              <h3 className="font-serif text-3xl italic font-light mb-6">Concierge Support</h3>
+              <p className="text-[12px] font-light text-white/50 mb-10 leading-relaxed uppercase tracking-widest">
+                Access your dedicated design consultant for studio optimization and heritage scaling.
               </p>
-              <button className="w-full bg-white text-accent px-4 py-2.5 rounded-lg text-sm font-bold uppercase tracking-wider hover:bg-gray-50 transition-colors shadow-sm">
-                Contact Support
+              <button className="w-full bg-white text-[#0D1B38] py-6 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl hover:-translate-y-1 transition-all">
+                Speak with Agent
               </button>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-border p-5">
-            <h3 className="font-serif font-medium text-lg text-text mb-4">Quick Links</h3>
-            <div className="space-y-3">
-              <Link to="/admin/products" className="flex items-center justify-between p-3 rounded-lg border border-transparent hover:border-border hover:bg-gray-50 group transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="bg-blue-50 text-blue-600 p-2 rounded-md group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                    <Package size={18} />
+          <div className="bg-white rounded-[3rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] border border-[#0D1B38]/5 p-10">
+            <h3 className="font-serif italic text-xl text-[#0D1B38] mb-10">Studio Quicklinks</h3>
+            <div className="space-y-4">
+              <Link to="/admin/products" className="flex items-center justify-between p-6 rounded-2xl bg-[#FAF9F6] border border-transparent hover:border-[#0D1B38]/10 hover:bg-white transition-all group">
+                <div className="flex items-center gap-6">
+                  <div className="text-[#0D1B38]/30 group-hover:text-primary transition-colors">
+                    <Database size={16} />
                   </div>
-                  <span className="text-sm font-medium text-text">Manage Inventory</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest">Master Archive</span>
                 </div>
-                <ChevronRight size={18} className="text-gray-300 group-hover:text-text transition-colors" />
+                <ChevronRight size={14} className="text-[#0D1B38]/10" />
               </Link>
-              <Link to="/admin/enquiries" className="flex items-center justify-between p-3 rounded-lg border border-transparent hover:border-border hover:bg-gray-50 group transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="bg-purple-50 text-purple-600 p-2 rounded-md group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                    <MessageCircle size={18} />
+              <Link to="/admin/settings" className="flex items-center justify-between p-6 rounded-2xl bg-[#FAF9F6] border border-transparent hover:border-[#0D1B38]/10 hover:bg-white transition-all group">
+                <div className="flex items-center gap-6">
+                  <div className="text-[#0D1B38]/30 group-hover:text-primary transition-colors">
+                    <ShoppingCart size={16} />
                   </div>
-                  <span className="text-sm font-medium text-text">View Enquiries</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest">Studio Settings</span>
                 </div>
-                <ChevronRight size={18} className="text-gray-300 group-hover:text-text transition-colors" />
+                <ChevronRight size={14} className="text-[#0D1B38]/10" />
               </Link>
             </div>
           </div>

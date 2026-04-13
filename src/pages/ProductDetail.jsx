@@ -80,7 +80,7 @@ const ProductDetail = () => {
           
           {/* IMAGE PERFORMANCE GALLERY */}
           <div className="lg:col-span-12 xl:col-span-7">
-            <ImageGallery images={product.images} />
+            <ImageGallery images={product.images?.slice(0, 3)} />
           </div>
 
           {/* RAZOR-SHARP SPECIFICATION SHEET */}

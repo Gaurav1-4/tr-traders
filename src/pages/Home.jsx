@@ -47,11 +47,10 @@ const Home = () => {
     }
   }, []);
 
-  // SEQUENTIAL VIDEO LOADING
+  // 🏎️ PARALLEL ACCELERATED LOADING
   useEffect(() => {
-    const t1 = setTimeout(() => setActiveVideoIndices(p => [...p, 1]), 800);
-    const t2 = setTimeout(() => { setActiveVideoIndices(heroVideos.map((_, i) => i)); }, 1600);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    // Enable all videos immediately for parallel handshake
+    setActiveVideoIndices(heroVideos.map((_, i) => i));
   }, [heroVideos]);
 
   // 🏛️ UNIFIED PRODUCT SYNC (NEVER EMPTY)
@@ -99,8 +98,8 @@ const Home = () => {
     return () => actions.forEach(a => window.removeEventListener(a, playAll));
   }, [heroVideos, activeVideoIndices]);
 
-  // Cap videos at 5 max
-  const displayVideos = heroVideos.slice(0, 5);
+  // Cap videos at exactly 3 max (Hard Limit)
+  const displayVideos = heroVideos.slice(0, 3);
   const videoCount = displayVideos.length;
 
   // Collage grid class based on video count
@@ -127,34 +126,53 @@ const Home = () => {
       {/* SIGNATURE HERO REEL */}
       <section className={`w-full relative bg-black overflow-hidden border-b border-border ${videoCount > 1 ? 'h-auto md:h-[75vh]' : 'h-[75vh]'} min-h-[500px]`}>
         <div className={`w-full h-full ${getCollageClass()}`}>
-          {displayVideos.map((url, i) => (
-            <div key={`${url}-${i}`} className={`relative overflow-hidden group bg-black border-r border-white/5 last:border-r-0 transition-all duration-1000 ${getItemClass(i)}`}>
-               {activeVideoIndices.includes(i) && !videoErrors[i] ? (
-                 <>
-                   <video 
-                     ref={el => videoRefs.current[i] = el}
-                     src={url} preload={i === 0 ? "auto" : "metadata"} autoPlay muted loop playsInline webkit-playsinline="true"
-                     className={`w-full h-full object-cover transition-all opacity-0 duration-[1.5s] ${activeVideoIndices.includes(i) ? 'opacity-80' : ''} group-hover:scale-110 group-hover:opacity-100`}
-                     onError={() => setVideoErrors(p => ({...p, [i]: true}))}
-                   />
-                   <div className="absolute top-10 left-10 z-10 pointer-events-none hidden md:block">
-                      <div className="flex flex-col">
-                        <span className="text-[12px] font-black uppercase tracking-[0.6em] text-white/50 mb-2 font-sans">TR Traders Editorial</span>
-                        <div className="w-16 h-px bg-white/30"></div>
-                      </div>
+          {displayVideos.map((url, i) => {
+            const isActive = activeVideoIndices.includes(i);
+            const hasError = videoErrors[i];
+            
+            return (
+              <div key={`${url}-${i}`} className={`relative overflow-hidden group bg-black border-r border-white/5 last:border-r-0 transition-all duration-1000 ${getItemClass(i)}`}>
+                 {!hasError ? (
+                   <>
+                     <video 
+                       ref={el => videoRefs.current[i] = el}
+                       src={url} 
+                       preload="auto" 
+                       autoPlay 
+                       muted 
+                       loop 
+                       playsInline 
+                       className={`w-full h-full object-cover transition-all duration-[1s] ${isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-105'} group-hover:scale-105`}
+                       onCanPlay={() => !isActive && setActiveVideoIndices(prev => prev.includes(i) ? prev : [...prev, i])}
+                       onError={() => setVideoErrors(p => ({...p, [i]: true}))}
+                     />
+                     
+                     {/* Signature Loading Layer */}
+                     <div className={`absolute inset-0 bg-[#0D1B38] transition-opacity duration-1000 ${isActive ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                        <div className="w-full h-full flex flex-col items-center justify-center">
+                           <Loader2 className="text-white/10 animate-spin mb-4" size={20} />
+                           <span className="text-[8px] uppercase tracking-[0.5em] text-white/10">Loading Legacy</span>
+                        </div>
+                     </div>
+                     <div className={`absolute top-10 left-10 z-10 pointer-events-none hidden md:block transition-all duration-1000 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                        <div className="flex flex-col">
+                          <span className="text-[12px] font-black uppercase tracking-[0.6em] text-white/50 mb-2 font-sans">TR Traders Editorial</span>
+                          <div className="w-16 h-px bg-white/30"></div>
+                        </div>
+                     </div>
+                     <div className="absolute bottom-12 left-12 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-6 group-hover:translate-y-0">
+                        <span className="text-white text-[10px] font-black uppercase tracking-[0.8em] font-sans border border-white/30 px-10 py-5 rounded-full backdrop-blur-xl">View Collection</span>
+                     </div>
+                   </>
+                 ) : (
+                   <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-[#0D1B38]">
+                      <VideoIcon className="text-white/5 mb-4 animate-pulse" size={40} />
+                      <p className="text-white/5 text-[8px] uppercase font-black tracking-[1em]">Media Piece {i+1}</p>
                    </div>
-                   <div className="absolute bottom-12 left-12 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-6 group-hover:translate-y-0">
-                      <span className="text-white text-[10px] font-black uppercase tracking-[0.8em] font-sans border border-white/30 px-10 py-5 rounded-full backdrop-blur-xl">View Collection</span>
-                   </div>
-                 </>
-               ) : (
-                 <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-[#0D1B38]">
-                    <VideoIcon className="text-white/5 mb-4 animate-pulse" size={40} />
-                    <p className="text-white/5 text-[8px] uppercase font-black tracking-[1em]">Collection Piece {i+1}</p>
-                 </div>
-               )}
-            </div>
-          ))}
+                 )}
+              </div>
+            );
+          })}
         </div>
         
         {/* SCROLL INDICATOR */}

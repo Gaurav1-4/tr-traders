@@ -366,14 +366,15 @@
 
 @media (max-width: 768px) {
   .hero-collage-4, .hero-collage-5, .grid-cols-3 {
-    grid-template-columns: 1fr 1fr !important;
-    grid-template-rows: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
     height: auto !important;
   }
   .collage-4-hero, .collage-4-item, .collage-5-top, .collage-5-bottom, .grid-cols-3 > div {
-    grid-column: span 1 !important;
-    grid-row: span 1 !important;
-    height: 250px !important; /* Shorter height for mobile players to avoid stretch */
+    width: 100% !important;
+    height: 60vh !important; /* Elegant tall players on mobile */
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
   }
 }
 

@@ -4,42 +4,55 @@ const ImageGallery = ({ images }) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const [fading, setFading] = useState(false);
   
-  // Ensure we have at least 1 image to avoid crashes and filter empty ones
   const filtered = images?.filter(img => img && img.trim() !== '') || [];
-  
-  const safeImages = filtered.length > 0 
+  const safeMedia = filtered.length > 0 
     ? filtered 
     : ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=1000&q=80'];
 
+  const isVideo = (url) => {
+    if (!url) return false;
+    const cleanUrl = url.split('?')[0].toLowerCase();
+    return cleanUrl.endsWith('.mp4') || 
+           cleanUrl.endsWith('.webm') || 
+           url.toLowerCase().includes('dropbox.com');
+  };
+
   const handleThumbnailClick = (idx) => {
     if (idx === activeIdx) return;
-    
-    // Trigger fade out
     setFading(true);
-    
-    // Wait for fade out, change image, trigger fade in
     setTimeout(() => {
       setActiveIdx(idx);
       setFading(false);
     }, 150);
   };
 
+  const activeMedia = safeMedia[activeIdx];
+
   return (
     <div className="w-full space-y-4">
-      {/* Main Image */}
-      <div className="w-full h-[420px] md:h-[500px] rounded-xl overflow-hidden bg-gray-100 relative">
-        <img
-          src={safeImages[activeIdx]}
-          alt="Product View"
-          className={`w-full h-full object-cover transition-opacity duration-150 ease-in-out ${fading ? 'opacity-0' : 'opacity-100'}`}
-          loading="lazy"
-        />
+      <div className="w-full h-[420px] md:h-[600px] rounded-xl overflow-hidden bg-gray-100 relative shadow-inner">
+        {isVideo(activeMedia) ? (
+          <video
+            key={activeMedia}
+            src={activeMedia}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className={`w-full h-full object-cover transition-opacity duration-150 ease-in-out ${fading ? 'opacity-0' : 'opacity-100'}`}
+          />
+        ) : (
+          <img
+            src={activeMedia}
+            alt="Product View"
+            className={`w-full h-full object-cover transition-opacity duration-150 ease-in-out ${fading ? 'opacity-0' : 'opacity-100'}`}
+          />
+        )}
       </div>
 
-      {/* Thumbnails */}
-      {safeImages.length > 1 && (
+      {safeMedia.length > 1 && (
         <div className="flex gap-3 overflow-x-auto no-scrollbar pt-2">
-          {safeImages.map((img, idx) => (
+          {safeMedia.map((url, idx) => (
             <button
               key={idx}
               onClick={() => handleThumbnailClick(idx)}
@@ -47,12 +60,11 @@ const ImageGallery = ({ images }) => {
                 activeIdx === idx ? 'border-accent p-0.5' : 'border-transparent hover:border-gray-300'
               }`}
             >
-              <img 
-                src={img} 
-                alt={`Thumbnail ${idx + 1}`} 
-                className="w-full h-full object-cover rounded-md" 
-                loading="lazy"
-              />
+              {isVideo(url) ? (
+                <video src={url} className="w-full h-full object-cover rounded-md" muted />
+              ) : (
+                <img src={url} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover rounded-md" />
+              )}
             </button>
           ))}
         </div>
