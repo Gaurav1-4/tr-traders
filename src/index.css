@@ -366,15 +366,14 @@
 
 @media (max-width: 768px) {
   .hero-collage-4, .hero-collage-5, .grid-cols-3 {
-    display: flex !important;
-    flex-direction: column !important;
-    height: auto !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    height: 60vh !important;
   }
-  .collage-4-hero, .collage-4-item, .collage-5-top, .collage-5-bottom, .grid-cols-3 > div {
-    width: 100% !important;
-    height: 60vh !important; /* Elegant tall players on mobile */
-    border-right: none !important;
-    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+  .grid-cols-3 > div {
+    height: 100% !important;
+    border-right: 1px solid rgba(255,255,255,0.1) !important;
+    border-bottom: none !important;
   }
 }
 
