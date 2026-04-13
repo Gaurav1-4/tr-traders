@@ -377,9 +377,10 @@
   }
 }
 
-/* Fix for possible stretching */
+/* Fix for possible stretching & cropping */
 video {
   width: 100%;
   height: 100%;
   object-fit: cover !important;
+  object-position: center 15% !important; /* Focus on the upper body/face for fashion */
 }

@@ -124,7 +124,7 @@ const Home = () => {
     <div className="flex flex-col min-h-screen bg-bg overflow-x-hidden">
       
       {/* SIGNATURE HERO REEL */}
-      <section className={`w-full relative bg-black overflow-hidden border-b border-border ${videoCount > 1 ? 'h-auto md:h-[75vh]' : 'h-[75vh]'} min-h-[500px]`}>
+      <section className={`w-full relative bg-black overflow-hidden border-b border-border ${videoCount > 1 ? 'h-auto md:h-[90vh]' : 'h-[90vh]'} min-h-[600px]`}>
         <div className={`w-full h-full ${getCollageClass()}`}>
           {displayVideos.map((url, i) => {
             const isActive = activeVideoIndices.includes(i);
