@@ -33,7 +33,7 @@ const AdminSettings = () => {
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
             const data = docSnap.data();
-            if (data.heroVideos) setHeroVideos(data.heroVideos);
+            if (data.heroVideos) setHeroVideos(data.heroVideos.slice(0, 3));
             setStoreSettings({
               storeName: data.storeName || 'TR TRADERS',
               whatsappNumber: data.whatsappNumber || '919208275274',
