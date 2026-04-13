@@ -56,6 +56,23 @@ const AdminProductTable = () => {
     } catch (err) { showToast('Sync error', 'error'); }
   };
 
+  const handleDuplicate = async (product) => {
+    try {
+      const { id, ...rest } = product;
+      const duplicatedData = {
+        ...rest,
+        name: `${product.name} (Copy)`,
+        status: 'hidden', // Default to hidden for duplicated items
+        createdAt: new Date().toISOString()
+      };
+      const newProduct = await addProduct(duplicatedData);
+      setProducts([newProduct, ...products]);
+      showToast('Masterpiece Duplicated & Hidden', 'success');
+    } catch (err) {
+      showToast('Duplication failed', 'error');
+    }
+  };
+
   const processedProducts = useMemo(() => {
     let filtered = products.filter(p => {
       const matchesSearch = (p.name || '').toLowerCase().includes(search.toLowerCase());
@@ -87,25 +104,34 @@ const AdminProductTable = () => {
       
       {/* Search & Filter Bar - PROFESSIONAL */}
       <div className="p-8 border-b border-[#0D1B38]/5 flex flex-col md:flex-row justify-between items-center bg-[#FAF9F6] gap-6">
-        <div className="relative w-full md:max-w-md group">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-[#0D1B38]/20 group-focus-within:text-[#0D1B38] transition-colors" size={18} />
-          <input
-            type="text"
-            placeholder="Search Signature Collection..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-14 pr-6 py-4 bg-transparent border-b-2 border-[#0D1B38]/5 text-[11px] font-black tracking-[0.1em] outline-none focus:border-[#0D1B38] transition-all uppercase placeholder:text-[#0D1B38]/10"
-          />
+        <div className="flex flex-col md:flex-row items-center gap-6 w-full md:w-auto">
+          <div className="relative w-full md:max-w-md group">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-[#0D1B38]/20 group-focus-within:text-[#0D1B38] transition-colors" size={18} />
+            <input
+              type="text"
+              placeholder="Search Signature Collection..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-14 pr-6 py-4 bg-transparent border-b-2 border-[#0D1B38]/5 text-[11px] font-black tracking-[0.1em] outline-none focus:border-[#0D1B38] transition-all uppercase placeholder:text-[#0D1B38]/10"
+            />
+          </div>
+          
+          <div className="flex gap-4 items-center">
+             <div className="flex items-center gap-4 bg-white px-6 py-3 rounded-2xl border border-[#0D1B38]/5 shadow-sm">
+                <Filter size={14} className="text-[#0D1B38]/20" />
+                <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="text-[10px] font-black tracking-widest uppercase outline-none bg-transparent">
+                   {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+             </div>
+          </div>
         </div>
-        
-        <div className="flex gap-4 items-center">
-           <div className="flex items-center gap-4 bg-white px-6 py-3 rounded-2xl border border-[#0D1B38]/5 shadow-sm">
-              <Filter size={14} className="text-[#0D1B38]/20" />
-              <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="text-[10px] font-black tracking-widest uppercase outline-none bg-transparent">
-                 {categories.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-           </div>
-        </div>
+
+        <Link 
+          to="/admin/products/new" 
+          className="bg-[#0D1B38] text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-black transition-all shadow-xl flex items-center gap-3"
+        >
+          <Plus size={16} /> Add New Piece
+        </Link>
       </div>
 
       <div className="overflow-x-auto min-h-[500px]">
@@ -125,7 +151,7 @@ const AdminProductTable = () => {
                 <tr key={p.id} className="hover:bg-[#FAF9F6] transition-colors group">
                   <td className="px-8 py-6">
                     <div className="relative w-20 h-24 bg-black rounded-2xl overflow-hidden shadow-xl border border-[#0D1B38]/5">
-                      <img src={p.image || p.images?.[0] || 'https://via.placeholder.com/400'} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90" />
+                      <img src={p.image || p.images?.find(img => img && img.trim() !== '') || 'https://via.placeholder.com/400'} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90" />
                     </div>
                   </td>
                   <td className="px-8 py-6">
@@ -142,13 +168,16 @@ const AdminProductTable = () => {
                   </td>
                   <td className="px-8 py-6 text-right">
                     <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => handeToggleVisibility(p.id, p.status)} className="p-3 bg-white rounded-xl border border-[#0D1B38]/5 shadow-sm hover:scale-110 transition-all">
+                      <button onClick={() => handeToggleVisibility(p.id, p.status)} title="Toggle Visibility" className="p-3 bg-white rounded-xl border border-[#0D1B38]/5 shadow-sm hover:scale-110 transition-all">
                         {p.status === 'active' ? <Eye size={16} /> : <EyeOff size={16} />}
                       </button>
-                      <Link to={`/admin/products/edit/${p.id}`} className="p-3 bg-white rounded-xl border border-[#0D1B38]/5 shadow-sm hover:scale-110 transition-all text-blue-500">
+                      <button onClick={() => handleDuplicate(p)} title="Duplicate Piece" className="p-3 bg-white rounded-xl border border-[#0D1B38]/5 shadow-sm hover:scale-110 transition-all text-amber-600">
+                        <Copy size={16} />
+                      </button>
+                      <Link to={`/admin/products/edit/${p.id}`} title="Edit Piece" className="p-3 bg-white rounded-xl border border-[#0D1B38]/5 shadow-sm hover:scale-110 transition-all text-blue-500">
                         <Edit2 size={16} />
                       </Link>
-                      <button onClick={() => handleDelete(p.id, p.name)} className="p-3 bg-white rounded-xl border border-[#0D1B38]/5 shadow-sm hover:scale-110 transition-all text-red-300 hover:text-red-500">
+                      <button onClick={() => handleDelete(p.id, p.name)} title="Delete Piece" className="p-3 bg-white rounded-xl border border-[#0D1B38]/5 shadow-sm hover:scale-110 transition-all text-red-300 hover:text-red-500">
                         <Trash2 size={16} />
                       </button>
                     </div>

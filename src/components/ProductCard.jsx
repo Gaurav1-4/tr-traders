@@ -28,7 +28,7 @@ const ProductCard = ({ product }) => {
       <Link to={`/product/${product.id}`} className="relative aspect-[3/4] overflow-hidden bg-[#f5f0eb] rounded-sm block">
         {!imageLoaded && <div className="absolute inset-0 skeleton"></div>}
         <img
-          src={product.images?.[0] || '/images/placeholder.jpg'}
+          src={product.images?.find(img => img && img.trim() !== '') || '/images/placeholder.jpg'}
           alt={product.name}
           className={`w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           loading="lazy"

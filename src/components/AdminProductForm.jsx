@@ -8,7 +8,6 @@ import { useToast } from './Toast';
 import { addProduct, updateProduct } from '../services/productService';
 
 const CATEGORIES = ['Sarees', 'Kurta Sets', 'Suits', 'Unstitched', 'Lehengas', 'Casual', 'Formal', 'Bridal', 'Festive', 'Winter', 'Cotton'];
-const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Custom', 'Unstitched'];
 
 const AdminProductForm = ({ initialData = null, isEdit = false }) => {
   const navigate = useNavigate();
@@ -24,7 +23,6 @@ const AdminProductForm = ({ initialData = null, isEdit = false }) => {
     status: initialData?.status || 'active',
     stock: initialData?.stock || 'in_stock',
     featured: initialData?.featured || false,
-    sizes: initialData?.sizes || [],
     colors: initialData?.colors || [],
     occasion: initialData?.occasion || [],
     images: initialData?.images?.length ? [...initialData.images, '', '', ''].slice(0, 4) : ['', '', '', '']
@@ -40,12 +38,6 @@ const AdminProductForm = ({ initialData = null, isEdit = false }) => {
     }));
   };
 
-  const handleSizeToggle = (size) => {
-    setFormData(prev => ({
-      ...prev,
-      sizes: prev.sizes.includes(size) ? prev.sizes.filter(s => s !== size) : [...prev.sizes, size]
-    }));
-  };
 
   const handleAddColor = (e) => {
     if (e.key === 'Enter' && colorInput.trim()) {
@@ -74,11 +66,16 @@ const AdminProductForm = ({ initialData = null, isEdit = false }) => {
     setLoading(true);
     
     try {
+      const cleanedData = {
+        ...formData,
+        images: formData.images.filter(img => img && img.trim() !== '')
+      };
+      
       if (isEdit && initialData?.id) {
-        await updateProduct(initialData.id, formData);
+        await updateProduct(initialData.id, cleanedData);
         showToast('Heritage design updated.', 'success');
       } else {
-        await addProduct(formData);
+        await addProduct(cleanedData);
         showToast('New masterpiece published.', 'success');
       }
       navigate('/admin/products');
@@ -153,19 +150,7 @@ const AdminProductForm = ({ initialData = null, isEdit = false }) => {
         <div className="bg-white p-10 md:p-16 rounded-[4rem] shadow-soft border border-[#0D1B38]/5">
            <h3 className="text-xl font-serif mb-12 flex items-center gap-4"><Layers className="opacity-10" /> Heritage Attributes</h3>
            <div className="space-y-12">
-              <div>
-                 <label className="text-[10px] uppercase font-black tracking-[0.4em] text-[#0D1B38]/30 mb-8 block">Universal Sizing</label>
-                 <div className="flex flex-wrap gap-4">
-                    {SIZES.map(size => (
-                      <button key={size} type="button" onClick={() => handleSizeToggle(size)}
-                        className={`px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
-                          formData.sizes.includes(size) ? 'bg-[#0D1B38] text-white shadow-xl scale-110' : 'bg-[#FAF9F6] text-[#0D1B38]/30 border border-[#0D1B38]/5'
-                        }`}>
-                        {size}
-                      </button>
-                    ))}
-                 </div>
-              </div>
+              {/* UNIVERSAL SIZING REMOVED */}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                  <div>

@@ -7,6 +7,35 @@ const MobileNav = () => {
   const location = useLocation();
   const { wishlist } = useWishlist();
 
+  const [whatsappNumber, setWhatsappNumber] = useState('919208275274');
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      // 1. Local first
+      const savedSettings = localStorage.getItem('tr_traders_settings');
+      if (savedSettings) {
+        const parsed = JSON.parse(savedSettings);
+        if (parsed.whatsappNumber) setWhatsappNumber(parsed.whatsappNumber);
+      }
+
+      // 2. Cloud sync
+      try {
+        const { db, isMockMode } = await import('../services/firebase');
+        const { doc, getDoc } = await import('firebase/firestore');
+        if (!isMockMode) {
+          const docRef = doc(db, 'settings', 'global');
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists() && docSnap.data().whatsappNumber) {
+            setWhatsappNumber(docSnap.data().whatsappNumber);
+          }
+        }
+      } catch (err) { console.error(err); }
+    };
+    loadSettings();
+    window.addEventListener('settingsUpdated', loadSettings);
+    return () => window.removeEventListener('settingsUpdated', loadSettings);
+  }, []);
+
   // Hide on admin routes
   if (location.pathname.startsWith('/admin')) {
     return null;
@@ -44,7 +73,7 @@ const MobileNav = () => {
               key={item.name}
               onClick={() => {
                 if (item.action === 'whatsapp') {
-                  window.open("https://wa.me/919208275274?text=Hi!%20I'm%20exploring%20your%20collection.", "_blank");
+                  window.open(`https://wa.me/${whatsappNumber}?text=Hi!%20I'm%20exploring%20your%20collection.`, "_blank");
                 } else if (item.action === 'wishlist') {
                   // Dispatch custom event to open wishlist modal
                   window.dispatchEvent(new Event('openWishlist'));

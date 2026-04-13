@@ -4,9 +4,11 @@ const ImageGallery = ({ images }) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const [fading, setFading] = useState(false);
   
-  // Ensure we have at least 1 image to avoid crashes
-  const safeImages = images && images.length > 0 
-    ? images 
+  // Ensure we have at least 1 image to avoid crashes and filter empty ones
+  const filtered = images?.filter(img => img && img.trim() !== '') || [];
+  
+  const safeImages = filtered.length > 0 
+    ? filtered 
     : ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=1000&q=80'];
 
   const handleThumbnailClick = (idx) => {

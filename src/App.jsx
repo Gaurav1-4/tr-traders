@@ -14,7 +14,6 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminProductEdit from './pages/admin/AdminProductEdit';
 import AdminSettings from './pages/admin/AdminSettings';
-import AdminEnquiries from './pages/admin/AdminEnquiries';
 import AdminLayout from './components/admin/AdminLayout';
 import { useState, useEffect } from 'react';
 import WishlistModal from './components/WishlistModal';
@@ -68,7 +67,6 @@ function App() {
             <Route path="products/new" element={<AdminProductEdit />} />
             <Route path="products/edit/:id" element={<AdminProductEdit />} />
             <Route path="settings" element={<AdminSettings />} />
-            <Route path="enquiries" element={<AdminEnquiries />} />
           </Route>
         </Routes>
       </Router>

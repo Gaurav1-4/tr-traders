@@ -9,13 +9,29 @@ const WhatsAppButton = ({
   const [phoneNumber, setPhoneNumber] = useState('919208275274');
 
   useEffect(() => {
-    const loadSettings = () => {
+    const loadSettings = async () => {
+      // 1. Local first
       const savedSettings = localStorage.getItem('tr_traders_settings');
       if (savedSettings) {
         const parsed = JSON.parse(savedSettings);
         if (parsed.whatsappNumber) setPhoneNumber(parsed.whatsappNumber);
       }
+
+      // 2. Cloud sync
+      try {
+        const { db, isMockMode } = await import('../services/firebase');
+        const { doc, getDoc } = await import('firebase/firestore');
+        
+        if (!isMockMode) {
+          const docRef = doc(db, 'settings', 'global');
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists() && docSnap.data().whatsappNumber) {
+            setPhoneNumber(docSnap.data().whatsappNumber);
+          }
+        }
+      } catch (err) { console.error(err); }
     };
+
     loadSettings();
     window.addEventListener('settingsUpdated', loadSettings);
     return () => window.removeEventListener('settingsUpdated', loadSettings);

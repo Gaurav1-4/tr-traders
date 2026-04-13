@@ -17,6 +17,11 @@ const AdminSettings = () => {
   const [fetching, setFetching] = useState(true);
   const [seeding, setSeeding] = useState(false);
   const [heroVideos, setHeroVideos] = useState([...DEFAULT_VIDEOS]);
+  const [storeSettings, setStoreSettings] = useState({
+    storeName: 'TR TRADERS',
+    whatsappNumber: '919208275274',
+    address: 'Shori Cloth Market\nRohtak, Haryana (124001)'
+  });
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -29,6 +34,11 @@ const AdminSettings = () => {
           if (docSnap.exists()) {
             const data = docSnap.data();
             if (data.heroVideos) setHeroVideos(data.heroVideos);
+            setStoreSettings({
+              storeName: data.storeName || 'TR TRADERS',
+              whatsappNumber: data.whatsappNumber || '919208275274',
+              address: data.address || 'Shori Cloth Market\nRohtak, Haryana (124001)'
+            });
           }
         }
       } catch (err) { console.error(err); } 
@@ -45,23 +55,16 @@ const AdminSettings = () => {
     });
   };
 
-  const seedProducts = async () => {
-    setSeeding(true);
-    try {
-      const batch = writeBatch(db);
-      for (const product of HERITAGE_COLLECTION) {
-        const newDocRef = doc(collection(db, 'products'));
-        batch.set(newDocRef, { ...product, createdAt: new Date().toISOString() });
-      }
-      await batch.commit();
-      showToast('Heritage Collection Restored!', 'success', 3000);
-      window.location.href = '/admin/products';
-    } catch (err) {
-      showToast('Database Blocked (Rules)', 'error');
-    } finally { setSeeding(false); }
+  const handleStoreSettingChange = (e) => {
+    const { name, value } = e.target;
+    setStoreSettings(prev => ({ ...prev, [name]: value }));
   };
 
-  const addVideoSlot = () => { setHeroVideos(p => [...p, '']); };
+
+  const addVideoSlot = () => {
+    if (heroVideos.length >= 5) { showToast('Maximum 5 video slots allowed.', 'error'); return; }
+    setHeroVideos(p => [...p, '']);
+  };
 
   const removeVideoSlot = (index) => {
     if (heroVideos.length <= 1) { showToast('Minimum 1 slot mandatory.', 'error'); return; }
@@ -82,10 +85,32 @@ const AdminSettings = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      // Validate links first
+      const cleaned = heroVideos.map(v => v.trim()).filter(v => v);
+      if (cleaned.length === 0) {
+        showToast('Please add at least one valid video link.', 'error');
+        setLoading(false);
+        return;
+      }
+
       const docRef = doc(db, 'settings', 'global');
-      await setDoc(docRef, { heroVideos, updatedAt: new Date().toISOString() }, { merge: true });
-      showToast('Reel Synchronized Successfully', 'success');
-    } catch (error) { showToast('Sync failed.', 'error'); } 
+      const payload = { 
+        heroVideos: cleaned, 
+        ...storeSettings,
+        updatedAt: new Date().toISOString() 
+      };
+      
+      await setDoc(docRef, payload, { merge: true });
+      
+      // Update local storage too for immediate UI feedback (consistent with other components)
+      localStorage.setItem('tr_traders_settings', JSON.stringify(storeSettings));
+      window.dispatchEvent(new Event('settingsUpdated'));
+
+      showToast('Exhibition & Studio Defaults Updated!', 'success');
+    } catch (error) { 
+      console.error("Firebase Save Error:", error);
+      showToast(`Save failed: ${error.message}`, 'error'); 
+    } 
     finally { setLoading(false); }
   };
 
@@ -93,40 +118,56 @@ const AdminSettings = () => {
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-[#0D1B38] pb-48 font-sans selection:bg-[#0D1B38] selection:text-white">
-      {/* ===== STUDIO NAV ===== */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[#0D1B38]/5 mb-12">
-         <div className="max-w-7xl mx-auto px-10 h-20 flex items-center justify-between">
-            <h1 className="text-xs font-black uppercase tracking-[0.4em] opacity-30">Studio Settings</h1>
-            <div className="flex items-center gap-10">
-               <button onClick={handleSave} disabled={loading} className="bg-[#0D1B38] text-white px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all disabled:opacity-30">
-                  {loading ? <Loader2 size={16} className="animate-spin" /> : 'Publish Changes'}
-               </button>
-            </div>
-         </div>
-      </nav>
 
       <main className="max-w-7xl mx-auto px-10">
          <header className="mb-24 flex flex-col md:flex-row md:items-end justify-between gap-12">
             <div className="max-w-2xl">
-               <h2 className="text-4xl md:text-6xl font-serif font-light tracking-tighter mb-6">Dashboard</h2>
+               <h2 className="text-4xl md:text-6xl font-serif font-light tracking-tighter mb-6">Studio Defaults</h2>
                <div className="w-16 h-px bg-[#0D1B38]/20 mb-6"></div>
                <p className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] font-black text-[#0D1B38]/30">
-                  Manage your visual presence and catalog defaults.
+                  Manage your visual presence and showcase video gallery.
                </p>
             </div>
             
-            <div className="bg-[#0D1B38]/[0.02] p-8 border border-dashed border-[#0D1B38]/10 rounded-3xl text-center md:text-left">
-               <p className="text-[9px] font-black uppercase tracking-[0.2em] text-[#0D1B38]/30 mb-6">System Refresh</p>
-               <button onClick={seedProducts} disabled={seeding}
-                 className="flex items-center gap-6 px-10 py-5 bg-white border border-[#0D1B38]/10 rounded-2xl shadow-sm transition-all group active:scale-95 disabled:opacity-50">
-                  <Package className="text-primary" />
-                  <div className="text-left">
-                     <p className="text-[10px] font-black uppercase tracking-widest leading-none mb-1">Restore Collection</p>
-                     <p className="text-[9px] opacity-40 font-serif italic">Seed 5 Original Products</p>
-                  </div>
+            <div className="flex justify-end">
+               <button onClick={handleSave} disabled={loading} className="bg-[#0D1B38] text-white px-10 py-5 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-black transition-all shadow-xl disabled:opacity-30">
+                  {loading ? <Loader2 size={24} className="animate-spin" /> : 'Save Exhibition'}
                </button>
             </div>
          </header>
+
+         {/* STUDIO INFORMATION */}
+         <section className="mb-40">
+            <div className="flex items-center gap-6 mb-16 border-b border-[#0D1B38]/5 pb-8">
+               <Sparkles size={20} className="opacity-10" />
+               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#0D1B38]/40">Studio Information</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+               <div className="space-y-12">
+                  <div className="group">
+                     <label className="text-[9px] uppercase font-black tracking-[0.4em] text-[#0D1B38]/20 mb-4 block">Store Name</label>
+                     <input 
+                        type="text" name="storeName" value={storeSettings.storeName} onChange={handleStoreSettingChange}
+                        className="w-full bg-transparent border-b border-[#0D1B38]/10 py-4 text-xl font-serif italic outline-none focus:border-[#0D1B38] transition-all"
+                     />
+                  </div>
+                  <div className="group">
+                     <label className="text-[9px] uppercase font-black tracking-[0.4em] text-[#0D1B38]/20 mb-4 block">WhatsApp Number (e.g. 919208275274)</label>
+                     <input 
+                        type="text" name="whatsappNumber" value={storeSettings.whatsappNumber} onChange={handleStoreSettingChange}
+                        className="w-full bg-transparent border-b border-[#0D1B38]/10 py-4 text-xl font-serif italic outline-none focus:border-[#0D1B38] transition-all"
+                     />
+                  </div>
+               </div>
+               <div className="group">
+                  <label className="text-[9px] uppercase font-black tracking-[0.4em] text-[#0D1B38]/20 mb-4 block">Studio Address</label>
+                  <textarea 
+                     name="address" rows="5" value={storeSettings.address} onChange={handleStoreSettingChange}
+                     className="w-full bg-transparent border-b border-[#0D1B38]/10 py-4 text-xl font-serif italic outline-none focus:border-[#0D1B38] transition-all resize-none"
+                  />
+               </div>
+            </div>
+         </section>
 
          {/* VIDEO SLOTS */}
          <section className="mb-40">
@@ -154,7 +195,7 @@ const AdminSettings = () => {
                        <button type="button" onClick={() => removeVideoSlot(i)} className="w-8 h-8 flex items-center justify-center text-red-100 hover:text-red-500 transition-colors"><Trash2 size={14}/></button>
                     </div>
 
-                    <div className="aspect-[3/4] bg-black rounded-[2.5rem] overflow-hidden relative shadow-[0_50px_130px_-30px_rgba(0,0,0,0.5)] transition-all duration-1000 group-hover:-translate-y-4 border border-white/5">
+                    <div className="aspect-video bg-black rounded-[2.5rem] overflow-hidden relative shadow-[0_50px_130px_-30px_rgba(0,0,0,0.5)] transition-all duration-1000 group-hover:-translate-y-4 border border-white/5">
                        <video src={url} autoPlay muted loop playsInline className="w-full h-full object-cover opacity-80" />
                     </div>
                     

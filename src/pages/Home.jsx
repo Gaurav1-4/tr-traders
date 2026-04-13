@@ -76,21 +76,54 @@ const Home = () => {
     return () => actions.forEach(a => window.removeEventListener(a, playAll));
   }, [heroVideos, activeVideoIndices]);
 
+  // Cap videos at 5 max
+  const displayVideos = heroVideos.slice(0, 5);
+  const videoCount = displayVideos.length;
+
+  // Collage grid class based on video count
+  const getCollageClass = () => {
+    if (videoCount <= 3) return 'grid grid-cols-3';
+    if (videoCount === 4) return 'hero-collage-4';
+    return 'hero-collage-5';
+  };
+
+  const getItemClass = (index) => {
+    if (videoCount <= 3) return 'w-full';
+    if (videoCount === 4) {
+      if (index === 0) return 'collage-4-hero';
+      return 'collage-4-item';
+    }
+    // 5 videos
+    if (index < 3) return 'collage-5-top';
+    return 'collage-5-bottom';
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-bg overflow-x-hidden">
       
       {/* SIGNATURE HERO REEL */}
-      <section className="w-full relative bg-black overflow-hidden border-b border-border h-[65vh] md:h-[85vh]">
-        <div className={`w-full h-full ${heroVideos.length > 3 ? 'flex overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory' : 'grid grid-cols-3'}`}>
-          {heroVideos.map((url, i) => (
-            <div key={`${url}-${i}`} className={`relative h-full overflow-hidden group bg-[#0D1B38] transition-all duration-1000 ${heroVideos.length > 3 ? 'flex-shrink-0 w-[85vw] md:w-[33.33vw] snap-center border-r border-white/10' : 'w-full border-r border-white/5 last:border-r-0'}`}>
+      <section className={`w-full relative bg-black overflow-hidden border-b border-border ${videoCount > 1 ? 'h-auto md:h-[75vh]' : 'h-[75vh]'} min-h-[500px]`}>
+        <div className={`w-full h-full ${getCollageClass()}`}>
+          {displayVideos.map((url, i) => (
+            <div key={`${url}-${i}`} className={`relative overflow-hidden group bg-black border-r border-white/5 last:border-r-0 transition-all duration-1000 ${getItemClass(i)}`}>
                {activeVideoIndices.includes(i) && !videoErrors[i] ? (
-                 <video 
-                   ref={el => videoRefs.current[i] = el}
-                   src={url} preload={i === 0 ? "auto" : "metadata"} autoPlay muted loop playsInline webkit-playsinline="true"
-                   className={`w-full h-full object-cover transition-all opacity-0 duration-[1.5s] ${activeVideoIndices.includes(i) ? 'opacity-90' : ''} group-hover:scale-105 group-hover:opacity-100`}
-                   onError={() => setVideoErrors(p => ({...p, [i]: true}))}
-                 />
+                 <>
+                   <video 
+                     ref={el => videoRefs.current[i] = el}
+                     src={url} preload={i === 0 ? "auto" : "metadata"} autoPlay muted loop playsInline webkit-playsinline="true"
+                     className={`w-full h-full object-cover transition-all opacity-0 duration-[1.5s] ${activeVideoIndices.includes(i) ? 'opacity-80' : ''} group-hover:scale-110 group-hover:opacity-100`}
+                     onError={() => setVideoErrors(p => ({...p, [i]: true}))}
+                   />
+                   <div className="absolute top-10 left-10 z-10 pointer-events-none hidden md:block">
+                      <div className="flex flex-col">
+                        <span className="text-[12px] font-black uppercase tracking-[0.6em] text-white/50 mb-2 font-sans">TR Traders Editorial</span>
+                        <div className="w-16 h-px bg-white/30"></div>
+                      </div>
+                   </div>
+                   <div className="absolute bottom-12 left-12 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-6 group-hover:translate-y-0">
+                      <span className="text-white text-[10px] font-black uppercase tracking-[0.8em] font-sans border border-white/30 px-10 py-5 rounded-full backdrop-blur-xl">View Collection</span>
+                   </div>
+                 </>
                ) : (
                  <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-[#0D1B38]">
                     <VideoIcon className="text-white/5 mb-4 animate-pulse" size={40} />
@@ -99,6 +132,12 @@ const Home = () => {
                )}
             </div>
           ))}
+        </div>
+        
+        {/* SCROLL INDICATOR */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-4 text-white/40 pointer-events-none animate-bounce">
+           <span className="text-[9px] uppercase tracking-[0.5em] font-black">Scroll</span>
+           <div className="w-px h-10 bg-white/20"></div>
         </div>
       </section>
 

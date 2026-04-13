@@ -10,12 +10,35 @@ const Footer = () => {
   });
 
   useEffect(() => {
-    const loadSettings = () => {
+    const loadSettings = async () => {
+      // 1. Load defaults/localStorage first for instant UI
       const savedSettings = localStorage.getItem('tr_traders_settings');
       if (savedSettings) {
         setSettings(prev => ({ ...prev, ...JSON.parse(savedSettings) }));
       }
+
+      // 2. Fetch from Firebase for global sync
+      try {
+        const { db, isMockMode } = await import('../services/firebase');
+        const { doc, getDoc } = await import('firebase/firestore');
+        
+        if (!isMockMode) {
+          const docRef = doc(db, 'settings', 'global');
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            const cloudSettings = {
+              storeName: data.storeName || 'TR TRADERS',
+              whatsappNumber: data.whatsappNumber || '919208275274',
+              address: data.address || 'Shori Cloth Market\nRohtak, Haryana (124001)'
+            };
+            setSettings(cloudSettings);
+            localStorage.setItem('tr_traders_settings', JSON.stringify(cloudSettings));
+          }
+        }
+      } catch (err) { console.error('Settings sync error:', err); }
     };
+
     loadSettings();
     window.addEventListener('settingsUpdated', loadSettings);
     return () => window.removeEventListener('settingsUpdated', loadSettings);

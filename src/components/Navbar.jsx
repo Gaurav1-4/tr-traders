@@ -11,10 +11,39 @@ const Navbar = ({ onOpenWishlist }) => {
   const location = useLocation();
   const { wishlist } = useWishlist();
 
+  const [whatsappNumber, setWhatsappNumber] = useState('919208275274');
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    
+    const loadSettings = async () => {
+      // 1. Local
+      const savedSettings = localStorage.getItem('tr_traders_settings');
+      if (savedSettings) {
+        const parsed = JSON.parse(savedSettings);
+        if (parsed.whatsappNumber) setWhatsappNumber(parsed.whatsappNumber);
+      }
+      // 2. Cloud
+      try {
+        const { db, isMockMode } = await import('../services/firebase');
+        const { doc, getDoc } = await import('firebase/firestore');
+        if (!isMockMode) {
+          const docRef = doc(db, 'settings', 'global');
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists() && docSnap.data().whatsappNumber) {
+            setWhatsappNumber(docSnap.data().whatsappNumber);
+          }
+        }
+      } catch (err) { console.error(err); }
+    };
+    loadSettings();
+    window.addEventListener('settingsUpdated', loadSettings);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('settingsUpdated', loadSettings);
+    };
   }, []);
 
   useEffect(() => {
@@ -61,7 +90,7 @@ const Navbar = ({ onOpenWishlist }) => {
             {/* Right: WhatsApp, Profile, Wishlist */}
             <div className="flex items-center gap-4 w-[140px] justify-end">
               <a 
-                href="https://wa.me/919208275274"
+                href={`https://wa.me/${whatsappNumber}`}
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-text hover:text-whatsapp transition-colors hidden sm:block"

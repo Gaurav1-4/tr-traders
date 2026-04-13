@@ -38,18 +38,6 @@ const AdminProductEdit = () => {
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-[#0D1B38] pb-48 font-sans selection:bg-[#0D1B38] selection:text-white">
-      {/* ===== STUDIO NAV ===== */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[#0D1B38]/5 mb-12">
-         <div className="max-w-7xl mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
-            <div className="flex items-center gap-6">
-               <Link to="/admin/products" className="text-[#0D1B38]/30 hover:text-black transition-colors"><ArrowLeft size={20}/></Link>
-               <h1 className="text-xs font-black uppercase tracking-[0.6em] opacity-30">Designer Specification</h1>
-            </div>
-            <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-widest text-[#0D1B38]/30">
-               <Globe size={12} /> Live Inventory Sync
-            </div>
-         </div>
-      </nav>
 
       <main className="max-w-7xl mx-auto px-6 md:px-12 pt-12 md:pt-20">
          <header className="mb-20">

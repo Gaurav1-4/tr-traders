@@ -12,8 +12,9 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [relatedProducts, setRelatedProducts] = useState([]);
-  const [selectedSize, setSelectedSize] = useState('');
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const [whatsappNumber, setWhatsappNumber] = useState('919208275274');
+  const [storeName, setStoreName] = useState('TR TRADERS');
 
   useEffect(() => {
     const fetchProductData = async () => {
@@ -21,9 +22,29 @@ const ProductDetail = () => {
       try {
         const data = await getProductById(id);
         setProduct(data);
-        if (data?.sizes?.length > 0) setSelectedSize(data.sizes[0]);
         const allProducts = await getProducts();
         setRelatedProducts(allProducts.filter(p => p.category === data?.category && p.id !== id).slice(0, 4));
+
+        // Load Settings
+        const savedSettings = localStorage.getItem('tr_traders_settings');
+        if (savedSettings) {
+          const parsed = JSON.parse(savedSettings);
+          if (parsed.whatsappNumber) setWhatsappNumber(parsed.whatsappNumber);
+          if (parsed.storeName) setStoreName(parsed.storeName);
+        }
+
+        // Cloud sync
+        const { db, isMockMode } = await import('../services/firebase');
+        const { doc, getDoc } = await import('firebase/firestore');
+        if (!isMockMode) {
+          const docRef = doc(db, 'settings', 'global');
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const settingsData = docSnap.data();
+            if (settingsData.whatsappNumber) setWhatsappNumber(settingsData.whatsappNumber);
+            if (settingsData.storeName) setStoreName(settingsData.storeName);
+          }
+        }
       } catch (error) { console.error(error); } 
       finally { setLoading(false); }
     };
@@ -43,8 +64,8 @@ const ProductDetail = () => {
   );
 
   const saved = isInWishlist(product.id);
-  const waMessage = `Hi TR TRADERS! I am interested in your ${product.name} (ID: ${product.id}). Can you provide more details?`;
-  const waUrl = `https://wa.me/919208275274?text=${encodeURIComponent(waMessage)}`;
+  const waMessage = `Hi ${storeName}! I am interested in your ${product.name} (ID: ${product.id}). Can you provide more details?`;
+  const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waMessage)}`;
 
   return (
     <div className="min-h-screen bg-bg pb-32 pt-24 md:pt-40">
@@ -91,21 +112,7 @@ const ProductDetail = () => {
                  {product.description || "A masterfully tailored signature piece from our collection. Blending cultural heritage with modern silhouettes."}
                </p>
 
-               {product.sizes && product.sizes.length > 0 && (
-                 <div className="space-y-6">
-                   <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-[0.4em]">
-                     <span>Designer Fit</span>
-                     <button className="flex items-center gap-2 opacity-30 hover:opacity-100 transition-opacity"><Ruler size={14} /> Size Map</button>
-                   </div>
-                   <div className="flex flex-wrap gap-4">
-                     {product.sizes.map(size => (
-                       <button key={size} onClick={() => setSelectedSize(size)} className={`px-8 py-3 text-[11px] font-black uppercase tracking-widest border transition-all ${selectedSize === size ? 'bg-[#0D1B38] text-white border-[#0D1B38] shadow-2xl' : 'bg-transparent border-[#0D1B38]/10 text-[#0D1B38]/40 hover:border-[#0D1B38]'}`}>
-                         {size}
-                       </button>
-                     ))}
-                   </div>
-                 </div>
-               )}
+               {/* REMOVED SIZE SELECTION AS PRODUCTS ARE UNSTITCHED */}
             </div>
 
             {/* PRIMARY BUSINESS ACTION */}
