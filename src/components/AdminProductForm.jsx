@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   UploadCloud, X, Image as ImageIcon, Tag, DollarSign, 
@@ -7,16 +7,34 @@ import {
 import { useToast } from './Toast';
 import { addProduct, updateProduct } from '../services/productService';
 
-const CATEGORIES = ['Sarees', 'Kurta Sets', 'Suits', 'Unstitched', 'Lehengas', 'Casual', 'Formal', 'Bridal', 'Festive', 'Winter', 'Cotton'];
+const DEFAULT_CATEGORIES = ['Cotton', 'Silk', 'Georgette', 'Chiffon', 'Organza', 'Banarasi', 'Linen', 'Wool', 'Rayon', 'Velvet'];
 
 const AdminProductForm = ({ initialData = null, isEdit = false }) => {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const { db, isMockMode } = await import('../services/firebase');
+        const { doc, getDoc } = await import('firebase/firestore');
+        if (!isMockMode) {
+          const docRef = doc(db, 'settings', 'global');
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists() && docSnap.data().categories && docSnap.data().categories.length > 0) {
+            setCategories(docSnap.data().categories);
+          }
+        }
+      } catch (err) { console.error(err); }
+    };
+    loadCategories();
+  }, []);
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
-    category: initialData?.category || 'Suits',
+    category: initialData?.category || 'Cotton',
     fabric: initialData?.fabric || '',
     description: initialData?.description || '',
     price: initialData?.price || '',
@@ -179,7 +197,7 @@ const AdminProductForm = ({ initialData = null, isEdit = false }) => {
                    <label className="text-[9px] uppercase font-black tracking-widest text-white/30 mb-3 block">Select Category</label>
                    <select name="category" value={formData.category} onChange={handleChange}
                      className="w-full bg-white/5 border border-white/10 px-6 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:bg-white/10 transition-all">
-                      {CATEGORIES.map(c => <option key={c} value={c} className="bg-[#0D1B38] text-white">{c}</option>)}
+                      {categories.map(c => <option key={c} value={c} className="bg-[#0D1B38] text-white">{c}</option>)}
                    </select>
                 </div>
 

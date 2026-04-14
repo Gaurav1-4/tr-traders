@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Settings, Video, Trash2, Plus, Link as LinkIcon, RefreshCcw, ArrowLeft, ArrowRight, Loader2, Globe, Sparkles, Database, Package, XCircle } from 'lucide-react';
+import { Save, Settings, Video, Trash2, Plus, Link as LinkIcon, RefreshCcw, ArrowLeft, ArrowRight, Loader2, Globe, Sparkles, Database, Package, XCircle, Tag } from 'lucide-react';
 import { useToast } from '../../components/Toast';
 import { db, isMockMode } from '../../services/firebase';
 import { doc, getDoc, setDoc, collection, writeBatch } from 'firebase/firestore';
@@ -10,6 +10,8 @@ const DEFAULT_VIDEOS = [
   'https://assets.mixkit.co/videos/preview/mixkit-girl-in-a-traditional-indian-dress-walking-41007-large.mp4',
   'https://assets.mixkit.co/videos/preview/mixkit-woman-showing-off-her-indian-dress-41014-large.mp4',
 ];
+
+const DEFAULT_CATEGORIES = ['Cotton', 'Silk', 'Georgette', 'Chiffon', 'Organza', 'Banarasi', 'Linen', 'Wool', 'Rayon', 'Velvet'];
 
 const AdminSettings = () => {
   const { showToast } = useToast();
@@ -23,6 +25,8 @@ const AdminSettings = () => {
     address: 'Shori Cloth Market\nRohtak, Haryana (124001)'
   });
   const [refreshKey, setRefreshKey] = useState(0);
+  const [categories, setCategories] = useState([...DEFAULT_CATEGORIES]);
+  const [newCategory, setNewCategory] = useState('');
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -34,6 +38,7 @@ const AdminSettings = () => {
           if (docSnap.exists()) {
             const data = docSnap.data();
             if (data.heroVideos) setHeroVideos(data.heroVideos.slice(0, 3));
+            if (data.categories && data.categories.length > 0) setCategories(data.categories);
             setStoreSettings({
               storeName: data.storeName || 'TR TRADERS',
               whatsappNumber: data.whatsappNumber || '919208275274',
@@ -96,6 +101,7 @@ const AdminSettings = () => {
       const docRef = doc(db, 'settings', 'global');
       const payload = { 
         heroVideos: cleaned, 
+        categories: categories.filter(c => c.trim()),
         ...storeSettings,
         updatedAt: new Date().toISOString() 
       };
@@ -211,7 +217,65 @@ const AdminSettings = () => {
                     </div>
                  </div>
                ))}
+         </section>
+
+         {/* CATEGORY MANAGEMENT */}
+         <section className="mb-40">
+            <div className="flex items-center justify-between mb-16 border-b border-[#0D1B38]/5 pb-8">
+               <div className="flex items-center gap-6">
+                  <Tag size={20} className="opacity-10" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#0D1B38]/40">Product Categories (Material Types)</span>
+               </div>
             </div>
+
+            <div className="flex gap-4 mb-10">
+               <input 
+                  type="text" 
+                  value={newCategory} 
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newCategory.trim()) {
+                      e.preventDefault();
+                      if (!categories.includes(newCategory.trim())) {
+                        setCategories(prev => [...prev, newCategory.trim()]);
+                      }
+                      setNewCategory('');
+                    }
+                  }}
+                  placeholder="Type new category name and press Enter"
+                  className="flex-1 bg-transparent border-b border-[#0D1B38]/10 py-4 text-[12px] font-black tracking-widest outline-none focus:border-[#0D1B38] transition-all uppercase placeholder:text-[#0D1B38]/10 placeholder:normal-case placeholder:tracking-normal placeholder:font-normal placeholder:text-[12px]"
+               />
+               <button 
+                  type="button"
+                  onClick={() => {
+                    if (newCategory.trim() && !categories.includes(newCategory.trim())) {
+                      setCategories(prev => [...prev, newCategory.trim()]);
+                      setNewCategory('');
+                    }
+                  }}
+                  className="px-8 py-3 bg-[#0D1B38] text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-black transition-all"
+               >
+                  Add
+               </button>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+               {categories.map((cat, i) => (
+                  <div key={cat} className="flex items-center gap-3 bg-white px-6 py-3 rounded-full border border-[#0D1B38]/10 shadow-sm group hover:border-[#0D1B38]/30 transition-all">
+                     <span className="text-[10px] font-black uppercase tracking-widest text-[#0D1B38]/60">{cat}</span>
+                     <button 
+                        type="button" 
+                        onClick={() => setCategories(prev => prev.filter((_, idx) => idx !== i))}
+                        className="text-[#0D1B38]/10 hover:text-red-500 transition-colors"
+                     >
+                        <XCircle size={14} />
+                     </button>
+                  </div>
+               ))}
+            </div>
+            {categories.length === 0 && (
+               <p className="text-[10px] text-[#0D1B38]/20 mt-4 uppercase font-black tracking-widest">No categories. Type above and press Enter.</p>
+            )}
          </section>
       </main>
     </div>

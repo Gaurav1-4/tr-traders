@@ -12,6 +12,7 @@ const Navbar = ({ onOpenWishlist }) => {
   const { wishlist } = useWishlist();
 
   const [whatsappNumber, setWhatsappNumber] = useState('919208275274');
+  const [navCategories, setNavCategories] = useState(['Cotton', 'Silk', 'Georgette', 'Chiffon', 'Organza']);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -33,6 +34,9 @@ const Navbar = ({ onOpenWishlist }) => {
           const docSnap = await getDoc(docRef);
           if (docSnap.exists() && docSnap.data().whatsappNumber) {
             setWhatsappNumber(docSnap.data().whatsappNumber);
+          }
+          if (docSnap.exists() && docSnap.data().categories && docSnap.data().categories.length > 0) {
+            setNavCategories(docSnap.data().categories.slice(0, 6));
           }
         }
       } catch (err) { console.error(err); }
@@ -117,15 +121,13 @@ const Navbar = ({ onOpenWishlist }) => {
           </div>
         </div>
 
-        {/* Category Nav - will be populated from firebase later */}
+        {/* Category Nav - dynamic from firebase */}
         <nav className="hidden md:block border-t border-border/60">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-center gap-8 lg:gap-12 py-3">
-              <Link to="/catalog?category=Sarees" className="nav-link-jaipur">Sarees</Link>
-              <Link to="/catalog?category=Kurta+Sets" className="nav-link-jaipur">Kurta Sets</Link>
-              <Link to="/catalog?category=Suits" className="nav-link-jaipur">Suits</Link>
-              <Link to="/catalog?category=Unstitched" className="nav-link-jaipur">Unstitched</Link>
-              <Link to="/catalog?category=Lehengas" className="nav-link-jaipur">Lehengas</Link>
+              {navCategories.map(cat => (
+                <Link key={cat} to={`/catalog?category=${encodeURIComponent(cat)}`} className="nav-link-jaipur">{cat}</Link>
+              ))}
             </div>
           </div>
         </nav>

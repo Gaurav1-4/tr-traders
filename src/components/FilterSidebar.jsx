@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, SlidersHorizontal, ChevronUp } from 'lucide-react';
 
-const CATEGORIES = ['All', 'Casual', 'Formal', 'Bridal', 'Festive', 'Winter', 'Cotton'];
+const DEFAULT_CATEGORIES = ['All', 'Cotton', 'Silk', 'Georgette', 'Chiffon', 'Organza', 'Banarasi', 'Linen', 'Wool', 'Rayon', 'Velvet'];
 const FABRICS = ['All', 'Cotton', 'Silk', 'Georgette', 'Chiffon', 'Linen', 'Wool', 'Banarasi'];
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const COLORS = [
@@ -35,6 +35,26 @@ const FilterSection = ({ title, defaultOpen = false, children }) => {
 };
 
 const FilterSidebar = ({ filters, setFilters, isOpen, setIsOpen }) => {
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const { db, isMockMode } = await import('../services/firebase');
+        const { doc, getDoc } = await import('firebase/firestore');
+        if (!isMockMode) {
+          const docRef = doc(db, 'settings', 'global');
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists() && docSnap.data().categories && docSnap.data().categories.length > 0) {
+            setCategories(['All', ...docSnap.data().categories]);
+          }
+        }
+      } catch (err) { console.error(err); }
+    };
+    loadCategories();
+    window.addEventListener('settingsUpdated', loadCategories);
+    return () => window.removeEventListener('settingsUpdated', loadCategories);
+  }, []);
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -90,7 +110,7 @@ const FilterSidebar = ({ filters, setFilters, isOpen, setIsOpen }) => {
       {/* Category */}
       <FilterSection title="Category" defaultOpen={true}>
         <div className="space-y-1">
-          {CATEGORIES.map(cat => (
+          {categories.map(cat => (
             <button
               key={cat}
               onClick={() => handleFilterChange('category', cat)}
