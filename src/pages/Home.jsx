@@ -137,13 +137,25 @@ const Home = () => {
                      <video 
                        ref={el => videoRefs.current[i] = el}
                        src={url} 
-                       preload="auto" 
+                       preload={i === 0 ? "auto" : "metadata"} 
                        autoPlay 
                        muted 
                        loop 
                        playsInline 
+                       style={{ 
+                         transitionDelay: `${i * 200}ms`,
+                         fetchpriority: i === 0 ? "high" : "low"
+                       }}
                        className={`w-full h-full object-cover transition-all duration-[1s] ${isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-105'} group-hover:scale-105`}
-                       onCanPlay={() => !isActive && setActiveVideoIndices(prev => prev.includes(i) ? prev : [...prev, i])}
+                       onCanPlay={() => {
+                         if (!isActive) {
+                            // Small delay for secondary videos to ease CPU/Bandwidth
+                            const delay = i === 0 ? 0 : i * 150;
+                            setTimeout(() => {
+                              setActiveVideoIndices(prev => prev.includes(i) ? prev : [...prev, i]);
+                            }, delay);
+                         }
+                       }}
                        onError={() => setVideoErrors(p => ({...p, [i]: true}))}
                      />
                      
