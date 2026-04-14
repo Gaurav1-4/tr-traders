@@ -17,6 +17,7 @@ import AdminSettings from './pages/admin/AdminSettings';
 import AdminLayout from './components/admin/AdminLayout';
 import { useState, useEffect } from 'react';
 import WishlistModal from './components/WishlistModal';
+import ScrollToTop from './components/ScrollToTop';
 
 import './App.css';
 
@@ -50,6 +51,7 @@ function App() {
   return (
     <ToastProvider>
       <Router>
+        <ScrollToTop />
         <Routes>
           {/* User Routes */}
           <Route element={<UserLayout />}>
