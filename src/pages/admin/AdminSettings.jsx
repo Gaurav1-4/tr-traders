@@ -217,6 +217,7 @@ const AdminSettings = () => {
                     </div>
                  </div>
                ))}
+            </div>
          </section>
 
          {/* CATEGORY MANAGEMENT */}
