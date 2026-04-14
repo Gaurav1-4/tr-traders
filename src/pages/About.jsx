@@ -16,11 +16,11 @@ const About = () => {
         </div>
 
         {/* Storefront Image */}
-        <div className="aspect-video md:aspect-[21/9] bg-surface border border-[#0D1B38]/10 overflow-hidden rounded-[2.5rem] shadow-2xl animate-fade-in">
+        <div className="bg-white border border-[#0D1B38]/5 overflow-hidden rounded-[2.5rem] shadow-2xl animate-fade-in flex items-center justify-center">
           <img 
             src="/images/shop-front.jpg" 
             alt="TR TRADERS Storefront" 
-            className="w-full h-full object-cover"
+            className="w-full h-auto max-h-[600px] object-contain"
           />
         </div>
 
