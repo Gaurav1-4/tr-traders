@@ -14,6 +14,7 @@ const AdminProductForm = ({ initialData = null, isEdit = false }) => {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+  const [fabrics, setFabrics] = useState(['Cotton', 'Silk', 'Georgette']);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -25,6 +26,9 @@ const AdminProductForm = ({ initialData = null, isEdit = false }) => {
           const docSnap = await getDoc(docRef);
           if (docSnap.exists() && docSnap.data().categories && docSnap.data().categories.length > 0) {
             setCategories(docSnap.data().categories);
+          }
+          if (docSnap.exists() && docSnap.data().fabrics && docSnap.data().fabrics.length > 0) {
+            setFabrics(docSnap.data().fabrics);
           }
         }
       } catch (err) { console.error(err); }
@@ -235,10 +239,11 @@ const AdminProductForm = ({ initialData = null, isEdit = false }) => {
 
                 <div className="group">
                    <label className="text-[9px] uppercase font-black tracking-widest text-white/30 mb-3 block">Fabric Type (Material)</label>
-                   <input name="fabric" value={formData.fabric} onChange={handleChange} required
-                      className="w-full bg-white/5 border border-white/10 px-6 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:bg-white/10 transition-all"
-                      placeholder="e.g. Pure Silk / Chiffon"
-                   />
+                   <select name="fabric" value={formData.fabric} onChange={handleChange} required
+                      className="w-full bg-white/5 border border-white/10 px-6 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:bg-white/10 transition-all font-sans">
+                      <option value="" className="bg-[#0D1B38] text-white">Select Fabric</option>
+                      {fabrics.map(f => <option key={f} value={f} className="bg-[#0D1B38] text-white">{f}</option>)}
+                   </select>
                 </div>
               </div>
 

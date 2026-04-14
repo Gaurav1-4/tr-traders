@@ -12,7 +12,6 @@ const COLORS = [
   { name: 'Yellow', value: '#d4a017' },
   { name: 'Black', value: '#1a1a1a' },
   { name: 'White', value: '#f5f0e8' },
-  { name: 'Purple', value: '#7e14ff' },
 ];
 const SORTS = ['Newest First', 'Price Low-High', 'Price High-Low', 'Popular'];
 
@@ -36,6 +35,8 @@ const FilterSection = ({ title, defaultOpen = false, children }) => {
 
 const FilterSidebar = ({ filters, setFilters, isOpen, setIsOpen }) => {
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+  const [fabrics, setFabrics] = useState(FABRICS);
+  const [colors, setColors] = useState(COLORS);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -48,6 +49,13 @@ const FilterSidebar = ({ filters, setFilters, isOpen, setIsOpen }) => {
           if (docSnap.exists() && docSnap.data().categories) {
             const dynamicCats = docSnap.data().categories.filter(c => c.toLowerCase() !== 'all');
             setCategories(['All', ...dynamicCats]);
+          }
+          if (docSnap.exists() && docSnap.data().fabrics) {
+            const dynamicFabs = docSnap.data().fabrics.filter(f => f.toLowerCase() !== 'all');
+            setFabrics(['All', ...dynamicFabs]);
+          }
+          if (docSnap.exists() && docSnap.data().colors) {
+            setColors(docSnap.data().colors);
           }
         }
       } catch (err) { console.error(err); }
@@ -131,7 +139,7 @@ const FilterSidebar = ({ filters, setFilters, isOpen, setIsOpen }) => {
       {/* Color */}
       <FilterSection title="Color">
         <div className="flex flex-wrap gap-3">
-          {COLORS.map(c => (
+          {colors.map(c => (
             <button
               key={c.name}
               title={c.name}
@@ -146,7 +154,7 @@ const FilterSidebar = ({ filters, setFilters, isOpen, setIsOpen }) => {
       {/* Fabric */}
       <FilterSection title="Fabric">
         <div className="space-y-1">
-          {FABRICS.map(fabric => (
+          {fabrics.map(fabric => (
             <button
               key={fabric}
               onClick={() => handleFilterChange('fabric', fabric)}

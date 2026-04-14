@@ -28,6 +28,16 @@ const AdminSettings = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [categories, setCategories] = useState([...DEFAULT_CATEGORIES]);
   const [newCategory, setNewCategory] = useState('');
+  
+  const [fabrics, setFabrics] = useState(['Cotton', 'Silk', 'Georgette', 'Chiffon', 'Organza', 'Linen']);
+  const [newFabric, setNewFabric] = useState('');
+  
+  const [colors, setColors] = useState([
+    { name: 'Red', value: '#8b2252' },
+    { name: 'Blue', value: '#1e40af' },
+    { name: 'Green', value: '#166534' }
+  ]);
+  const [newColor, setNewColor] = useState({ name: '', value: '#000000' });
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -40,6 +50,8 @@ const AdminSettings = () => {
             const data = docSnap.data();
             if (data.heroVideos) setHeroVideos(data.heroVideos.slice(0, 3));
             if (data.categories && data.categories.length > 0) setCategories(data.categories);
+            if (data.fabrics && data.fabrics.length > 0) setFabrics(data.fabrics);
+            if (data.colors && data.colors.length > 0) setColors(data.colors);
             setStoreSettings({
               storeName: data.storeName || 'TR TRADERS',
               whatsappNumber: data.whatsappNumber || '919208275274',
@@ -103,6 +115,8 @@ const AdminSettings = () => {
       const payload = { 
         heroVideos: cleaned, 
         categories: categories.filter(c => c.trim()),
+        fabrics: fabrics.filter(f => f.trim()),
+        colors: colors.filter(c => c.name.trim()),
         ...storeSettings,
         updatedAt: new Date().toISOString() 
       };
@@ -300,6 +314,110 @@ const AdminSettings = () => {
             {categories.length === 0 && (
                <p className="text-xs text-[#0D1B38]/30 mt-4">No categories added yet.</p>
             )}
+         </section>
+
+         {/* FABRIC MANAGEMENT */}
+         <section className="mb-20">
+            <div className="flex items-center gap-3 mb-8 border-b border-[#0D1B38]/5 pb-4">
+               <span className="text-xs font-bold text-[#0D1B38]/50 uppercase tracking-widest">Global Fabrics</span>
+            </div>
+
+            <div className="flex gap-4 mb-10">
+               <input 
+                  type="text" 
+                  value={newFabric} 
+                  onChange={(e) => setNewFabric(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newFabric.trim()) {
+                      e.preventDefault();
+                      if (!fabrics.includes(newFabric.trim())) {
+                        setFabrics(prev => [...prev, newFabric.trim()]);
+                      }
+                      setNewFabric('');
+                    }
+                  }}
+                  placeholder="New fabric name..."
+                  className="flex-1 bg-white border border-[#0D1B38]/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#0D1B38] transition-all"
+               />
+               <button 
+                  type="button"
+                  onClick={() => {
+                    if (newFabric.trim() && !fabrics.includes(newFabric.trim())) {
+                      setFabrics(prev => [...prev, newFabric.trim()]);
+                      setNewFabric('');
+                    }
+                  }}
+                  className="px-6 py-2 bg-[#0D1B38] text-white rounded-lg text-xs font-semibold hover:bg-black transition-all"
+               >
+                  Add
+               </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+               {fabrics.map((fab, i) => (
+                  <div key={fab} className="flex items-center gap-2 bg-[#FAF9F6] px-4 py-2 rounded-lg border border-[#0D1B38]/5 group">
+                     <span className="text-xs font-medium text-[#0D1B38]/80">{fab}</span>
+                     <button 
+                        type="button" 
+                        onClick={() => setFabrics(prev => prev.filter((_, idx) => idx !== i))}
+                        className="text-[#0D1B38]/20 hover:text-red-500 transition-colors"
+                     >
+                        <XCircle size={14} />
+                     </button>
+                  </div>
+               ))}
+            </div>
+         </section>
+
+         {/* COLOR MANAGEMENT */}
+         <section className="mb-20">
+            <div className="flex items-center gap-3 mb-8 border-b border-[#0D1B38]/5 pb-4">
+               <span className="text-xs font-bold text-[#0D1B38]/50 uppercase tracking-widest">Global Colors</span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 mb-10">
+               <input 
+                  type="text" 
+                  value={newColor.name} 
+                  onChange={(e) => setNewColor(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Color name (e.g. Indigo Blue)..."
+                  className="flex-1 bg-white border border-[#0D1B38]/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#0D1B38] transition-all"
+               />
+               <input 
+                  type="color" 
+                  value={newColor.value} 
+                  onChange={(e) => setNewColor(prev => ({ ...prev, value: e.target.value }))}
+                  className="w-20 h-10 p-1 bg-white border border-[#0D1B38]/10 rounded-xl cursor-pointer"
+               />
+               <button 
+                  type="button"
+                  onClick={() => {
+                    if (newColor.name.trim()) {
+                      setColors(prev => [...prev, { ...newColor }]);
+                      setNewColor({ name: '', value: '#000000' });
+                    }
+                  }}
+                  className="px-8 py-2 bg-[#0D1B38] text-white rounded-lg text-xs font-semibold hover:bg-black transition-all"
+               >
+                  Add Color
+               </button>
+            </div>
+
+            <div className="flex flex-wrap gap-6">
+               {colors.map((col, i) => (
+                  <div key={`${col.name}-${i}`} className="flex items-center gap-4 bg-white px-5 py-3 rounded-2xl border border-[#0D1B38]/5 shadow-sm group">
+                     <div className="w-6 h-6 rounded-full border border-black/5" style={{ backgroundColor: col.value }} />
+                     <span className="text-xs font-bold text-[#0D1B38]/60 uppercase tracking-widest">{col.name}</span>
+                     <button 
+                        type="button" 
+                        onClick={() => setColors(prev => prev.filter((_, idx) => idx !== i))}
+                        className="text-[#0D1B38]/10 hover:text-red-500 transition-colors"
+                     >
+                        <Trash2 size={14} />
+                     </button>
+                  </div>
+               ))}
+            </div>
          </section>
       </main>
     </div>
