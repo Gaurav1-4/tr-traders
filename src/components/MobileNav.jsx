@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Search, Heart, MessageCircle, User } from 'lucide-react';
+import { Home, Search, Heart, MessageCircle } from 'lucide-react';
 import { useWishlist } from '../hooks/useWishlist'; // Will create this later
 
 const MobileNav = () => {
@@ -49,11 +49,6 @@ const MobileNav = () => {
       path: '#', // Handled via modal or page
       icon: Heart, 
       action: 'wishlist' 
-    },
-    { 
-      name: 'Account', 
-      path: '/admin/login', 
-      icon: User,
     },
     { 
       name: 'WhatsApp', 
