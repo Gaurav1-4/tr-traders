@@ -97,123 +97,121 @@ const AdminProductForm = ({ initialData = null, isEdit = false }) => {
 
       <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row gap-20 animate-fade-in pb-48">
         {/* Main Panel */}
-        <div className="flex-1 space-y-20">
-          <div className="bg-white p-12 md:p-20 rounded-[3rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.05)] border border-[#0D1B38]/5 relative overflow-hidden">
-             <div className="absolute top-0 left-0 w-2 h-full bg-primary opacity-20"></div>
-             <div className="mb-16 border-b border-[#0D1B38]/5 pb-8">
-                <span className="text-[10px] font-black tracking-[0.4em] text-[#0D1B38]/20 uppercase">Core Specification</span>
-             </div>
+        <div className="flex-1 space-y-12">
+          <div className="bg-white p-10 md:p-16 rounded-[2.5rem] shadow-xl border border-[#0D1B38]/5 relative overflow-hidden">
+             <div className="absolute top-0 left-0 w-1.5 h-full bg-[#0D1B38] opacity-10"></div>
              
-             <div className="space-y-16">
-                <div className="relative group">
-                   <label className="text-[9px] uppercase font-black tracking-[0.4em] text-[#0D1B38]/20 mb-4 block">Design Title</label>
+             <div className="space-y-12">
+                <div className="relative">
+                   <label className="text-[10px] uppercase font-black tracking-widest text-[#0D1B38]/40 mb-3 block">Product Name</label>
                    <input 
                       required name="name" value={formData.name} onChange={handleChange}
-                      className="w-full bg-transparent border-b border-[#0D1B38]/10 py-6 text-2xl md:text-4xl font-serif italic outline-none focus:border-[#0D1B38] transition-all placeholder:text-[#0D1B38]/5"
-                      placeholder="Enter Signature Name..."
+                      className="w-full bg-[#FAF9F6] px-6 py-4 rounded-xl text-xl font-serif italic outline-none border border-transparent focus:border-[#0D1B38]/10 transition-all"
+                      placeholder="e.g. Royal Blue Banarasi Saree"
                    />
                 </div>
 
-                <div className="relative group">
-                   <label className="text-[9px] uppercase font-black tracking-[0.4em] text-[#0D1B38]/20 mb-4 block">Craftsmanship Narrative</label>
+                <div className="relative">
+                   <label className="text-[10px] uppercase font-black tracking-widest text-[#0D1B38]/40 mb-3 block">Description / Product Story</label>
                    <textarea 
-                      required name="description" rows="5" value={formData.description} onChange={handleChange}
-                      className="w-full bg-transparent border-b border-[#0D1B38]/10 py-6 text-[15px] font-light tracking-wide leading-relaxed outline-none focus:border-[#0D1B38] transition-all placeholder:text-[#0D1B38]/5 resize-none"
-                      placeholder="Describe the heritage journey of this piece..."
+                      required name="description" rows="4" value={formData.description} onChange={handleChange}
+                      className="w-full bg-[#FAF9F6] px-6 py-4 rounded-xl text-[14px] font-light leading-relaxed outline-none border border-transparent focus:border-[#0D1B38]/10 transition-all resize-none"
+                      placeholder="Tell the story of this dress... what makes it special?"
                    />
                 </div>
              </div>
           </div>
 
-          {/* Exhibition Stills */}
-          <div className="bg-white p-12 md:p-20 rounded-[3rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.05)] border border-[#0D1B38]/5">
-             <div className="mb-16 flex items-center justify-between border-b border-[#0D1B38]/5 pb-8">
-                <span className="text-[10px] font-black tracking-[0.4em] text-[#0D1B38]/20 uppercase">Exhibition Stills</span>
-                <ImageIcon className="opacity-10" size={20} />
+          {/* Photos/Videos */}
+          <div className="bg-white p-10 md:p-16 rounded-[2.5rem] shadow-xl border border-[#0D1B38]/5">
+             <div className="mb-10 flex items-center justify-between">
+                <span className="text-[10px] font-black tracking-widest text-[#0D1B38]/40 uppercase">Product Media (Images or Videos)</span>
+                <ImageIcon className="opacity-10" size={18} />
              </div>
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {formData.images.map((url, idx) => (
-                  <div key={idx} className="space-y-8">
-                     <div className="aspect-[3/4] bg-[#FAF9F6] rounded-[2rem] overflow-hidden shadow-2xl border border-[#0D1B38]/5 relative group transition-all duration-700 hover:-translate-y-4">
+                  <div key={idx} className="space-y-4">
+                     <div className="aspect-[3/4] bg-[#FAF9F6] rounded-2xl overflow-hidden border border-[#0D1B38]/5 relative group">
                         {url ? (
                           <>
                              {url.toLowerCase().includes('mp4') || url.toLowerCase().includes('webm') || url.toLowerCase().includes('dropbox.com') ? (
                                <video src={url} key={url} autoPlay muted loop playsInline className="w-full h-full object-cover" />
                              ) : (
-                               <img src={url} alt={`Still ${idx+1}`} className="w-full h-full object-cover" />
+                               <img src={url} alt="Preview" className="w-full h-full object-cover" />
                              )}
-                             <button type="button" onClick={() => handleImageUrlChange(idx, '')} className="absolute top-6 right-6 text-white opacity-0 group-hover:opacity-100 transition-opacity bg-[#0D1B38] p-2 rounded-full shadow-2xl"><X size={14}/></button>
+                             <button type="button" onClick={() => handleImageUrlChange(idx, '')} className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black transition-colors"><X size={12}/></button>
                           </>
                         ) : (
-                          <div className="w-full h-full flex flex-col items-center justify-center p-10 text-center">
-                             <UploadCloud className="text-[#0D1B38]/5 mb-6" size={32} />
-                             <span className="text-[8px] uppercase font-black tracking-[0.4em] text-[#0D1B38]/20">Empty Reel</span>
+                          <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center group-hover:bg-[#0D1B38]/5 transition-colors">
+                             <UploadCloud className="opacity-10 mb-2" size={24} />
+                             <span className="text-[8px] uppercase font-black tracking-widest opacity-20">Slot {idx+1} Empty</span>
                           </div>
                         )}
                      </div>
                      <input 
                         type="url" value={url} onChange={(e) => handleImageUrlChange(idx, e.target.value)}
-                        placeholder="PASTE URL"
-                        className="w-full bg-transparent border-b border-[#0D1B38]/10 py-4 text-[9px] font-black tracking-[0.2em] outline-none focus:border-[#0D1B38] transition-all uppercase placeholder:text-[#0D1B38]/10"
+                        placeholder="PASTE LINK HERE"
+                        className="w-full bg-[#FAF9F6] px-4 py-3 rounded-xl text-[9px] font-black tracking-widest outline-none border border-transparent focus:border-[#0D1B38]/10 transition-all"
                      />
                   </div>
                 ))}
              </div>
+             <p className="text-[8px] text-[#0D1B38]/20 mt-6 uppercase font-black tracking-widest text-center">Tip: Use Dropbox links ending in ?raw=1 for best results</p>
           </div>
         </div>
 
         {/* Side Panel */}
-        <div className="w-full lg:w-[400px] space-y-12">
-           <div className="bg-[#0D1B38] p-12 rounded-[3rem] text-white shadow-2xl space-y-16 sticky top-12 border border-white/5">
+        <div className="w-full lg:w-[380px] space-y-8">
+           <div className="bg-[#0D1B38] p-10 rounded-[2.5rem] text-white shadow-2xl space-y-12">
               <div>
-                 <label className="text-[9px] uppercase font-black tracking-[0.4em] text-white/30 mb-6 block">Asset Valuation</label>
-                 <div className="flex items-center gap-6 border-b border-white/10 pb-6 focus-within:border-white transition-colors">
-                    <span className="text-3xl font-serif text-white/20 italic">₹</span>
+                 <label className="text-[9px] uppercase font-black tracking-widest text-white/30 mb-4 block">Price (Rupees)</label>
+                 <div className="flex items-center gap-4 border-b border-white/10 pb-4">
+                    <span className="text-2xl font-serif text-white/20 italic">₹</span>
                     <input type="number" name="price" value={formData.price} onChange={handleChange}
-                      className="w-full bg-transparent text-4xl font-serif outline-none placeholder:text-white/5 italic"
-                      placeholder="PoA"
+                      className="w-full bg-transparent text-3xl font-serif outline-none placeholder:text-white/5"
+                      placeholder="0.00"
                     />
                  </div>
               </div>
 
-              <div className="space-y-10">
+              <div className="space-y-8">
                 <div className="group">
-                   <label className="text-[9px] uppercase font-black tracking-[0.4em] text-white/30 mb-4 block">Vault Category</label>
+                   <label className="text-[9px] uppercase font-black tracking-widest text-white/30 mb-3 block">Select Category</label>
                    <select name="category" value={formData.category} onChange={handleChange}
-                     className="w-full bg-white/5 border border-white/10 px-8 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none focus:bg-white/10 transition-all appearance-none">
+                     className="w-full bg-white/5 border border-white/10 px-6 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:bg-white/10 transition-all">
                       {CATEGORIES.map(c => <option key={c} value={c} className="bg-[#0D1B38] text-white">{c}</option>)}
                    </select>
                 </div>
 
                 <div className="group">
-                   <label className="text-[9px] uppercase font-black tracking-[0.4em] text-white/30 mb-4 block">Fabric Heritage</label>
+                   <label className="text-[9px] uppercase font-black tracking-widest text-white/30 mb-3 block">Fabric Type (Material)</label>
                    <input name="fabric" value={formData.fabric} onChange={handleChange} required
-                      className="w-full bg-white/5 border border-white/10 px-8 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none focus:bg-white/10 transition-all"
-                      placeholder="E.G. PURE SILK"
+                      className="w-full bg-white/5 border border-white/10 px-6 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:bg-white/10 transition-all"
+                      placeholder="e.g. Pure Silk / Chiffon"
                    />
                 </div>
               </div>
 
-              <div className="pt-8 border-t border-white/10 space-y-8">
+              <div className="pt-6 border-t border-white/10">
                  <label className="flex items-center justify-between cursor-pointer group">
-                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-white/40 group-hover:text-white transition-colors">Showcase Highlight</span>
-                    <div className={`w-14 h-7 rounded-full transition-all relative ${formData.featured ? 'bg-primary shadow-[0_0_20px_rgba(126,20,255,0.4)]' : 'bg-white/10'}`}>
-                       <div className={`absolute top-1 w-5 h-5 rounded-full transition-all shadow-xl ${formData.featured ? 'left-8 bg-white' : 'left-1 bg-white/20'}`} />
+                    <span className="text-[9px] font-black uppercase tracking-widest text-white/40 group-hover:text-white transition-colors">Show on Home Page?</span>
+                    <div className={`w-12 h-6 rounded-full transition-all relative ${formData.featured ? 'bg-white' : 'bg-white/10'}`}>
+                       <div className={`absolute top-1 w-4 h-4 rounded-full transition-all ${formData.featured ? 'left-7 bg-[#0D1B38]' : 'left-1 bg-white/20'}`} />
                        <input type="checkbox" name="featured" checked={formData.featured} onChange={handleChange} className="hidden" />
                     </div>
                  </label>
               </div>
 
-              <div className="pt-10 flex flex-col gap-6">
+              <div className="pt-8 flex flex-col gap-4">
                  <button type="submit" disabled={loading}
-                   className="w-full bg-white text-[#0D1B38] py-8 rounded-full text-[12px] font-black uppercase tracking-[0.4em] shadow-2xl hover:-translate-y-2 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4">
-                    {loading ? <Loader2 size={24} className="animate-spin" /> : (
+                   className="w-full bg-white text-[#0D1B38] py-6 rounded-xl text-[11px] font-black uppercase tracking-widest shadow-xl hover:-translate-y-1 transition-all disabled:opacity-50 flex items-center justify-center gap-3">
+                    {loading ? <Loader2 size={18} className="animate-spin" /> : (
                       <>
-                         Publish Piece <Check size={20} />
+                         Save & Publish <Check size={16} />
                       </>
                     )}
                  </button>
-                 <button type="button" onClick={() => navigate('/admin/products')} className="w-full py-4 text-[9px] font-black uppercase tracking-[0.4em] text-white/20 hover:text-red-400 transition-colors">Discard Edition</button>
+                 <button type="button" onClick={() => navigate('/admin/products')} className="w-full py-2 text-[9px] font-black uppercase tracking-widest text-white/20 hover:text-red-400 transition-colors">Cancel</button>
               </div>
            </div>
         </div>
