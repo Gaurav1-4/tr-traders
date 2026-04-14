@@ -72,7 +72,11 @@ const Catalog = () => {
     }
 
     if (filters.color !== 'All') {
-      result = result.filter(p => p.colors && p.colors.some(c => c.toLowerCase() === filters.color.toLowerCase()));
+      result = result.filter(p => 
+        p.colors && p.colors.some(c => 
+          c.toLowerCase().includes(filters.color.toLowerCase())
+        )
+      );
     }
 
     switch (filters.sort) {
