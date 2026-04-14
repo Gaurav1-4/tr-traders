@@ -45,8 +45,9 @@ const FilterSidebar = ({ filters, setFilters, isOpen, setIsOpen }) => {
         if (!isMockMode) {
           const docRef = doc(db, 'settings', 'global');
           const docSnap = await getDoc(docRef);
-          if (docSnap.exists() && docSnap.data().categories && docSnap.data().categories.length > 0) {
-            setCategories(['All', ...docSnap.data().categories]);
+          if (docSnap.exists() && docSnap.data().categories) {
+            const dynamicCats = docSnap.data().categories.filter(c => c.toLowerCase() !== 'all');
+            setCategories(['All', ...dynamicCats]);
           }
         }
       } catch (err) { console.error(err); }
@@ -124,19 +125,7 @@ const FilterSidebar = ({ filters, setFilters, isOpen, setIsOpen }) => {
         </div>
       </FilterSection>
 
-      {/* Size */}
-      <FilterSection title="Size">
-        <div className="flex flex-wrap gap-2">
-          {SIZES.map(size => (
-            <button
-              key={size}
-              className="size-pill-filter"
-            >
-              {size}
-            </button>
-          ))}
-        </div>
-      </FilterSection>
+      {/* Size filter removed as requested because items are unstitched */}
 
       {/* Color */}
       <FilterSection title="Color">
