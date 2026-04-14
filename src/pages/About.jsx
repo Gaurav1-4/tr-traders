@@ -15,11 +15,11 @@ const About = () => {
           <p className="font-accent italic text-xl md:text-2xl text-primary">Stitching traditions since 1995</p>
         </div>
 
-        {/* Image / Banner */}
-        <div className="aspect-[21/9] bg-surface border border-border overflow-hidden rounded-xl shadow-sm md:aspect-[3/1]">
+        {/* Storefront Image */}
+        <div className="aspect-video md:aspect-[21/9] bg-surface border border-[#0D1B38]/10 overflow-hidden rounded-[2.5rem] shadow-2xl animate-fade-in">
           <img 
-            src="https://images.unsplash.com/photo-1596462502278-27bf85033e5a?auto=format&fit=crop&q=80&w=2000" 
-            alt="Hand embroidery" 
+            src="/images/shop-front.jpg" 
+            alt="TR TRADERS Storefront" 
             className="w-full h-full object-cover"
           />
         </div>
