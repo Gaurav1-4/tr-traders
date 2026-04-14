@@ -9,7 +9,8 @@ import {
   Eye, 
   ShoppingCart,
   MessageCircle,
-  ChevronRight
+  ChevronRight,
+  Database
 } from 'lucide-react';
 import { getProducts } from '../../services/productService';
 
