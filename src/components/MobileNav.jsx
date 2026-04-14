@@ -44,12 +44,7 @@ const MobileNav = () => {
 
   const navItems = [
     { name: 'Home', path: '/', icon: Home },
-    { name: 'Search', path: '/catalog', icon: Search },
-    { 
-      name: 'Account', 
-      path: '/admin/login', 
-      icon: User
-    },
+    { name: 'Collections', path: '/catalog', icon: Search },
     { 
       name: 'Saved', 
       path: '#',

@@ -125,67 +125,60 @@ const AdminSettings = () => {
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-[#0D1B38] pb-48 font-sans selection:bg-[#0D1B38] selection:text-white">
 
-      <main className="max-w-7xl mx-auto px-10">
-         <header className="mb-24 flex flex-col md:flex-row md:items-end justify-between gap-12">
+      <main className="max-w-7xl mx-auto px-10 pt-10 md:pt-16 uppercase-none">
+         <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div className="max-w-2xl">
-               <h2 className="text-4xl md:text-6xl font-serif font-light tracking-tighter mb-6">Studio Defaults</h2>
-               <div className="w-16 h-px bg-[#0D1B38]/20 mb-6"></div>
-               <p className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] font-black text-[#0D1B38]/30">
-                  Manage your visual presence and showcase video gallery.
-               </p>
+               <h2 className="text-3xl font-bold text-[#0D1B38] mb-2">Store Settings</h2>
+               <p className="text-sm font-medium text-[#0D1B38]/40">Manage your visual content and store information.</p>
             </div>
             
             <div className="flex justify-end">
-               <button onClick={handleSave} disabled={loading} className="bg-[#0D1B38] text-white px-10 py-5 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-black transition-all shadow-xl disabled:opacity-30">
-                  {loading ? <Loader2 size={24} className="animate-spin" /> : 'Save Exhibition'}
+               <button onClick={handleSave} disabled={loading} className="bg-[#0D1B38] text-white px-8 py-3.5 rounded-xl text-sm font-semibold hover:bg-black transition-all shadow-md disabled:opacity-30">
+                  {loading ? <Loader2 size={24} className="animate-spin" /> : 'Save Changes'}
                </button>
             </div>
          </header>
 
          {/* STUDIO INFORMATION */}
          <section className="mb-40">
-            <div className="flex items-center gap-6 mb-16 border-b border-[#0D1B38]/5 pb-8">
-               <Sparkles size={20} className="opacity-10" />
-               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#0D1B38]/40">Studio Information</span>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-               <div className="space-y-12">
-                  <div className="group">
-                     <label className="text-[9px] uppercase font-black tracking-[0.4em] text-[#0D1B38]/20 mb-4 block">Store Name</label>
-                     <input 
-                        type="text" name="storeName" value={storeSettings.storeName} onChange={handleStoreSettingChange}
-                        className="w-full bg-transparent border-b border-[#0D1B38]/10 py-4 text-xl font-serif italic outline-none focus:border-[#0D1B38] transition-all"
-                     />
-                  </div>
-                  <div className="group">
-                     <label className="text-[9px] uppercase font-black tracking-[0.4em] text-[#0D1B38]/20 mb-4 block">WhatsApp Number (e.g. 919208275274)</label>
-                     <input 
-                        type="text" name="whatsappNumber" value={storeSettings.whatsappNumber} onChange={handleStoreSettingChange}
-                        className="w-full bg-transparent border-b border-[#0D1B38]/10 py-4 text-xl font-serif italic outline-none focus:border-[#0D1B38] transition-all"
-                     />
-                  </div>
-               </div>
-               <div className="group">
-                  <label className="text-[9px] uppercase font-black tracking-[0.4em] text-[#0D1B38]/20 mb-4 block">Studio Address</label>
-                  <textarea 
-                     name="address" rows="5" value={storeSettings.address} onChange={handleStoreSettingChange}
-                     className="w-full bg-transparent border-b border-[#0D1B38]/10 py-4 text-xl font-serif italic outline-none focus:border-[#0D1B38] transition-all resize-none"
-                  />
-               </div>
-            </div>
-         </section>
+          <div className="flex items-center gap-3 mb-8 border-b border-[#0D1B38]/5 pb-4">
+             <span className="text-xs font-bold text-[#0D1B38]/50 uppercase tracking-widest">Store Information</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+             <div className="space-y-6">
+                <div>
+                   <label className="text-[10px] font-bold text-[#0D1B38]/30 uppercase tracking-widest mb-2 block">Store Name</label>
+                   <input 
+                      type="text" name="storeName" value={storeSettings.storeName} onChange={handleStoreSettingChange}
+                      className="w-full bg-white border border-[#0D1B38]/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#0D1B38] transition-all"
+                   />
+                </div>
+                <div>
+                   <label className="text-[10px] font-bold text-[#0D1B38]/30 uppercase tracking-widest mb-2 block">WhatsApp (e.g. 919208275274)</label>
+                   <input 
+                      type="text" name="whatsappNumber" value={storeSettings.whatsappNumber} onChange={handleStoreSettingChange}
+                      className="w-full bg-white border border-[#0D1B38]/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#0D1B38] transition-all"
+                   />
+                </div>
+             </div>
+             <div>
+                <label className="text-[10px] font-bold text-[#0D1B38]/30 uppercase tracking-widest mb-2 block">Store Address</label>
+                <textarea 
+                   name="address" rows="5" value={storeSettings.address} onChange={handleStoreSettingChange}
+                   className="w-full bg-white border border-[#0D1B38]/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#0D1B38] transition-all resize-none"
+                />
+             </div>
+          </div>
+       </section>
 
-         {/* VIDEO SLOTS */}
-         <section className="mb-40">
-            <div className="flex items-center justify-between mb-16 border-b border-[#0D1B38]/5 pb-8">
-               <div className="flex items-center gap-6">
-                  <Video size={20} className="opacity-10" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#0D1B38]/40">Video Feed</span>
-               </div>
-               <button onClick={addVideoSlot} className="text-[9px] font-black uppercase tracking-widest border border-[#0D1B38]/10 py-3 px-8 rounded-full hover:bg-[#0D1B38] hover:text-white transition-all shadow-sm">
-                  Add Video Slot
-               </button>
-            </div>
+       {/* VIDEO SLOTS */}
+       <section className="mb-20">
+          <div className="flex items-center justify-between mb-8 border-b border-[#0D1B38]/5 pb-4">
+             <span className="text-xs font-bold text-[#0D1B38]/50 uppercase tracking-widest">Home Page Videos</span>
+             <button onClick={addVideoSlot} className="text-[10px] font-bold uppercase tracking-widest bg-white border border-[#0D1B38]/10 py-2 px-6 rounded-lg hover:bg-[#FAF9F6] transition-all">
+                Add Video
+             </button>
+          </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-y-24">
                {heroVideos.map((url, i) => (
@@ -221,12 +214,9 @@ const AdminSettings = () => {
          </section>
 
          {/* CATEGORY MANAGEMENT */}
-         <section className="mb-40">
-            <div className="flex items-center justify-between mb-16 border-b border-[#0D1B38]/5 pb-8">
-               <div className="flex items-center gap-6">
-                  <Tag size={20} className="opacity-10" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#0D1B38]/40">Product Categories (Material Types)</span>
-               </div>
+         <section className="mb-20">
+            <div className="flex items-center gap-3 mb-8 border-b border-[#0D1B38]/5 pb-4">
+               <span className="text-xs font-bold text-[#0D1B38]/50 uppercase tracking-widest">Product Categories</span>
             </div>
 
             <div className="flex gap-4 mb-10">
@@ -243,8 +233,8 @@ const AdminSettings = () => {
                       setNewCategory('');
                     }
                   }}
-                  placeholder="Type new category name and press Enter"
-                  className="flex-1 bg-transparent border-b border-[#0D1B38]/10 py-4 text-[12px] font-black tracking-widest outline-none focus:border-[#0D1B38] transition-all uppercase placeholder:text-[#0D1B38]/10 placeholder:normal-case placeholder:tracking-normal placeholder:font-normal placeholder:text-[12px]"
+                  placeholder="New category name..."
+                  className="flex-1 bg-white border border-[#0D1B38]/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#0D1B38] transition-all"
                />
                <button 
                   type="button"
@@ -254,20 +244,20 @@ const AdminSettings = () => {
                       setNewCategory('');
                     }
                   }}
-                  className="px-8 py-3 bg-[#0D1B38] text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-black transition-all"
+                  className="px-6 py-2 bg-[#0D1B38] text-white rounded-lg text-xs font-semibold hover:bg-black transition-all"
                >
                   Add
                </button>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
                {categories.map((cat, i) => (
-                  <div key={cat} className="flex items-center gap-3 bg-white px-6 py-3 rounded-full border border-[#0D1B38]/10 shadow-sm group hover:border-[#0D1B38]/30 transition-all">
-                     <span className="text-[10px] font-black uppercase tracking-widest text-[#0D1B38]/60">{cat}</span>
+                  <div key={cat} className="flex items-center gap-2 bg-[#FAF9F6] px-4 py-2 rounded-lg border border-[#0D1B38]/5 group">
+                     <span className="text-xs font-medium text-[#0D1B38]/80">{cat}</span>
                      <button 
                         type="button" 
                         onClick={() => setCategories(prev => prev.filter((_, idx) => idx !== i))}
-                        className="text-[#0D1B38]/10 hover:text-red-500 transition-colors"
+                        className="text-[#0D1B38]/20 hover:text-red-500 transition-colors"
                      >
                         <XCircle size={14} />
                      </button>
@@ -275,7 +265,7 @@ const AdminSettings = () => {
                ))}
             </div>
             {categories.length === 0 && (
-               <p className="text-[10px] text-[#0D1B38]/20 mt-4 uppercase font-black tracking-widest">No categories. Type above and press Enter.</p>
+               <p className="text-xs text-[#0D1B38]/30 mt-4">No categories added yet.</p>
             )}
          </section>
       </main>

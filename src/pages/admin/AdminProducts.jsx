@@ -8,13 +8,9 @@ const AdminProducts = () => {
 
       <main className="max-w-7xl mx-auto px-6 md:px-12 pt-12 md:pt-20">
          
-         {/* ===== INTRODUCTION ===== */}
-         <header className="mb-10 md:mb-20">
-            <h2 className="text-4xl md:text-8xl font-serif font-light tracking-tighter mb-4 md:mb-6 italic leading-none">Exhibition Vault</h2>
-            <div className="w-16 md:w-24 h-px bg-[#0D1B38]/20 mb-6 md:mb-8"></div>
-            <p className="max-w-2xl text-[9px] md:text-[11px] uppercase tracking-[0.4em] font-black leading-loose text-[#0D1B38]/30">
-               Signature Pieces Registry
-            </p>
+         <header className="mb-12">
+            <h2 className="text-3xl font-bold text-[#0D1B38] mb-2">Products Portfolio</h2>
+            <p className="text-sm font-medium text-[#0D1B38]/40">Manage your collection and inventory status.</p>
          </header>
 
          {/* ===== PRODUCT TABLE AREA ===== */}
@@ -22,19 +18,12 @@ const AdminProducts = () => {
             <AdminProductTable />
          </section>
 
-         {/* ===== FOOTER METADATA ===== */}
-         <footer className="mt-40 pt-20 border-t border-[#0D1B38]/5 flex flex-col md:flex-row md:items-center justify-between gap-8 text-[#0D1B38]/20">
-            <div className="flex items-center gap-12">
-               <div className="flex flex-col gap-2">
-                  <span className="text-[8px] uppercase tracking-[0.4em] font-black">Architecture</span>
-                  <span className="text-[10px] font-serif italic">Global Inventory Native</span>
-               </div>
-               <div className="flex flex-col gap-2">
-                  <span className="text-[8px] uppercase tracking-[0.4em] font-black">Asset Status</span>
-                  <span className="text-[10px] font-serif italic text-green-800/40">Secure & Verified</span>
-               </div>
+         <footer className="mt-20 pt-10 border-t border-[#0D1B38]/5 flex flex-col md:flex-row md:items-center justify-between gap-6 text-[#0D1B38]/30">
+            <div className="flex flex-col">
+               <span className="text-[10px] font-bold uppercase tracking-widest mb-1">Status</span>
+               <span className="text-xs font-medium text-green-700/60">System Online</span>
             </div>
-            <p className="text-[9px] uppercase tracking-[0.4em] font-black text-right">Heritage Vault Management © 2026</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest">TR TRADERS Admin © 2026</p>
          </footer>
       </main>
     </div>
