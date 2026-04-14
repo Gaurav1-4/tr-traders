@@ -20,6 +20,7 @@ const Catalog = () => {
   const [filters, setFilters] = useState({
     category: searchParams.get('category') || 'All',
     fabric: 'All',
+    color: 'All',
     sort: 'Newest First'
   });
 
@@ -68,6 +69,10 @@ const Catalog = () => {
 
     if (filters.fabric !== 'All') {
       result = result.filter(p => p.fabric?.toLowerCase() === filters.fabric.toLowerCase());
+    }
+
+    if (filters.color !== 'All') {
+      result = result.filter(p => p.colors && p.colors.some(c => c.toLowerCase() === filters.color.toLowerCase()));
     }
 
     switch (filters.sort) {
@@ -139,7 +144,7 @@ const Catalog = () => {
             ) : (
               <div className="py-48 text-center bg-white border border-dashed border-[#0D1B38]/5 rounded-[4rem]">
                 <h3 className="text-3xl font-serif italic mb-6">No pieces match your search</h3>
-                <button onClick={() => { setSearchQuery(''); setFilters({ category: 'All', fabric: 'All', sort: 'Newest First' }); }} className="text-[10px] font-black uppercase tracking-[0.4em] bg-[#0D1B38] text-white px-12 py-4 shadow-2xl transition-all active:scale-95">Reset Exhibition</button>
+                <button onClick={() => { setSearchQuery(''); setFilters({ category: 'All', fabric: 'All', color: 'All', sort: 'Newest First' }); }} className="text-[10px] font-black uppercase tracking-[0.4em] bg-[#0D1B38] text-white px-12 py-4 shadow-2xl transition-all active:scale-95">Reset Exhibition</button>
               </div>
             )}
           </div>

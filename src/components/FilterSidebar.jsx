@@ -65,6 +65,7 @@ const FilterSidebar = ({ filters, setFilters, isOpen, setIsOpen }) => {
     setFilters({
       category: 'All',
       fabric: 'All',
+      color: 'All',
       sort: 'Newest First'
     });
   };
@@ -134,7 +135,8 @@ const FilterSidebar = ({ filters, setFilters, isOpen, setIsOpen }) => {
             <button
               key={c.name}
               title={c.name}
-              className="filter-color-swatch"
+              onClick={() => handleFilterChange('color', filters.color === c.name ? 'All' : c.name)}
+              className={`filter-color-swatch ring-offset-2 transition-all ${filters.color === c.name ? 'ring-2 ring-[#0D1B38] scale-110' : 'hover:scale-110'}`}
               style={{ backgroundColor: c.value, border: c.name === 'White' ? '1px solid #d4c5b0' : undefined }}
             />
           ))}
