@@ -98,7 +98,7 @@ const Navbar = ({ onOpenWishlist }) => {
               >
                 <MessageCircle size={20} strokeWidth={1.5} />
               </a>
-              <Link to="/admin/login" className="text-text hover:text-primary transition-colors hidden sm:block" aria-label="Account">
+              <Link to="/admin/login" className="text-text hover:text-primary transition-colors" aria-label="Account">
                 <User size={20} strokeWidth={1.5} />
               </Link>
               <button 
