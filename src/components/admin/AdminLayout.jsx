@@ -40,24 +40,23 @@ const AdminLayout = () => {
               <X size={24} />
             </button>
           </div>
-          <nav className="p-10 space-y-4 flex-grow overflow-y-auto no-scrollbar">
-            <div className="mb-10 text-[9px] uppercase font-black tracking-[0.4em] text-white/20">Navigation</div>
+          <nav className="p-6 space-y-2 flex-grow overflow-y-auto no-scrollbar">
+            <div className="mb-6 text-[10px] uppercase font-semibold tracking-widest text-white/30 px-4">Menu</div>
             {navItems.map((item) => (
               <NavLink
                 key={item.name}
                 to={item.path}
                 end
                 onClick={() => setIsSidebarOpen(false)}
-                className={({ isActive }) => `flex items-center gap-6 px-6 py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${isActive ? 'bg-white text-[#0D1B38] shadow-[0_20px_40px_-10px_rgba(0,0,0,0.3)] scale-105' : 'text-white/30 hover:bg-white/5 hover:text-white hover:translate-x-2'}`}
+                className={({ isActive }) => `flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium transition-all duration-300 ${isActive ? 'bg-white text-[#0D1B38] shadow-lg' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
               >
-                <div className="opacity-40">{item.icon}</div>
+                {item.icon}
                 {item.name}
               </NavLink>
             ))}
           </nav>
-          <div className="p-10 border-t border-white/5 space-y-6">
-            <div className="text-[8px] uppercase tracking-[0.4em] text-white/10 text-center">Version 4.2.0 Secure</div>
-            <button onClick={handleLogout} className="flex items-center justify-center gap-4 px-6 py-5 w-full rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-red-400 bg-red-500/5 hover:bg-red-500/20 transition-all border border-red-500/10">
+          <div className="p-6 border-t border-white/10">
+            <button onClick={handleLogout} className="flex items-center justify-center gap-3 px-4 py-3 w-full rounded-xl text-sm font-medium text-red-300 hover:bg-red-500/20 hover:text-red-200 transition-all">
               <LogOut size={16} />
               Sign Out
             </button>
@@ -66,20 +65,16 @@ const AdminLayout = () => {
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-w-0 min-h-screen overflow-x-hidden relative">
-          <header className="h-32 bg-[#FAF9F6] border-b border-[#0D1B38]/5 flex items-center justify-between px-10 shrink-0">
-            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden text-[#0D1B38] hover:text-primary mr-4">
-              <Menu size={24} />
+          <header className="h-16 bg-[#FAF9F6] border-b border-[#0D1B38]/8 flex items-center justify-between px-6 shrink-0">
+            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden text-[#0D1B38] hover:text-primary">
+              <Menu size={22} />
             </button>
-            <div className="hidden md:flex flex-col">
-              <h1 className="font-serif text-2xl font-light italic text-[#0D1B38] tracking-tight">TR Studio Console</h1>
-              <span className="text-[8px] uppercase tracking-[0.5em] font-black text-[#0D1B38]/20">Legacy Management System</span>
+            <div className="hidden md:block">
+              <h1 className="text-lg font-semibold text-[#0D1B38]">TR TRADERS Admin</h1>
             </div>
-            <div className="flex items-center gap-8">
-               <div className="flex flex-col items-end">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-[#0D1B38]">Gaurav Goyal</span>
-                  <span className="text-[8px] font-black uppercase tracking-widest text-[#0D1B38]/20 flex items-center gap-2"><Globe size={8}/> Global Admin</span>
-               </div>
-               <div className="w-14 h-14 bg-[#0D1B38] text-white rounded-[1.2rem] flex items-center justify-center font-black font-serif text-xl shadow-2xl">
+            <div className="flex items-center gap-4">
+               <span className="text-xs font-medium text-[#0D1B38]/50">Admin</span>
+               <div className="w-9 h-9 bg-[#0D1B38] text-white rounded-lg flex items-center justify-center font-bold text-sm">
                  G
                </div>
             </div>
