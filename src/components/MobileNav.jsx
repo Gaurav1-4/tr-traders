@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Home, Search, Heart, MessageCircle } from 'lucide-react';
-import { useWishlist } from '../hooks/useWishlist'; // Will create this later
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Home, Search, Heart, MessageCircle, User } from 'lucide-react';
+import { useWishlist } from '../hooks/useWishlist';
 
 const MobileNav = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { wishlist } = useWishlist();
 
   const [whatsappNumber, setWhatsappNumber] = useState('919208275274');
@@ -36,8 +37,8 @@ const MobileNav = () => {
     return () => window.removeEventListener('settingsUpdated', loadSettings);
   }, []);
 
-  // Hide on admin routes
-  if (location.pathname.startsWith('/admin')) {
+  // Hide on admin routes (except login so we can get in)
+  if (location.pathname.startsWith('/admin') && location.pathname !== '/admin/login') {
     return null;
   }
 
@@ -45,8 +46,13 @@ const MobileNav = () => {
     { name: 'Home', path: '/', icon: Home },
     { name: 'Search', path: '/catalog', icon: Search },
     { 
+      name: 'Account', 
+      path: '/admin/login', 
+      icon: User
+    },
+    { 
       name: 'Saved', 
-      path: '#', // Handled via modal or page
+      path: '#',
       icon: Heart, 
       action: 'wishlist' 
     },
@@ -65,7 +71,7 @@ const MobileNav = () => {
       
       <div className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.06)] md:hidden z-50 flex justify-around items-center px-2">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path && item.action !== 'wishlist' && item.action !== 'whatsapp';
+          const isActive = location.pathname === item.path && !item.action;
           const Icon = item.icon;
           
           return (
@@ -75,11 +81,10 @@ const MobileNav = () => {
                 if (item.action === 'whatsapp') {
                   window.open(`https://wa.me/${whatsappNumber}?text=Hi!%20I'm%20exploring%20your%20collection.`, "_blank");
                 } else if (item.action === 'wishlist') {
-                  // Dispatch custom event to open wishlist modal
                   window.dispatchEvent(new Event('openWishlist'));
                 } else {
                   if (location.pathname !== item.path) {
-                    window.location.href = item.path;
+                    navigate(item.path);
                   } else {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }

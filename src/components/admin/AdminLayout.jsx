@@ -8,7 +8,8 @@ import {
   LogOut, 
   Menu, 
   X, 
-  Bell 
+  Bell,
+  Globe 
 } from 'lucide-react';
 import { BrandLogo } from '../BrandLogo';
 import ProtectedRoute from '../ProtectedRoute';
@@ -49,7 +50,7 @@ const AdminLayout = () => {
                 onClick={() => setIsSidebarOpen(false)}
                 className={({ isActive }) => `flex items-center gap-6 px-6 py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${isActive ? 'bg-white text-[#0D1B38] shadow-[0_20px_40px_-10px_rgba(0,0,0,0.3)] scale-105' : 'text-white/30 hover:bg-white/5 hover:text-white hover:translate-x-2'}`}
               >
-                <span className={({ isActive }) => isActive ? 'text-primary' : 'opacity-40'}>{item.icon}</span>
+                <div className="opacity-40">{item.icon}</div>
                 {item.name}
               </NavLink>
             ))}
@@ -64,9 +65,9 @@ const AdminLayout = () => {
         </aside>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        <div className="flex-1 flex flex-col min-w-0 min-h-screen overflow-x-hidden relative">
           <header className="h-32 bg-[#FAF9F6] border-b border-[#0D1B38]/5 flex items-center justify-between px-10 shrink-0">
-            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden text-[#0D1B38] hover:text-primary">
+            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden text-[#0D1B38] hover:text-primary mr-4">
               <Menu size={24} />
             </button>
             <div className="hidden md:flex flex-col">
