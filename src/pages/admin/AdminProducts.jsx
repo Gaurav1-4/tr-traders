@@ -9,12 +9,11 @@ const AdminProducts = () => {
       <main className="max-w-7xl mx-auto px-6 md:px-12 pt-12 md:pt-20">
          
          {/* ===== INTRODUCTION ===== */}
-         <header className="mb-20">
-            <h2 className="text-5xl md:text-8xl font-serif font-light tracking-tighter mb-6 italic leading-none">Exhibition Vault</h2>
-            <div className="w-24 h-px bg-[#0D1B38]/20 mb-8"></div>
-            <p className="max-w-2xl text-[10px] md:text-[11px] uppercase tracking-[0.5em] font-black leading-loose text-[#0D1B38]/30">
-               Manage the signature pieces within your heritage collection. <br/> 
-               Every addition is curated for the global digital showroom.
+         <header className="mb-10 md:mb-20">
+            <h2 className="text-4xl md:text-8xl font-serif font-light tracking-tighter mb-4 md:mb-6 italic leading-none">Exhibition Vault</h2>
+            <div className="w-16 md:w-24 h-px bg-[#0D1B38]/20 mb-6 md:mb-8"></div>
+            <p className="max-w-2xl text-[9px] md:text-[11px] uppercase tracking-[0.4em] font-black leading-loose text-[#0D1B38]/30">
+               Signature Pieces Registry
             </p>
          </header>
 

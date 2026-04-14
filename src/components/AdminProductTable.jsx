@@ -134,7 +134,8 @@ const AdminProductTable = () => {
         </Link>
       </div>
 
-      <div className="overflow-x-auto min-h-[500px] no-scrollbar">
+      {/* TABLE VIEW - DESKTOP ONLY */}
+      <div className="hidden md:block overflow-x-auto min-h-[500px] no-scrollbar">
         <table className="w-full text-left border-collapse whitespace-nowrap">
           <thead>
             <tr className="bg-[#FAF9F6] text-[9px] uppercase tracking-[0.4em] text-[#0D1B38]/40 border-b border-[#0D1B38]/5">
@@ -146,61 +147,62 @@ const AdminProductTable = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#0D1B38]/5">
-            {paginatedProducts.length > 0 ? (
-              paginatedProducts.map((p) => (
-                <tr key={p.id} className="hover:bg-[#FAF9F6]/50 transition-colors group">
-                  <td className="px-12 py-8">
-                    <div className="relative w-24 h-32 bg-black rounded-2xl overflow-hidden shadow-2xl border border-[#0D1B38]/5">
-                      <img src={p.image || p.images?.find(img => img && img.trim() !== '') || 'https://via.placeholder.com/400'} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] opacity-90" />
-                      {p.featured && (
-                        <div className="absolute top-2 left-2 px-3 py-1 bg-white text-[#0D1B38] text-[8px] font-black uppercase tracking-widest rounded-full shadow-2xl">Featured</div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-12 py-8">
-                    <div className="space-y-2">
-                       <p className="font-serif text-xl text-[#0D1B38] italic font-light tracking-tight">{p.name}</p>
-                       <p className="text-[9px] font-black uppercase tracking-[0.4em] text-[#0D1B38]/20 flex items-center gap-3">
-                          <Sparkles size={10} className="text-primary"/> {p.fabric || 'Heritage Textile'} &bull; {p.id}
-                       </p>
-                    </div>
-                  </td>
-                  <td className="px-12 py-8 text-center">
-                    <span className="px-6 py-2 bg-[#FAF9F6] border border-[#0D1B38]/5 rounded-full text-[9px] font-black tracking-widest uppercase text-[#0D1B38]/40">
-                      {p.category}
-                    </span>
-                  </td>
-                  <td className="px-12 py-8 font-serif text-xl text-[#0D1B38] italic">
-                    {p.price ? `₹${p.price.toLocaleString()}` : <span className="opacity-20">Price on Request</span>}
-                  </td>
-                  <td className="px-12 py-8 text-right">
-                    <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-4 group-hover:translate-x-0">
-                      <button onClick={() => handeToggleVisibility(p.id, p.status)} title="Toggle Visibility" className={`p-4 rounded-xl border transition-all shadow-sm ${p.status === 'active' ? 'bg-white text-[#0D1B38] border-[#0D1B38]/5' : 'bg-[#0D1B38] text-white border-transparent'}`}>
-                        {p.status === 'active' ? <Eye size={16} /> : <EyeOff size={16} />}
-                      </button>
-                      <button onClick={() => handleDuplicate(p)} title="Duplicate Masterpiece" className="p-4 bg-white text-primary rounded-xl border border-[#0D1B38]/5 shadow-sm hover:bg-primary-light transition-all">
-                        <Copy size={16} />
-                      </button>
-                      <Link to={`/admin/products/edit/${p.id}`} title="Edit Piece" className="p-4 bg-white text-blue-600 rounded-xl border border-[#0D1B38]/5 shadow-sm hover:bg-blue-50 transition-all">
-                        <Edit2 size={16} />
-                      </Link>
-                      <button onClick={() => handleDelete(p.id, p.name)} title="Remove Piece" className="p-4 bg-white text-red-400 rounded-xl border border-[#0D1B38]/5 shadow-sm hover:bg-red-50 hover:text-red-600 transition-all">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" className="px-12 py-48 text-center">
-                   <Package size={64} className="mx-auto text-[#0D1B38]/5 mb-8" strokeWidth={1} />
-                   <p className="font-serif text-3xl italic font-light text-[#0D1B38]/10 uppercase tracking-[0.5em]">Collections are Empty</p>
+            {paginatedProducts.map((p) => (
+              <tr key={p.id} className="hover:bg-[#FAF9F6]/50 transition-colors group">
+                <td className="px-12 py-8">
+                  <div className="relative w-24 h-32 bg-black rounded-2xl overflow-hidden shadow-2xl border border-[#0D1B38]/5">
+                    <img src={p.images?.find(img => img && img.trim() !== '') || 'https://via.placeholder.com/400'} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] opacity-90" />
+                  </div>
+                </td>
+                <td className="px-12 py-8">
+                  <div className="space-y-2">
+                     <p className="font-serif text-xl text-[#0D1B38] italic font-light tracking-tight">{p.name}</p>
+                     <p className="text-[9px] font-black uppercase tracking-[0.4em] text-[#0D1B38]/20">{p.category} &bull; {p.id}</p>
+                  </div>
+                </td>
+                <td className="px-12 py-8 text-center text-[10px] font-black uppercase tracking-widest text-[#0D1B38]/40">{p.category}</td>
+                <td className="px-12 py-8 font-serif text-xl text-[#0D1B38] italic">{p.price ? `₹${p.price.toLocaleString()}` : 'PoA'}</td>
+                <td className="px-12 py-8 text-right">
+                  <div className="flex justify-end gap-3 translate-x-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500">
+                    <button onClick={() => handeToggleVisibility(p.id, p.status)} className={`p-4 rounded-xl border ${p.status === 'active' ? 'bg-white text-[#0D1B38] border-border' : 'bg-[#0D1B38] text-white'}`}>
+                      {p.status === 'active' ? <Eye size={16} /> : <EyeOff size={16} />}
+                    </button>
+                    <Link to={`/admin/products/edit/${p.id}`} className="p-4 bg-white text-blue-600 rounded-xl border border-border"><Edit2 size={16} /></Link>
+                    <button onClick={() => handleDelete(p.id, p.name)} className="p-4 bg-white text-red-400 rounded-xl border border-border"><Trash2 size={16} /></button>
+                  </div>
                 </td>
               </tr>
-            )}
+            ))}
           </tbody>
         </table>
+      </div>
+
+      {/* MOBILE LIST VIEW */}
+      <div className="md:hidden divide-y divide-[#0D1B38]/5">
+        {paginatedProducts.map((p) => (
+          <div key={p.id} className="p-6 flex gap-6 items-start">
+             <div className="w-20 h-28 bg-black rounded-xl overflow-hidden shrink-0 border border-border">
+                <img src={p.images?.find(img => img && img.trim() !== '') || 'https://via.placeholder.com/400'} alt={p.name} className="w-full h-full object-cover opacity-80" />
+             </div>
+             <div className="flex-1 min-w-0 space-y-4">
+                <div>
+                   <h4 className="font-serif text-lg italic text-[#0D1B38] truncate">{p.name}</h4>
+                   <p className="text-[8px] font-black uppercase tracking-[0.3em] text-[#0D1B38]/20 mt-1">{p.category} &bull; ₹{p.price?.toLocaleString() || 'PoA'}</p>
+                </div>
+                <div className="flex gap-2">
+                   <button onClick={() => handeToggleVisibility(p.id, p.status)} className={`p-3 rounded-lg border ${p.status === 'active' ? 'bg-white text-[#0D1B38] border-[#0D1B38]/5' : 'bg-[#0D1B38] text-white'}`}>
+                      {p.status === 'active' ? <Eye size={14} /> : <EyeOff size={14} />}
+                   </button>
+                   <Link to={`/admin/products/edit/${p.id}`} className="flex-1 flex items-center justify-center gap-3 bg-[#FAF9F6] text-[#0D1B38] py-3 rounded-lg text-[8px] font-black uppercase tracking-widest border border-[#0D1B38]/5">
+                      <Edit2 size={12} /> Edit
+                   </Link>
+                   <button onClick={() => handleDelete(p.id, p.name)} className="p-3 text-red-400 bg-red-50 rounded-lg">
+                      <Trash2 size={14} />
+                   </button>
+                </div>
+             </div>
+          </div>
+        ))}
       </div>
 
       {/* Pagination - MINIMALIST */}
