@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Save, Settings, Video, Trash2, Plus, Link as LinkIcon, RefreshCcw, ArrowLeft, ArrowRight, Loader2, Globe, Sparkles, Database, Package, XCircle, Tag } from 'lucide-react';
 import { useToast } from '../../components/Toast';
+import { uploadFile } from '../../services/uploadService';
 import { db, isMockMode } from '../../services/firebase';
 import { doc, getDoc, setDoc, collection, writeBatch } from 'firebase/firestore';
 import { HERITAGE_COLLECTION } from '../../services/productService';
@@ -120,6 +121,22 @@ const AdminSettings = () => {
     finally { setLoading(false); }
   };
 
+  const [uploadingSlots, setUploadingSlots] = useState({});
+
+  const handleFileUpload = async (index, file) => {
+    if (!file) return;
+    setUploadingSlots(prev => ({ ...prev, [index]: true }));
+    try {
+      const downloadURL = await uploadFile(file, 'hero_videos');
+      handleVideoLinkChange(index, downloadURL);
+      showToast('Media uploaded to studio storage.', 'success');
+    } catch (err) {
+      showToast('Upload failed.', 'error');
+    } finally {
+      setUploadingSlots(prev => ({ ...prev, [index]: false }));
+    }
+  };
+
   if (fetching) return <div className="h-screen flex flex-col items-center justify-center bg-[#FAF9F6]"><Loader2 size={32} className="text-primary animate-spin" /></div>;
 
   return (
@@ -194,16 +211,32 @@ const AdminSettings = () => {
                        <button type="button" onClick={() => removeVideoSlot(i)} className="w-8 h-8 flex items-center justify-center text-red-100 hover:text-red-500 transition-colors"><Trash2 size={14}/></button>
                     </div>
 
-                    <div className="aspect-video bg-black rounded-[2.5rem] overflow-hidden relative shadow-[0_50px_130px_-30px_rgba(0,0,0,0.5)] transition-all duration-1000 group-hover:-translate-y-4 border border-white/5">
-                       <video src={url} key={url} autoPlay muted loop playsInline className="w-full h-full object-cover opacity-100" />
-                    </div>
+                    <div 
+                        className="aspect-video bg-black rounded-[2.5rem] overflow-hidden relative shadow-[0_50px_130px_-30px_rgba(0,0,0,0.5)] transition-all duration-1000 group-hover:-translate-y-4 border border-white/5 cursor-pointer"
+                        onClick={() => !uploadingSlots[i] && document.getElementById(`hero-upload-${i}`).click()}
+                      >
+                        {uploadingSlots[i] ? (
+                           <div className="w-full h-full flex flex-col items-center justify-center bg-white/5 p-12">
+                              <Loader2 className="animate-spin text-white/20 mb-4" size={32} />
+                              <span className="text-[10px] uppercase font-black tracking-widest text-white/10">Uploading to Studio Cloud...</span>
+                           </div>
+                        ) : (
+                           <>
+                              <video src={url} key={url} autoPlay muted loop playsInline className="w-full h-full object-cover opacity-100 transition-opacity" />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                 <Plus size={32} className="text-white/50" />
+                              </div>
+                           </>
+                        )}
+                        <input id={`hero-upload-${i}`} type="file" className="hidden" accept="video/*,image/*" onChange={(e) => handleFileUpload(i, e.target.files[0])} />
+                     </div>
                     
                     <div className="px-4">
                        <div className="relative group/input">
                           <input 
                             type="text" value={url} onChange={(e) => handleVideoLinkChange(i, e.target.value)}
                             placeholder="Exhibition Link (Dropbox)" 
-                            className="w-full bg-transparent border-b border-[#0D1B38]/10 py-5 text-[10px] font-black tracking-[0.1em] outline-none focus:border-[#0D1B38] transition-all text-[#0D1B38]/60 uppercase placeholder:text-[#0D1B38]/10"
+                            className="w-full bg-transparent border-b border-[#0D1B38]/10 py-5 text-[10px] font-black tracking-[0.1em] outline-none focus:border-[#0D1B38] transition-all text-[#0D1B38]/60 uppercase placeholder:text-[#0D1B38]/10 font-mono"
                           />
                           <LinkIcon size={12} className="absolute right-0 top-1/2 -translate-y-1/2 opacity-10 group-focus-within/input:opacity-100 transition-opacity" />
                        </div>

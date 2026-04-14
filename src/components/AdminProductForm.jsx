@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useToast } from './Toast';
 import { addProduct, updateProduct } from '../services/productService';
+import { uploadFile } from '../services/uploadService';
 
 const DEFAULT_CATEGORIES = ['Cotton', 'Silk', 'Georgette', 'Chiffon', 'Organza', 'Banarasi', 'Linen', 'Wool', 'Rayon', 'Velvet'];
 
@@ -47,6 +48,7 @@ const AdminProductForm = ({ initialData = null, isEdit = false }) => {
   });
 
   const [colorInput, setColorInput] = useState('');
+  const [uploadingSlots, setUploadingSlots] = useState({}); // Tracking upload state per slot
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -76,6 +78,21 @@ const AdminProductForm = ({ initialData = null, isEdit = false }) => {
       newImages[index] = value.trim();
       return { ...prev, images: newImages };
     });
+  };
+
+  const handleFileUpload = async (index, file) => {
+    if (!file) return;
+    
+    setUploadingSlots(prev => ({ ...prev, [index]: true }));
+    try {
+      const downloadURL = await uploadFile(file, 'products');
+      handleImageUrlChange(index, downloadURL);
+      showToast('Image uploaded successfully', 'success');
+    } catch (error) {
+      showToast('Upload failed. Try again.', 'error');
+    } finally {
+      setUploadingSlots(prev => ({ ...prev, [index]: false }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -149,27 +166,42 @@ const AdminProductForm = ({ initialData = null, isEdit = false }) => {
              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {formData.images.map((url, idx) => (
                   <div key={idx} className="space-y-4">
-                     <div className="aspect-[3/4] bg-[#FAF9F6] rounded-2xl overflow-hidden border border-[#0D1B38]/5 relative group">
-                        {url ? (
+                     <div 
+                        className="aspect-[3/4] bg-[#FAF9F6] rounded-2xl overflow-hidden border border-[#0D1B38]/5 relative group cursor-pointer"
+                        onClick={() => !uploadingSlots[idx] && document.getElementById(`file-input-${idx}`).click()}
+                      >
+                        {uploadingSlots[idx] ? (
+                          <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-[#0D1B38]/5">
+                             <Loader2 className="animate-spin text-[#0D1B38]/40 mb-2" size={24} />
+                             <span className="text-[8px] uppercase font-black tracking-widest text-[#0D1B38]/30">Uploading...</span>
+                          </div>
+                        ) : url ? (
                           <>
                              {url.toLowerCase().includes('mp4') || url.toLowerCase().includes('webm') || url.toLowerCase().includes('dropbox.com') ? (
                                <video src={url} key={url} autoPlay muted loop playsInline className="w-full h-full object-cover" />
                              ) : (
                                <img src={url} alt="Preview" className="w-full h-full object-cover" />
                              )}
-                             <button type="button" onClick={() => handleImageUrlChange(idx, '')} className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black transition-colors"><X size={12}/></button>
+                             <button type="button" onClick={(e) => { e.stopPropagation(); handleImageUrlChange(idx, ''); }} className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black transition-colors z-10"><X size={12}/></button>
                           </>
                         ) : (
                           <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center group-hover:bg-[#0D1B38]/5 transition-colors">
-                             <UploadCloud className="opacity-10 mb-2" size={24} />
-                             <span className="text-[8px] uppercase font-black tracking-widest opacity-20">Slot {idx+1} Empty</span>
+                             <UploadCloud className="text-[#0D1B38]/10 mb-2" size={24} />
+                             <span className="text-[8px] uppercase font-black tracking-widest opacity-20">Click to Upload <br/> or paste link below</span>
                           </div>
                         )}
+                        <input 
+                           id={`file-input-${idx}`}
+                           type="file" 
+                           className="hidden" 
+                           accept="image/*,video/*"
+                           onChange={(e) => handleFileUpload(idx, e.target.files[0])}
+                        />
                      </div>
                      <input 
                         type="url" value={url} onChange={(e) => handleImageUrlChange(idx, e.target.value)}
                         placeholder="PASTE LINK HERE"
-                        className="w-full bg-[#FAF9F6] px-4 py-3 rounded-xl text-[9px] font-black tracking-widest outline-none border border-transparent focus:border-[#0D1B38]/10 transition-all"
+                        className="w-full bg-[#FAF9F6] px-4 py-3 rounded-xl text-[9px] font-black tracking-widest outline-none border border-transparent focus:border-[#0D1B38]/10 transition-all font-mono"
                      />
                   </div>
                 ))}
