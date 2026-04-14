@@ -124,7 +124,7 @@ const Home = () => {
     <div className="flex flex-col min-h-screen bg-bg overflow-x-hidden">
       
       {/* SIGNATURE HERO REEL */}
-      <section className={`w-full relative bg-black overflow-hidden border-b border-border ${videoCount > 1 ? 'h-auto md:h-[90vh]' : 'h-[90vh]'} min-h-[600px]`}>
+      <section className="w-full relative bg-black overflow-hidden border-b border-border h-[65vh] md:h-[90vh]">
         <div className={`w-full h-full ${getCollageClass()}`}>
           {displayVideos.map((url, i) => {
             const isActive = activeVideoIndices.includes(i);
@@ -175,8 +175,8 @@ const Home = () => {
           })}
         </div>
         
-        {/* SCROLL INDICATOR */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-4 text-white/40 pointer-events-none animate-bounce">
+        {/* SCROLL INDICATOR - HIDDEN ON MOBILE */}
+        <div className="hidden md:flex absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-4 text-white/40 pointer-events-none animate-bounce">
            <span className="text-[9px] uppercase tracking-[0.5em] font-black">Scroll</span>
            <div className="w-px h-10 bg-white/20"></div>
         </div>

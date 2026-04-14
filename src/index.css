@@ -368,11 +368,11 @@
   .hero-collage-4, .hero-collage-5, .grid-cols-3 {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
-    height: 60vh !important;
+    height: 100% !important;
   }
   .grid-cols-3 > div {
     height: 100% !important;
-    border-right: 1px solid rgba(255,255,255,0.1) !important;
+    border-right: 1px solid rgba(255,255,255,0.05) !important;
     border-bottom: none !important;
   }
 }
